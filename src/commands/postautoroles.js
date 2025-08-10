@@ -36,7 +36,6 @@ export default async function postautoroles(itx) {
     .setDescription([
       "• Selecciona el color que quieras usar como distintivo.",
       "• Las opciones que tengan un **💎** son **solo para boosters**."
-      // Si implementaste el toggle: "• Tocá el mismo color de nuevo para **quitarlo**."
     ].join("\n"))
     .setColor(0x5865f2)
     .setThumbnail(itx.guild.iconURL({ size: 128 }))

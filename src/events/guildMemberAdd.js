@@ -2,7 +2,7 @@ import { welcomeEmbed, logJoinEmbed } from "../utils/embeds.js";
 import { getSettings, getCooldown, setCooldown } from "../db.js";
 
 export default async function guildMemberAdd(client, member) {
-  // if (member.pending) return; // si usás screening y querés esperar verificación
+  // if (member.pending) return;
 
   const cfg = getSettings.get(member.guild.id);
   if (!cfg) return;
@@ -23,7 +23,7 @@ export default async function guildMemberAdd(client, member) {
     }
   }
 
-  // log para admins (siempre, SIN cooldown)
+  // log para admins
   if (cfg.log_channel_id) {
     const log = await member.guild.channels.fetch(cfg.log_channel_id).catch(() => null);
     if (log?.isTextBased()) {

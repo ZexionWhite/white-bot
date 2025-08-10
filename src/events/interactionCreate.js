@@ -116,10 +116,8 @@ export default async function interactionCreate(client, itx) {
           const member = await itx.guild.members.fetch(targetUser.id).catch(() => null);
           if (!member) return itx.reply({ content: "No encontré ese miembro.", ephemeral: true });
 
-          // armá el embed con tu builder real
           const embed = (await import("../utils/embeds.js")).boosterEmbed(member);
 
-          // si querés forzar el número de boosts para ver el footer
           const forced = itx.options.getInteger("boosts");
           if (forced !== null) {
               const when = new Intl.DateTimeFormat("es-AR", {
@@ -133,7 +131,6 @@ export default async function interactionCreate(client, itx) {
               return itx.reply({ embeds: [embed], ephemeral: true });
           }
 
-          // público: mandalo al canal de boosters si está seteado; si no, al canal actual
           const { getSettings } = await import("../db.js");
           const cfg = getSettings.get(itx.guild.id);
           let ch = null;
@@ -185,7 +182,7 @@ export default async function interactionCreate(client, itx) {
 
   }
 
-// select menu para elegir color (toggle con ternario)
+// select menu
 if (itx.isStringSelectMenu() && itx.customId === "color-select") {
   await itx.deferReply({ ephemeral: true });
 
@@ -196,24 +193,20 @@ if (itx.isStringSelectMenu() && itx.customId === "color-select") {
   const chosen = all.find(r => r.role_id === selectedId);
   if (!chosen) return itx.editReply({ content: "Opción inválida." });
 
-  // refrescar roles reales del usuario (evita cache desactualizado)
   const member = await itx.guild.members.fetch(itx.user.id);
 
   const togglingOff = member.roles.cache.has(selectedId);
 
-  // si vamos a AGREGAR (no toggle off), validar booster-only
   if (!togglingOff && chosen.booster_only) {
     const boosterRoleId = cfg?.booster_role_id;
     const hasBooster = boosterRoleId ? member.roles.cache.has(boosterRoleId) : false;
     if (!hasBooster) return itx.editReply({ content: "Este color es solo para boosters.", });
   }
 
-  // preparar lista de roles de la paleta para remover cuando agregamos
   const paletteIds = new Set(all.map(r => r.role_id));
   const toRemove = member.roles.cache.filter(r => paletteIds.has(r.id) && r.id !== selectedId);
 
   try {
-    // ⭐ ternario para toggle:
     await (
       togglingOff
         ? member.roles.remove(selectedId) // quitar si ya lo tiene

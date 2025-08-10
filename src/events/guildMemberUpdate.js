@@ -6,7 +6,6 @@ export default async function guildMemberUpdate(client, oldM, newM) {
   const had = Boolean(oldM?.premiumSince);
   const has = Boolean(newM?.premiumSince);
 
-  // Anunciamos solo cuando empieza a boostear (null -> fecha)
   const started = !had && has;
   if (!started) return;
 

@@ -16,7 +16,6 @@ export function welcomeEmbed(member, {
     member.user.globalName ??
     member.user.username;
 
-  // un único bullet “agradable”; si no hay canal configurado, queda genérico
   const tip = autorolesChannelId
     ? `• Tip: elegí tu color en <#${autorolesChannelId}>.`
     : "• Tip: elegí tu color para arrancar con estilo.";
@@ -24,8 +23,8 @@ export function welcomeEmbed(member, {
   return new EmbedBuilder()
     .setTitle(`¡Bienvenido a ${member.guild.name}!`)
     .setDescription(`**${username}**, nos encanta tenerte acá.\n${tip}`)
-    .setThumbnail(member.user.displayAvatarURL({ size: 256 })) // foto a la derecha
-    .setImage(gifUrl)                                          // GIF grande abajo
+    .setThumbnail(member.user.displayAvatarURL({ size: 256 })) 
+    .setImage(gifUrl)                                         
     .setColor(0x5865f2)
     .setFooter({ text: `Se unió el ${when}` });
 }
@@ -55,8 +54,7 @@ export function boosterEmbed(member, { gifUrl = BOOST_GIF_URL } = {}) {
   return new EmbedBuilder()
     .setTitle(`🚀 Gracias por boostear ${username}`)
     .setDescription(desc)
-    .setImage(gifUrl) // GIF grande abajo (capybara)
-    // Si te parece repetitivo, no ponemos thumbnail. Si lo querés, descomentá:
+    .setImage(gifUrl)
     .setThumbnail(member.user.displayAvatarURL({ size: 256 }))
     .setColor(0xf47fff)
     .setFooter({ text: `Anunciado el ${when} • ${boosts} boosts actuales` });

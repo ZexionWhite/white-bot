@@ -1,0 +1,34 @@
+# --- Node ---
+node_modules/
+dist/
+build/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- Env/Secrets ---
+.env
+.env.*
+!.env.example
+
+# --- SQLite data ---
+data/*.db
+data/*.sqlite
+data/*.db-shm
+data/*.db-wal
+
+# --- Editor/OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- PM2 / logs ---
+pids/
+logs/
+*.log
+
+# --- Misc ---
+*.local

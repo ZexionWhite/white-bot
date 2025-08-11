@@ -1,6 +1,6 @@
 export const TZ = "America/Argentina/Cordoba";
 
-export const WELCOME_GIF_URL = "https://media.giphy.com/media/MDJ9IbxxvDUQM/giphy.gif"; // placeholder
+export const WELCOME_GIF_URL = "https://media.discordapp.net/attachments/1404008041728315453/1404286628351971378/ezgif.com-crop.gif?ex=689aa356&is=689951d6&hm=0f4b98624b17dca95745209c85b3c0c04272ecc6df924948e0311cc7fc9eb68f&=&width=355&height=199"; // placeholder
 export const BOOST_GIF_URL = "https://media.discordapp.net/attachments/1307294317819330604/1404122922515431505/capybaratrex2.gif?ex=689a0ae0&is=6898b960&hm=0d0ffcc7c1d70b6bb81c387eedfdd06195bfd29b025c0447bc736191b684fc90&=&width=576&height=324"; // placeholder
 
 // paleta default para /setupcolors

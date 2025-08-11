@@ -34,7 +34,7 @@ export default async function postautoroles(itx) {
   const embed = new EmbedBuilder()
     .setTitle("Autoroles de color")
     .setDescription([
-      "• Selecciona el color que quieras usar como distintivo.",
+      "• Selecciona el color que más se adapte a ti.",
       "• Las opciones que tengan un **💎** son **solo para boosters**."
     ].join("\n"))
     .setColor(0x5865f2)
@@ -59,7 +59,8 @@ export default async function postautoroles(itx) {
         autorole_message_id: msg.id,
         booster_role_id: cfg.booster_role_id ?? null,
         booster_announce_channel_id: row.booster_announce_channel_id ?? null,
-        welcome_cd_minutes: row.welcome_cd_minutes ?? 60
+        welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
+        info_channel_id: row.info_channel_id ?? null
       };
       upsertSettings.run(updated);
     }

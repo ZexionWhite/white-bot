@@ -48,6 +48,7 @@ function ensureColumn(table, column, ddl) {
 // nuevas columnas para features
 ensureColumn("guild_settings", "welcome_cd_minutes", "welcome_cd_minutes INTEGER DEFAULT 60");
 ensureColumn("guild_settings", "booster_announce_channel_id", "booster_announce_channel_id TEXT");
+ensureColumn("guild_settings", "info_channel_id", "info_channel_id TEXT"); // 👈 NUEVA
 
 // ---------- prepared statements ----------
 export const getSettings = db.prepare(`
@@ -65,7 +66,8 @@ export const upsertSettings = db.prepare(`
     autorole_message_id,
     booster_role_id,
     booster_announce_channel_id,
-    welcome_cd_minutes
+    welcome_cd_minutes,
+    info_channel_id
   )
   VALUES (
     @guild_id,
@@ -75,7 +77,8 @@ export const upsertSettings = db.prepare(`
     @autorole_message_id,
     @booster_role_id,
     @booster_announce_channel_id,
-    @welcome_cd_minutes
+    @welcome_cd_minutes,
+    @info_channel_id
   )
   ON CONFLICT(guild_id) DO UPDATE SET
     welcome_channel_id           = excluded.welcome_channel_id,
@@ -84,7 +87,8 @@ export const upsertSettings = db.prepare(`
     autorole_message_id          = excluded.autorole_message_id,
     booster_role_id              = excluded.booster_role_id,
     booster_announce_channel_id  = excluded.booster_announce_channel_id,
-    welcome_cd_minutes           = excluded.welcome_cd_minutes;
+    welcome_cd_minutes           = excluded.welcome_cd_minutes,
+    info_channel_id              = excluded.info_channel_id;
 `);
 
 export const insertColorRole = db.prepare(`

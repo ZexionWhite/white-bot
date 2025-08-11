@@ -78,6 +78,18 @@ const commands = [
      .setDescription("Si true, lo muestra en el canal (default: ephemeral)")
   ),
 
+  new SlashCommandBuilder()
+  .setName("setinfochannel")
+  .setDescription("Set the channel for server info/perks")
+  .addChannelOption(o =>
+    o.setName("channel")
+     .setDescription("Info/perks channel")
+     .addChannelTypes(ChannelType.GuildText)
+     .setRequired(true)
+  )
+  .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+
+
 ].map(c => c.toJSON());
 
 const rest = new REST({ version: "10" }).setToken(process.env.BOT_TOKEN);

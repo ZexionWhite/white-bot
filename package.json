@@ -5,7 +5,10 @@
   "main": "src/index.js",
   "scripts": {
     "dev": "node src/index.js",
-    "register": "node src/commands/register-commands.js"
+    "register": "node src/commands/register-commands.js",
+    "clean:guild": "node src/commands/cleanup-commands.js guild",
+    "clean:global": "node src/commands/cleanup-commands.js global",
+    "clean:both": "node src/commands/cleanup-commands.js"
   },
   "dependencies": {
     "better-sqlite3": "^9.4.0",

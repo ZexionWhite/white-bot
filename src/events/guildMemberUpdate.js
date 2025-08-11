@@ -16,6 +16,12 @@ export default async function guildMemberUpdate(client, oldM, newM) {
   const ch = await newM.guild.channels.fetch(channelId).catch(() => null);
   if (!ch?.isTextBased()) return;
 
-  const embed = boosterEmbed(newM);
+  const autoBoosterRoleId =
+    newM.guild.roles.cache.find(r => r.tags?.premiumSubscriberRole)?.id ?? null;
+  const boosterRoleId = cfg?.booster_role_id ?? autoBoosterRoleId;
+
+  const infoChannelId = cfg?.info_channel_id ?? null;
+
+  const embed = boosterEmbed(newM, { boosterRoleId, infoChannelId });
   await ch.send({ embeds: [embed] }).catch(() => {});
 }

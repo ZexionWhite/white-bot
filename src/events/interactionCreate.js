@@ -17,7 +17,8 @@ export default async function interactionCreate(client, itx) {
         autorole_message_id: row.autorole_message_id ?? null,
         booster_role_id: row.booster_role_id ?? null,
         booster_announce_channel_id: row.booster_announce_channel_id ?? null,
-        welcome_cd_minutes: row.welcome_cd_minutes ?? 60
+        welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
+        info_channel_id: row.info_channel_id ?? null
       });
       return itx.reply({ content: `Canal de bienvenida seteado a <#${channel.id}>`, ephemeral: true });
     }
@@ -34,7 +35,8 @@ export default async function interactionCreate(client, itx) {
         autorole_message_id: row.autorole_message_id ?? null,
         booster_role_id: row.booster_role_id ?? null,
         booster_announce_channel_id: row.booster_announce_channel_id ?? null,
-        welcome_cd_minutes: row.welcome_cd_minutes ?? 60
+        welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
+        info_channel_id: row.info_channel_id ?? null
       });
       return itx.reply({ content: `Canal de logs seteado a <#${channel.id}>`, ephemeral: true });
     }
@@ -51,7 +53,8 @@ export default async function interactionCreate(client, itx) {
         autorole_message_id: row.autorole_message_id ?? null,
         booster_role_id: role.id,
         booster_announce_channel_id: row.booster_announce_channel_id ?? null,
-        welcome_cd_minutes: row.welcome_cd_minutes ?? 60
+        welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
+        info_channel_id: row.info_channel_id ?? null
       });
       return itx.reply({ content: `Rol de boosters seteado a **@${role.name}**`, ephemeral: true });
     }
@@ -81,7 +84,8 @@ export default async function interactionCreate(client, itx) {
         autorole_message_id: row.autorole_message_id ?? null,
         booster_role_id: row.booster_role_id ?? null,
         booster_announce_channel_id: row.booster_announce_channel_id ?? null,
-        welcome_cd_minutes: min
+        welcome_cd_minutes: min,
+        info_channel_id: row.info_channel_id ?? null
       });
       return itx.reply({ content: `Cooldown de welcome fijado en **${min} min**.`, ephemeral: true });
     }
@@ -101,7 +105,8 @@ export default async function interactionCreate(client, itx) {
         autorole_message_id: row.autorole_message_id ?? null,
         booster_role_id: row.booster_role_id ?? null,
         booster_announce_channel_id: ch.id,
-        welcome_cd_minutes: row.welcome_cd_minutes ?? 60
+        welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
+        info_channel_id: row.info_channel_id ?? null
     });
 
     return itx.reply({ content: `Canal de boosters seteado a <#${ch.id}>`, ephemeral: true });
@@ -123,7 +128,9 @@ export default async function interactionCreate(client, itx) {
               const when = new Intl.DateTimeFormat("es-AR", {
                   dateStyle: "short", timeStyle: "short", timeZone: "America/Argentina/Cordoba"
               }).format(new Date());
-              embed.setFooter({ text: `Anunciado el ${when} • ${forced} boosts actuales` });
+              embed.setFooter({ text: `${forced} boosts actuales • ${when}`,
+                iconURL: member.guild.iconURL({ size: 16 }) ?? undefined
+            });
           }
 
           const publico = itx.options.getBoolean("publico") ?? false;
@@ -179,6 +186,27 @@ export default async function interactionCreate(client, itx) {
 
           await itx.editReply({ embeds: [embed] });
       }
+
+      if (name === "setinfochannel") {
+          if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild)) {
+              return itx.reply({ content: "Sin permisos.", ephemeral: true });
+          }
+          const ch = itx.options.getChannel("channel", true);
+          const row = getSettings.get(itx.guild.id) ?? {};
+          upsertSettings.run({
+              guild_id: itx.guild.id,
+              welcome_channel_id: row.welcome_channel_id ?? null,
+              log_channel_id: row.log_channel_id ?? null,
+              autorole_channel_id: row.autorole_channel_id ?? null,
+              autorole_message_id: row.autorole_message_id ?? null,
+              booster_role_id: row.booster_role_id ?? null,
+              booster_announce_channel_id: row.booster_announce_channel_id ?? null,
+              welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
+              info_channel_id: ch.id                     // 👈 nuevo
+          });
+          return itx.reply({ content: `Info channel set to <#${ch.id}>`, ephemeral: true });
+      }
+
 
   }
 

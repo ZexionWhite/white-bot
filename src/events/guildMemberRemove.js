@@ -17,11 +17,10 @@ export default async function guildMemberRemove(client, member) {
   const id  = member.id ?? "desconocido";
 
   const embed = new EmbedBuilder()
-    .setTitle("📤 Salida")
-    .setDescription(`**${tag}** (\`${id}\`) salió del servidor`)
-    .setFooter({ text: `Registrado el ${when}` })
+    .setTitle("<:user_left:1404291902236528700> User left")
+    .setDescription(`**${tag}** (\`${id}\`) user left the guild.`)
+    .setFooter({ text: `${when}` })
     .setColor(0xed4245)
-    .setTimestamp();
 
   await ch.send({ embeds: [embed] }).catch(() => {});
 }

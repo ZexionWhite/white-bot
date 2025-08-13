@@ -48,7 +48,7 @@ function ensureColumn(table, column, ddl) {
 // nuevas columnas para features
 ensureColumn("guild_settings", "welcome_cd_minutes", "welcome_cd_minutes INTEGER DEFAULT 60");
 ensureColumn("guild_settings", "booster_announce_channel_id", "booster_announce_channel_id TEXT");
-ensureColumn("guild_settings", "info_channel_id", "info_channel_id TEXT"); // 👈 NUEVA
+ensureColumn("guild_settings", "info_channel_id", "info_channel_id TEXT");
 
 // ---------- prepared statements ----------
 export const getSettings = db.prepare(`

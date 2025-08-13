@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "main": "src/index.js",
   "scripts": {
+    "start": "node src/index.js",
     "dev": "node src/index.js",
     "register": "node src/commands/register-commands.js",
     "clean:guild": "node src/commands/cleanup-commands.js guild",

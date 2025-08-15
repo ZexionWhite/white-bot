@@ -1,39 +1,52 @@
-# --- Base compatible (glibc) para librerías nativas / sqlite ---
-FROM node:22-bookworm-slim
-
-# Paquetes del sistema que vas a necesitar:
-# - ffmpeg: audio para @discordjs/voice
-# - sqlite3: CLI (útil para debug) y runtime
-# - python3 + build-essential: por si algún paquete compila nativo (p. ej. sqlite3, sharp, bcrypt)
-# - ca-certificates: TLS
-RUN apt-get update && apt-get install -y \
-    ffmpeg sqlite3 ca-certificates python3 build-essential curl \
-  && rm -rf /var/lib/apt/lists/*
-
-# (Opcional pero útil) yt-dlp para fuentes tipo YouTube
-RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
-      -o /usr/local/bin/yt-dlp && chmod +x /usr/local/bin/yt-dlp
-
+# ---------- Stage 1: deps (compila nativos como sharp/better-sqlite3) ----------
+FROM node:22-bookworm-slim AS deps
 WORKDIR /app
 
-# Cache de deps: primero package.json / lock
+# Herramientas de build para módulos nativos
+RUN apt-get update && apt-get install -y \
+    python3 build-essential ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+# Cache de deps
 COPY package*.json ./
 RUN npm ci --omit=dev
+
+# ---------- Stage 2: runtime (limpio y liviano) ----------
+FROM node:22-bookworm-slim AS runtime
+WORKDIR /app
+
+# Runtime tools (opcional ffmpeg/sqlite3 si los usás)
+RUN apt-get update && apt-get install -y \
+    ffmpeg sqlite3 ca-certificates curl \
+ && rm -rf /var/lib/apt/lists/*
+
+# (Opcional) yt-dlp si algún día reproducís contenido externo
+# RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
+#     -o /usr/local/bin/yt-dlp && chmod +x /usr/local/bin/yt-dlp
+
+# Copiá node_modules ya compilados
+COPY --from=deps /app/node_modules ./node_modules
 
 # Copiá tu código
 COPY . .
 
-# Carpeta para la DB/archivos que tienen que persistir fuera de la imagen
+# Carpeta para la DB y archivos persistentes
 RUN mkdir -p /app/data
 
-# VARIABLES de entorno de prod
+# Variables de entorno
 ENV NODE_ENV=production \
-    TZ=America/Argentina/Buenos_Aires \
-    # Tu SQLite vivirá en /app/data dentro del contenedor
-    DATABASE_URL=file:/app/data/bot.db
+    TZ=America/Argentina/Cordoba
 
-# (Opcional) si usás Prisma, descomentá:
-# RUN npx prisma generate
+# Seguridad: correr como usuario no root
+RUN useradd -m -u 10001 appuser && chown -R appuser:appuser /app
+USER appuser
 
-# Arranque del bot
+# Declarar volumen para persistir la DB fuera de la imagen
+VOLUME ["/app/data"]
+
+# Healthcheck simple (opcional)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD node -e "fetch('https://discord.com/api/v10/gateway').then(()=>process.exit(0)).catch(()=>process.exit(1))"
+
+# Arranque
 CMD ["npm","start"]

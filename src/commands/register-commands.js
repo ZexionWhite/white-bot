@@ -89,6 +89,40 @@ const commands = [
   )
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 
+  new SlashCommandBuilder()
+  .setName("setmessagelog")
+  .setDescription("Define the channel for message delete/edit logs")
+  .addChannelOption(o =>
+    o.setName("channel")
+     .setDescription("Log channel for message events")
+     .addChannelTypes(ChannelType.GuildText)
+     .setRequired(true)
+  )
+  .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+
+new SlashCommandBuilder()
+  .setName("setavatarlog")
+  .setDescription("Define the channel for avatar change logs")
+  .addChannelOption(o =>
+    o.setName("channel")
+     .setDescription("Log channel for avatar updates")
+     .addChannelTypes(ChannelType.GuildText)
+     .setRequired(true)
+  )
+  .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+
+  new SlashCommandBuilder()
+  .setName("setnicklog")
+  .setDescription("Define el canal para logs de cambios de apodo")
+  .addChannelOption(o =>
+    o.setName("channel")
+     .setDescription("Canal de logs de apodos")
+     .addChannelTypes(ChannelType.GuildText)
+     .setRequired(true)
+  )
+  .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+
+
 
 ].map(c => c.toJSON());
 

@@ -38,7 +38,6 @@ db.exec(`
 
 // ---------- migraciones idempotentes ----------
 function ensureColumn(table, column, ddl) {
-  // lee columnas actuales
   const cols = db.prepare(`PRAGMA table_info('${table}')`).all().map(c => c.name);
   if (!cols.includes(column)) {
     db.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
@@ -49,6 +48,9 @@ function ensureColumn(table, column, ddl) {
 ensureColumn("guild_settings", "welcome_cd_minutes", "welcome_cd_minutes INTEGER DEFAULT 60");
 ensureColumn("guild_settings", "booster_announce_channel_id", "booster_announce_channel_id TEXT");
 ensureColumn("guild_settings", "info_channel_id", "info_channel_id TEXT");
+ensureColumn("guild_settings", "message_log_channel_id", "message_log_channel_id TEXT");
+ensureColumn("guild_settings", "avatar_log_channel_id", "avatar_log_channel_id TEXT");
+ensureColumn("guild_settings", "nickname_log_channel_id", "nickname_log_channel_id TEXT"); // 🆕
 
 // ---------- prepared statements ----------
 export const getSettings = db.prepare(`
@@ -67,7 +69,10 @@ export const upsertSettings = db.prepare(`
     booster_role_id,
     booster_announce_channel_id,
     welcome_cd_minutes,
-    info_channel_id
+    info_channel_id,
+    message_log_channel_id,
+    avatar_log_channel_id,
+    nickname_log_channel_id
   )
   VALUES (
     @guild_id,
@@ -78,7 +83,10 @@ export const upsertSettings = db.prepare(`
     @booster_role_id,
     @booster_announce_channel_id,
     @welcome_cd_minutes,
-    @info_channel_id
+    @info_channel_id,
+    @message_log_channel_id,
+    @avatar_log_channel_id,
+    @nickname_log_channel_id
   )
   ON CONFLICT(guild_id) DO UPDATE SET
     welcome_channel_id           = excluded.welcome_channel_id,
@@ -88,7 +96,10 @@ export const upsertSettings = db.prepare(`
     booster_role_id              = excluded.booster_role_id,
     booster_announce_channel_id  = excluded.booster_announce_channel_id,
     welcome_cd_minutes           = excluded.welcome_cd_minutes,
-    info_channel_id              = excluded.info_channel_id;
+    info_channel_id              = excluded.info_channel_id,
+    message_log_channel_id       = excluded.message_log_channel_id,
+    avatar_log_channel_id        = excluded.avatar_log_channel_id,
+    nickname_log_channel_id      = excluded.nickname_log_channel_id;
 `);
 
 export const insertColorRole = db.prepare(`

@@ -60,7 +60,10 @@ export default async function postautoroles(itx) {
         booster_role_id: cfg.booster_role_id ?? null,
         booster_announce_channel_id: row.booster_announce_channel_id ?? null,
         welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
-        info_channel_id: row.info_channel_id ?? null
+        info_channel_id: row.info_channel_id ?? null,
+        message_log_channel_id: row.message_log_channel_id ?? null,
+        avatar_log_channel_id: row.avatar_log_channel_id ?? null,
+        nickname_log_channel_id: row.nickname_log_channel_id ?? null
       };
       upsertSettings.run(updated);
     }

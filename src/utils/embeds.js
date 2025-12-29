@@ -427,6 +427,8 @@ export function voiceModEmbed(channel, members, moderator, client = null) {
   const UNDEAFEN_EMOJI = "<:sound:1455326656959873201>";
   const GUILD_MUTE_EMOJI = "<:guild_mute:1455326680838050004>";
   const GUILD_DEAFEN_EMOJI = "<:guild_deafen:1455326695413256203>";
+  const STAFF_EMOJI = "<:staff:1455329507623043135>";
+  const OWNER_EMOJI = "<:owner:1455329532042022952>";
 
   // Formatear lista de usuarios
   const memberList = members.map((member) => {
@@ -441,12 +443,12 @@ export function voiceModEmbed(channel, members, moderator, client = null) {
     const isSelfDeafened = member.voice.selfDeaf;
     const deafIcon = (isGuildDeafened || isSelfDeafened) ? GUILD_DEAFEN_EMOJI : UNDEAFEN_EMOJI;
     
-    // Iconos de roles (similar a la imagen)
+    // Iconos de roles
     let roleIcons = "";
     if (isOwner(member)) {
-      roleIcons += "👑"; // Owner (corona dorada)
+      roleIcons += OWNER_EMOJI;
     } else if (isModerator(member)) {
-      roleIcons += "⚒️"; // Moderador (martillo y llave cruzados - emoji más cercano)
+      roleIcons += STAFF_EMOJI;
     }
 
     return `${muteIcon}${deafIcon} <@${member.id}> ${roleIcons}`;
@@ -463,33 +465,48 @@ export function voiceModEmbed(channel, members, moderator, client = null) {
   return embed;
 }
 
-// Helper para obtener emoji para botones/menús (necesita objeto Emoji, no string markdown)
-function getEmojiForComponent(client, emojiId, fallback) {
-  if (!client) return fallback;
-  const emoji = client.emojis.cache.get(emojiId);
-  return emoji || fallback;
+// Helper para parsear markdown de emoji y convertir a formato de componente
+// Discord.js necesita { id: string } para emojis custom en componentes
+function parseEmojiMarkdown(markdown, fallback) {
+  if (!markdown || typeof markdown !== 'string') return fallback;
+  
+  // Formato: <:name:id> o <a:name:id> para animados
+  const match = markdown.match(/^<a?:(\w+):(\d+)>$/);
+  if (match) {
+    return { id: match[2], name: match[1] };
+  }
+  
+  return fallback;
 }
 
 // Helper para crear componentes de moderación (menú + botones)
 export function createVoiceModComponents(channel, members, moderator, targetMember = null, client = null) {
-  // IDs de emojis custom para componentes
-  const GUILD_MUTE_EMOJI_ID = "1455326680838050004";
-  const UNMUTED_EMOJI_ID = "1455326669803094066";
-  const muteEmoji = getEmojiForComponent(client, GUILD_MUTE_EMOJI_ID, "🔇");
-  const unmutedEmoji = getEmojiForComponent(client, UNMUTED_EMOJI_ID, "🔊");
+  // Emojis custom en formato markdown (para referencia)
+  const muteEmojiMarkdown = "<:guild_mute:1455326680838050004>";
+  const unmutedEmojiMarkdown = "<:microphone:1455326669803094066>";
+  const refreshEmojiMarkdown = "<:refresh:1455329478321373468>";
+  const moveOutEmojiMarkdown = "<:move_out:1455333144248058064>";
+  const moveInEmojiMarkdown = "<:move_in:1455333134274134119>";
+  
+  // Convertir a formato de componente
+  const muteEmoji = parseEmojiMarkdown(muteEmojiMarkdown, "🔇");
+  const unmutedEmoji = parseEmojiMarkdown(unmutedEmojiMarkdown, "🔊");
+  const refreshEmoji = parseEmojiMarkdown(refreshEmojiMarkdown, "🔄");
+  const moveOutEmoji = parseEmojiMarkdown(moveOutEmojiMarkdown, "👥");
+  const moveInEmoji = parseEmojiMarkdown(moveInEmojiMarkdown, "🔊");
 
   const menuOptions = [
     {
       label: "Moverme al canal",
       value: `mod_join_${channel.id}`,
       description: "Te mueve a este canal de voz",
-      emoji: unmutedEmoji
+      emoji: moveInEmoji
     },
     {
       label: "Traer todos a mi canal",
       value: `mod_bring_all_${channel.id}`,
       description: "Mueve todos los usuarios no-mods a tu canal",
-      emoji: "👥"
+      emoji: moveOutEmoji
     },
     {
       label: "Mutear a todos",
@@ -504,10 +521,10 @@ export function createVoiceModComponents(channel, members, moderator, targetMemb
       emoji: unmutedEmoji
     },
     {
-      label: "🔄 Recargar",
+      label: "Recargar",
       value: `mod_refresh_${channel.id}`,
       description: "Actualiza la lista de usuarios",
-      emoji: "🔄"
+      emoji: refreshEmoji
     }
   ];
 
@@ -520,7 +537,7 @@ export function createVoiceModComponents(channel, members, moderator, targetMemb
       label: `Traer ${targetMember.user.username} a mi canal`,
       value: `mod_bring_${targetMember.id}`,
       description: `Mover ${targetMember.user.username} a tu canal`,
-      emoji: "👤"
+      emoji: moveOutEmoji
     });
   }
 
@@ -550,24 +567,21 @@ export function createVoiceModComponents(channel, members, moderator, targetMemb
 
   const menuRow = new ActionRowBuilder().addComponents(menu);
 
-  // Botones rápidos
+  // Botones rápidos (solo emojis, sin texto) - todos grises
   const quickButtons = new ActionRowBuilder()
     .addComponents(
       new ButtonBuilder()
         .setCustomId(`mod_join_${channel.id}`)
-        .setStyle(ButtonStyle.Primary)
-        .setEmoji(unmutedEmoji)
-        .setLabel("Unirme"),
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji(moveInEmoji),
       new ButtonBuilder()
         .setCustomId(`mod_mute_all_${channel.id}`)
-        .setStyle(ButtonStyle.Danger)
-        .setEmoji(muteEmoji)
-        .setLabel("Mutear todos"),
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji(muteEmoji),
       new ButtonBuilder()
         .setCustomId(`mod_refresh_${channel.id}`)
         .setStyle(ButtonStyle.Secondary)
-        .setEmoji("🔄")
-        .setLabel("Recargar")
+        .setEmoji(refreshEmoji)
     );
 
   return [menuRow, quickButtons];

@@ -57,16 +57,30 @@ const commands = [
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 
   new SlashCommandBuilder()
-  .setName("previewboost")
-  .setDescription("Previsualiza el embed de boost sin boostear de verdad")
-  .addUserOption(o =>
-    o.setName("usuario").setDescription("Miembro a simular (opcional)")
+  .setName("preview")
+  .setDescription("Previsualiza embeds (boost, bienvenida, etc.)")
+  .addSubcommand(sc =>
+    sc.setName("boost")
+     .setDescription("Previsualiza el embed de boost")
+     .addUserOption(o =>
+       o.setName("usuario").setDescription("Miembro a simular (opcional)")
+     )
+     .addBooleanOption(o =>
+       o.setName("publico").setDescription("Envíalo al canal (si no, es ephemeral)")
+     )
+     .addIntegerOption(o =>
+       o.setName("boosts").setDescription("Forzar cantidad de boosts (opcional)").setMinValue(0)
+     )
   )
-  .addBooleanOption(o =>
-    o.setName("publico").setDescription("Envíalo al canal (si no, es ephemeral)")
-  )
-  .addIntegerOption(o =>
-    o.setName("boosts").setDescription("Forzar cantidad de boosts (opcional)").setMinValue(0)
+  .addSubcommand(sc =>
+    sc.setName("welcome")
+     .setDescription("Previsualiza el embed de bienvenida")
+     .addUserOption(o =>
+       o.setName("usuario").setDescription("Miembro a simular (opcional)")
+     )
+     .addBooleanOption(o =>
+       o.setName("publico").setDescription("Envíalo al canal (si no, es ephemeral)")
+     )
   )
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 
@@ -121,6 +135,57 @@ new SlashCommandBuilder()
      .setRequired(true)
   )
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+
+  new SlashCommandBuilder()
+  .setName("setvoicelog")
+  .setDescription("Define el canal para logs de estados de voz (join/leave/move)")
+  .addChannelOption(o =>
+    o.setName("channel")
+     .setDescription("Canal de logs de voz")
+     .addChannelTypes(ChannelType.GuildText)
+     .setRequired(true)
+  )
+  .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+
+  new SlashCommandBuilder()
+  .setName("userstats")
+  .setDescription("Muestra estadísticas de un usuario (tiempo en voz, mensajes, etc.)")
+  .addUserOption(o =>
+    o.setName("usuario")
+     .setDescription("Usuario a consultar (default: tú mismo)")
+  ),
+
+  new SlashCommandBuilder()
+  .setName("help")
+  .setDescription("Muestra información sobre todos los comandos disponibles"),
+
+  new SlashCommandBuilder()
+  .setName("config")
+  .setDescription("Muestra la configuración actual del servidor (solo moderadores)")
+  .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+
+  new SlashCommandBuilder()
+  .setName("mod")
+  .setDescription("Herramientas de moderación de canales de voz")
+  .addSubcommand(sc =>
+    sc.setName("voicechat")
+     .setDescription("Modera usuarios en un canal de voz")
+     .addChannelOption(o =>
+       o.setName("canal")
+        .setDescription("Canal de voz a moderar (opcional, usa el canal actual si no se especifica)")
+        .addChannelTypes(ChannelType.GuildVoice, ChannelType.GuildStageVoice)
+     )
+  )
+  .addSubcommand(sc =>
+    sc.setName("voiceuser")
+     .setDescription("Modera un usuario específico en voz")
+     .addUserOption(o =>
+       o.setName("usuario")
+        .setDescription("Usuario a moderar")
+        .setRequired(true)
+     )
+  )
+  .setDefaultMemberPermissions(PermissionFlagsBits.MuteMembers | PermissionFlagsBits.MoveMembers),
 
 
 

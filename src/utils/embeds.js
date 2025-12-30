@@ -435,28 +435,36 @@ export function voiceModEmbed(channel, members, moderator, client = null) {
   // Formatear lista de usuarios
   const memberList = members.map((member) => {
     // Iconos de estado de voz
-    // Mute: distinguir entre mute de servidor (guild) y self mute (local)
-    const isGuildMuted = member.voice.mute;
-    const isSelfMuted = member.voice.selfMute;
+    // Mute: 3 estados posibles
+    const isGuildMuted = member.voice.mute; // Mute de servidor
+    const isSelfMuted = member.voice.selfMute; // Mute local (self)
+    
     let muteIcon;
     if (isGuildMuted) {
-      muteIcon = GUILD_MUTE_EMOJI; // Mute de servidor tiene prioridad
+      // Si está muteado por servidor, usar emoji de guild mute
+      muteIcon = GUILD_MUTE_EMOJI;
     } else if (isSelfMuted) {
-      muteIcon = LOCAL_MUTED_EMOJI; // Mute local (self)
+      // Si solo está self muted (no guild muted), usar emoji de local mute
+      muteIcon = LOCAL_MUTED_EMOJI;
     } else {
-      muteIcon = UNMUTED_EMOJI; // No muteado
+      // Si no está muteado, usar emoji normal
+      muteIcon = UNMUTED_EMOJI;
     }
     
-    // Deafen: distinguir entre deafen de servidor (guild) y self deafen (local)
-    const isGuildDeafened = member.voice.deaf;
-    const isSelfDeafened = member.voice.selfDeaf;
+    // Deafen: 3 estados posibles
+    const isGuildDeafened = member.voice.deaf; // Deafen de servidor
+    const isSelfDeafened = member.voice.selfDeaf; // Deafen local (self)
+    
     let deafIcon;
     if (isGuildDeafened) {
-      deafIcon = GUILD_DEAFEN_EMOJI; // Deafen de servidor tiene prioridad
+      // Si está deafened por servidor, usar emoji de guild deafen
+      deafIcon = GUILD_DEAFEN_EMOJI;
     } else if (isSelfDeafened) {
-      deafIcon = LOCAL_DEAFEN_EMOJI; // Deafen local (self)
+      // Si solo está self deafened (no guild deafened), usar emoji de local deafen
+      deafIcon = LOCAL_DEAFEN_EMOJI;
     } else {
-      deafIcon = UNDEAFEN_EMOJI; // No deafened
+      // Si no está deafened, usar emoji normal
+      deafIcon = UNDEAFEN_EMOJI;
     }
     
     // Iconos de roles

@@ -1,6 +1,7 @@
 import { EmbedBuilder } from "discord.js";
 import { getSettings } from "../db.js";
 import { TZ } from "../config.js";
+import { EMOJIS } from "../config/emojis.js";
 
 function truncate(str, n = 1000) {
   if (!str) return "(no content)";
@@ -44,7 +45,7 @@ export default async function messageUpdate(client, oldMessage, newMessage) {
   const guildIcon = newMessage.guild.iconURL({ size: 64, extension: "png" }) ?? undefined;
 
   const embed = new EmbedBuilder()
-    .setTitle("<:message_updated:1405708704330027038> Message Edited")
+    .setTitle(`${EMOJIS.LOGS.MESSAGE_UPDATED} Message Edited`)
     .setDescription(
       [
         `**User:** ${authorTag} (\`${authorId}\`)`,

@@ -3,6 +3,7 @@ import { boosterEmbed } from "../utils/embeds.js";
 import { getSettings } from "../db.js";
 import { TZ } from "../config.js";
 import { composeBeforeAfter } from "../utils/beforeAfter.js";
+import { EMOJIS } from "../config/emojis.js";
 
 export default async function guildMemberUpdate(client, oldM, newM) {
   const cfg = getSettings.get(newM.guild.id) ?? {};
@@ -46,7 +47,7 @@ export default async function guildMemberUpdate(client, oldM, newM) {
           }).format(new Date());
 
           const embed = new EmbedBuilder()
-            .setTitle("<:user_picture:1405722148823367830> Avatar updated")
+            .setTitle(`${EMOJIS.LOGS.USER_PICTURE} Avatar updated`)
             .setDescription(`**User:** ${newM.user?.tag ?? "(unknown)"} (\`${newM.id}\`)`)
             .setColor(0x9b59b6)
             .setFooter({
@@ -107,7 +108,7 @@ export default async function guildMemberUpdate(client, oldM, newM) {
           }).format(new Date());
 
           const embed = new EmbedBuilder()
-            .setTitle("<:nickname_change:1405729775330398308> Nickname updated")
+            .setTitle(`${EMOJIS.LOGS.NICKNAME_CHANGE} Nickname updated`)
             .setDescription(
               [
                 `**User:** ${newM.user?.tag ?? "(unknown)"} (\`${newM.id}\`)`,

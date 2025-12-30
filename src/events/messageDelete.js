@@ -1,6 +1,7 @@
 import { AuditLogEvent, EmbedBuilder } from "discord.js";
 import { getSettings } from "../db.js";
 import { TZ } from "../config.js";
+import { EMOJIS } from "../config/emojis.js";
 
 function truncate(str, n = 1000) {
   if (!str) return "(no content)";
@@ -65,7 +66,7 @@ export default async function messageDelete(client, message) {
     `Message ID: ${message.id ?? "unknown"}`].join(" • ");
 
     const embed = new EmbedBuilder()
-    .setTitle("<:message_deleted:1405708649334046750> Message Deleted")
+    .setTitle(`${EMOJIS.LOGS.MESSAGE_DELETED} Message Deleted`)
     .setDescription(
         [
         `**User:** ${authorTag} (\`${authorId}\`)`,

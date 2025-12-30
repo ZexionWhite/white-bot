@@ -1,0 +1,34 @@
+export const EMOJIS = {
+  LOGS: {
+    USER_JOINED: "<:user_joined:1404291903465455809>",
+    MESSAGE_UPDATED: "<:message_updated:1405708704330027038>",
+    MESSAGE_DELETED: "<:message_deleted:1405708649334046750>",
+    USER_PICTURE: "<:user_picture:1405722148823367830>",
+    NICKNAME_CHANGE: "<:nickname_change:1405729775330398308>"
+  },
+  
+  BOOST: {
+    DEV_WHITEBOOSTER: "<:dev_whitebooster:1404272356905713674>"
+  },
+  
+  VOICE: {
+    UNMUTED: "<:microphone:1455326669803094066>",
+    UNDEAFEN: "<:sound:1455326656959873201>",
+    GUILD_MUTE: "<:guild_mute:1455326680838050004>",
+    GUILD_DEAFEN: "<:guild_deafen:1455326695413256203>",
+    LOCAL_MUTED: "<:local_muted:1455354429522968720>",
+    LOCAL_DEAFEN: "<:local_deafen:1455354439819857970>"
+  },
+  
+  ROLES: {
+    STAFF: "<:staff:1455329507623043135>",
+    OWNER: "<:owner:1455329532042022952>"
+  },
+  
+  ACTIONS: {
+    REFRESH: "<:refresh:1455329478321373468>",
+    MOVE_OUT: "<:move_out:1455333144248058064>",
+    MOVE_IN: "<:move_in:1455333134274134119>"
+  }
+};
+

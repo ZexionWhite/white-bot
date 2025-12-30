@@ -4,50 +4,68 @@ import { userStatsEmbed, helpEmbed, configEmbed, voiceModEmbed, createVoiceModCo
 import { updateVoiceModEmbed } from "../utils/voiceMod.js";
 
 export default async function interactionCreate(client, itx) {
-  if (itx.isChatInputCommand()) {
-    const name = itx.commandName;
+  try {
+    if (itx.isChatInputCommand()) {
+      const name = itx.commandName;
+      console.log(`[interactionCreate] Comando ejecutado: ${name} por ${itx.user.tag} en ${itx.guild?.name || "DM"}`);
 
-    if (name === "setwelcome") {
-      if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild)) return itx.reply({ content: "Sin permisos.", ephemeral: true });
-      const channel = itx.options.getChannel("canal", true);
-      const row = getSettings.get(itx.guild.id) ?? {};
-      upsertSettings.run({
-        guild_id: itx.guild.id,
-        welcome_channel_id: channel.id,
-        log_channel_id: row.log_channel_id ?? null,
-        autorole_channel_id: row.autorole_channel_id ?? null,
-        autorole_message_id: row.autorole_message_id ?? null,
-        booster_role_id: row.booster_role_id ?? null,
-        booster_announce_channel_id: row.booster_announce_channel_id ?? null,
-        welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
-        info_channel_id: row.info_channel_id ?? null,
-        message_log_channel_id: row.message_log_channel_id ?? null,
-        avatar_log_channel_id: row.avatar_log_channel_id ?? null,
-        nickname_log_channel_id: row.nickname_log_channel_id ?? null,
-        voice_log_channel_id: row.voice_log_channel_id ?? null
-      });
-      return itx.reply({ content: `Canal de bienvenida seteado a <#${channel.id}>`, ephemeral: true });
-    }
+      if (name === "setwelcome") {
+        if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild)) {
+          console.warn(`[interactionCreate] setwelcome: Sin permisos - ${itx.user.tag} en ${itx.guild.name}`);
+          return itx.reply({ content: "Sin permisos.", ephemeral: true });
+        }
+        const channel = itx.options.getChannel("canal", true);
+        const row = getSettings.get(itx.guild.id) ?? {};
+        try {
+          upsertSettings.run({
+            guild_id: itx.guild.id,
+            welcome_channel_id: channel.id,
+            log_channel_id: row.log_channel_id ?? null,
+            autorole_channel_id: row.autorole_channel_id ?? null,
+            autorole_message_id: row.autorole_message_id ?? null,
+            booster_role_id: row.booster_role_id ?? null,
+            booster_announce_channel_id: row.booster_announce_channel_id ?? null,
+            welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
+            info_channel_id: row.info_channel_id ?? null,
+            message_log_channel_id: row.message_log_channel_id ?? null,
+            avatar_log_channel_id: row.avatar_log_channel_id ?? null,
+            nickname_log_channel_id: row.nickname_log_channel_id ?? null,
+            voice_log_channel_id: row.voice_log_channel_id ?? null
+          });
+          console.log(`[interactionCreate] setwelcome: Canal configurado a ${channel.name} (${channel.id}) en ${itx.guild.name}`);
+        } catch (err) {
+          console.error(`[interactionCreate] setwelcome: Error al guardar configuración:`, err.message);
+        }
+        return itx.reply({ content: `Canal de bienvenida seteado a <#${channel.id}>`, ephemeral: true });
+      }
 
     if (name === "setlog") {
-      if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild)) return itx.reply({ content: "Sin permisos.", ephemeral: true });
+      if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild)) {
+        console.warn(`[interactionCreate] setlog: Sin permisos - ${itx.user.tag} en ${itx.guild.name}`);
+        return itx.reply({ content: "Sin permisos.", ephemeral: true });
+      }
       const channel = itx.options.getChannel("canal", true);
       const row = getSettings.get(itx.guild.id) ?? {};
-      upsertSettings.run({
-        guild_id: itx.guild.id,
-        welcome_channel_id: row.welcome_channel_id ?? null,
-        log_channel_id: channel.id,
-        autorole_channel_id: row.autorole_channel_id ?? null,
-        autorole_message_id: row.autorole_message_id ?? null,
-        booster_role_id: row.booster_role_id ?? null,
-        booster_announce_channel_id: row.booster_announce_channel_id ?? null,
-        welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
-        info_channel_id: row.info_channel_id ?? null,
-        message_log_channel_id: row.message_log_channel_id ?? null,
-        avatar_log_channel_id: row.avatar_log_channel_id ?? null,
-        nickname_log_channel_id: row.nickname_log_channel_id ?? null,
-        voice_log_channel_id: row.voice_log_channel_id ?? null
-      });
+      try {
+        upsertSettings.run({
+          guild_id: itx.guild.id,
+          welcome_channel_id: row.welcome_channel_id ?? null,
+          log_channel_id: channel.id,
+          autorole_channel_id: row.autorole_channel_id ?? null,
+          autorole_message_id: row.autorole_message_id ?? null,
+          booster_role_id: row.booster_role_id ?? null,
+          booster_announce_channel_id: row.booster_announce_channel_id ?? null,
+          welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
+          info_channel_id: row.info_channel_id ?? null,
+          message_log_channel_id: row.message_log_channel_id ?? null,
+          avatar_log_channel_id: row.avatar_log_channel_id ?? null,
+          nickname_log_channel_id: row.nickname_log_channel_id ?? null,
+          voice_log_channel_id: row.voice_log_channel_id ?? null
+        });
+        console.log(`[interactionCreate] setlog: Canal configurado a ${channel.name} (${channel.id}) en ${itx.guild.name}`);
+      } catch (err) {
+        console.error(`[interactionCreate] setlog: Error al guardar configuración:`, err.message);
+      }
       return itx.reply({ content: `Canal de logs seteado a <#${channel.id}>`, ephemeral: true });
     }
 
@@ -888,8 +906,14 @@ export default async function interactionCreate(client, itx) {
         await updateVoiceModEmbed(client, channelId, itx.guild.id);
         return itx.deferUpdate();
       } catch (error) {
+        console.error(`[interactionCreate] Error al desmutear usuarios:`, error.message);
         return itx.reply({ content: "❌ No pude desmutear algunos usuarios. Verifica permisos.", ephemeral: true });
       }
+    }
+  } catch (error) {
+    console.error(`[interactionCreate] Error inesperado al procesar interacción:`, error.message);
+    if (itx.isRepliable() && !itx.replied && !itx.deferred) {
+      itx.reply({ content: "❌ Ocurrió un error al procesar esta interacción.", ephemeral: true }).catch(() => {});
     }
   }
 }

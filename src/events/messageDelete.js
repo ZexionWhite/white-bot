@@ -16,7 +16,10 @@ export default async function messageDelete(client, message) {
   const logId = cfg?.message_log_channel_id;
   if (!logId) return;
 
-  const logCh = await message.guild.channels.fetch(logId).catch(() => null);
+  const logCh = await message.guild.channels.fetch(logId).catch((err) => {
+    console.error(`[messageDelete] Error al obtener canal de logs ${logId} en ${message.guild.name}:`, err.message);
+    return null;
+  });
   if (!logCh?.isTextBased()) return;
 
   const authorTag = message.author?.tag ?? message.member?.user?.tag ?? "Desconocido";
@@ -39,7 +42,8 @@ export default async function messageDelete(client, message) {
         break;
       }
     }
-  } catch {
+  } catch (err) {
+    console.warn(`[messageDelete] Error al obtener audit log en ${message.guild.name}:`, err.message);
   }
 
   const content = message.content ?? (message.partial ? "(uncached)" : "(no content)");
@@ -85,5 +89,7 @@ export default async function messageDelete(client, message) {
         iconURL: message.guild.iconURL({ size: 64, extension: "png" }) ?? undefined
     });
 
-  await logCh.send({ embeds: [embed] }).catch(() => {});
+  await logCh.send({ embeds: [embed] }).catch((err) => {
+    console.error(`[messageDelete] Error al enviar log de eliminación en ${message.guild.name}:`, err.message);
+  });
 }

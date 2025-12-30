@@ -7,7 +7,8 @@ export default async function messageCreate(client, message) {
 
   try {
     incrementMessageCount.run(message.guild.id, message.author.id);
-  } catch {
+  } catch (error) {
+    console.error(`[messageCreate] Error al incrementar contador de mensajes para ${message.author?.tag || message.author?.id} en ${message.guild.name}:`, error.message);
   }
 }
 

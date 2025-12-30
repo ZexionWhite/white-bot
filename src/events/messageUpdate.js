@@ -17,11 +17,18 @@ export default async function messageUpdate(client, oldMessage, newMessage) {
   const logId = cfg?.message_log_channel_id;
   if (!logId) return;
 
-  const logCh = await newMessage.guild.channels.fetch(logId).catch(() => null);
+  const logCh = await newMessage.guild.channels.fetch(logId).catch((err) => {
+    console.error(`[messageUpdate] Error al obtener canal de logs ${logId} en ${newMessage.guild.name}:`, err.message);
+    return null;
+  });
   if (!logCh?.isTextBased()) return;
 
-  try { if (oldMessage?.partial) oldMessage = await oldMessage.fetch(); } catch {}
-  try { if (newMessage?.partial) newMessage = await newMessage.fetch(); } catch {}
+  try { if (oldMessage?.partial) oldMessage = await oldMessage.fetch(); } catch (err) {
+    console.warn(`[messageUpdate] Error al fetch oldMessage parcial:`, err.message);
+  }
+  try { if (newMessage?.partial) newMessage = await newMessage.fetch(); } catch (err) {
+    console.warn(`[messageUpdate] Error al fetch newMessage parcial:`, err.message);
+  }
 
   const before = oldMessage?.content ?? "(uncached)";
   const after  = newMessage?.content ?? "(no content)";
@@ -65,5 +72,7 @@ export default async function messageUpdate(client, oldMessage, newMessage) {
       iconURL: guildIcon
     });
 
-  await logCh.send({ embeds: [embed] }).catch(() => {});
+  await logCh.send({ embeds: [embed] }).catch((err) => {
+    console.error(`[messageUpdate] Error al enviar log de edición en ${newMessage.guild.name}:`, err.message);
+  });
 }

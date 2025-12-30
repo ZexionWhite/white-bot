@@ -13,9 +13,13 @@ export default async function guildMemberUpdate(client, oldM, newM) {
   const started = !had && has;
 
   if (started) {
+    console.log(`[guildMemberUpdate] Boost detectado: ${newM.user.tag} en ${newM.guild.name}`);
     const channelId = cfg?.booster_announce_channel_id;
     if (channelId) {
-      const ch = await newM.guild.channels.fetch(channelId).catch(() => null);
+      const ch = await newM.guild.channels.fetch(channelId).catch((err) => {
+        console.error(`[guildMemberUpdate] Error al obtener canal de boost ${channelId} en ${newM.guild.name}:`, err.message);
+        return null;
+      });
       if (ch?.isTextBased()) {
         const autoBoosterRoleId =
           newM.guild.roles.cache.find(r => r.tags?.premiumSubscriberRole)?.id ?? null;
@@ -23,8 +27,12 @@ export default async function guildMemberUpdate(client, oldM, newM) {
         const infoChannelId = cfg?.info_channel_id ?? null;
 
         const embed = boosterEmbed(newM, { boosterRoleId, infoChannelId });
-        await ch.send({ embeds: [embed] }).catch(() => {});
+        await ch.send({ embeds: [embed] }).catch((err) => {
+          console.error(`[guildMemberUpdate] Error al enviar anuncio de boost en ${newM.guild.name}:`, err.message);
+        });
       }
+    } else {
+      console.log(`[guildMemberUpdate] Boost detectado pero no hay canal configurado en ${newM.guild.name}`);
     }
   }
 
@@ -33,12 +41,19 @@ export default async function guildMemberUpdate(client, oldM, newM) {
     if (serverAvatarChanged) {
       const avatarLogId = cfg?.avatar_log_channel_id;
       if (avatarLogId) {
-        const logCh = await newM.guild.channels.fetch(avatarLogId).catch(() => null);
+        const logCh = await newM.guild.channels.fetch(avatarLogId).catch((err) => {
+          console.error(`[guildMemberUpdate] Error al obtener canal de logs de avatar ${avatarLogId} en ${newM.guild.name}:`, err.message);
+          return null;
+        });
         if (logCh?.isTextBased()) {
           const oldServerUrl = oldM?.avatar ? oldM.avatarURL({ size: 512, extension: "png" }) : null;
           const newServerUrl = newM?.avatar ? newM.avatarURL({ size: 512, extension: "png" }) : null;
 
-          const composed = await composeBeforeAfter(oldServerUrl, newServerUrl).catch(() => null);
+          console.log(`[guildMemberUpdate] Avatar de servidor cambiado: ${newM.user.tag} en ${newM.guild.name}`);
+          const composed = await composeBeforeAfter(oldServerUrl, newServerUrl).catch((err) => {
+            console.warn(`[guildMemberUpdate] Error al componer imagen before/after para avatar de servidor:`, err.message);
+            return null;
+          });
 
           const when = new Intl.DateTimeFormat("es-AR", {
             dateStyle: "short",
@@ -64,11 +79,15 @@ export default async function guildMemberUpdate(client, oldM, newM) {
           if (composed) {
             const file = new AttachmentBuilder(composed, { name: "server-avatar-before-after.png" });
             embed.setImage("attachment://server-avatar-before-after.png");
-            await logCh.send({ embeds: [embed], files: [file] }).catch(() => {});
+            await logCh.send({ embeds: [embed], files: [file] }).catch((err) => {
+              console.error(`[guildMemberUpdate] Error al enviar log de avatar de servidor con imagen compuesta en ${newM.guild.name}:`, err.message);
+            });
           } else {
             const fallback = newServerUrl ?? oldServerUrl ?? null;
             if (fallback) embed.setImage(fallback);
-            await logCh.send({ embeds: [embed] }).catch(() => {});
+            await logCh.send({ embeds: [embed] }).catch((err) => {
+              console.error(`[guildMemberUpdate] Error al enviar log de avatar de servidor en ${newM.guild.name}:`, err.message);
+            });
           }
         }
       }
@@ -82,8 +101,12 @@ export default async function guildMemberUpdate(client, oldM, newM) {
     if (nickChanged) {
       const nickLogId = cfg?.nickname_log_channel_id;
       if (nickLogId) {
-        const ch = await newM.guild.channels.fetch(nickLogId).catch(() => null);
+        const ch = await newM.guild.channels.fetch(nickLogId).catch((err) => {
+          console.error(`[guildMemberUpdate] Error al obtener canal de logs de nickname ${nickLogId} en ${newM.guild.name}:`, err.message);
+          return null;
+        });
         if (ch?.isTextBased()) {
+          console.log(`[guildMemberUpdate] Nickname cambiado: ${newM.user.tag} en ${newM.guild.name} (${oldM?.displayName} → ${newM.displayName})`);
           let executorText = "(unknown)";
           try {
             const logs = await newM.guild.fetchAuditLogs({ type: AuditLogEvent.MemberUpdate, limit: 5 });
@@ -99,7 +122,9 @@ export default async function guildMemberUpdate(client, oldM, newM) {
                 break;
               }
             }
-          } catch { /* sin View Audit Log o rate-limit */ }
+          } catch (err) {
+            console.warn(`[guildMemberUpdate] Error al obtener audit log para nickname:`, err.message);
+          }
 
           const when = new Intl.DateTimeFormat("es-AR", {
             dateStyle: "short",
@@ -126,7 +151,9 @@ export default async function guildMemberUpdate(client, oldM, newM) {
               iconURL: newM.guild.iconURL({ size: 64, extension: "png" }) ?? undefined
             });
 
-          await ch.send({ embeds: [embed] }).catch(() => {});
+          await ch.send({ embeds: [embed] }).catch((err) => {
+            console.error(`[guildMemberUpdate] Error al enviar log de nickname en ${newM.guild.name}:`, err.message);
+          });
         }
       }
     }

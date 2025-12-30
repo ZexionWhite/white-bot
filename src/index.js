@@ -41,4 +41,24 @@ client.on("messageUpdate", (oldM, newM) => messageUpdate(client, oldM, newM));
 client.on("userUpdate", (oldU, newU) => userUpdate(client, oldU, newU));
 client.on("voiceStateUpdate", (oldState, newState) => voiceStateUpdate(client, oldState, newState));
 
-client.login(process.env.BOT_TOKEN);
+client.on("error", (error) => {
+  console.error("[Client] Error del cliente Discord:", error.message);
+});
+
+client.on("warn", (warning) => {
+  console.warn("[Client] Advertencia del cliente Discord:", warning);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("[Process] Unhandled Rejection at:", promise, "reason:", reason);
+});
+
+process.on("uncaughtException", (error) => {
+  console.error("[Process] Uncaught Exception:", error);
+  process.exit(1);
+});
+
+client.login(process.env.BOT_TOKEN).catch((error) => {
+  console.error("[Client] Error al iniciar sesión:", error.message);
+  process.exit(1);
+});

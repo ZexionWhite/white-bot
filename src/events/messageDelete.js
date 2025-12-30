@@ -9,7 +9,6 @@ function truncate(str, n = 1000) {
 }
 
 export default async function messageDelete(client, message) {
-  // Solo guilds
   if (!message?.guild) return;
 
   const cfg = getSettings.get(message.guild.id);
@@ -19,12 +18,10 @@ export default async function messageDelete(client, message) {
   const logCh = await message.guild.channels.fetch(logId).catch(() => null);
   if (!logCh?.isTextBased()) return;
 
-  // Autor del mensaje
   const authorTag = message.author?.tag ?? message.member?.user?.tag ?? "Desconocido";
   const authorId  = message.author?.id  ?? message.member?.id       ?? "Desconocido";
   const channelMention = message.channel?.id ? `<#${message.channel.id}>` : "(unknown)";
 
-  // Audit Log (best-effort)
   let deleter = null;
   try {
     const logs = await message.guild.fetchAuditLogs({
@@ -42,10 +39,8 @@ export default async function messageDelete(client, message) {
       }
     }
   } catch {
-    // sin View Audit Log o rate limit: ignorar
   }
 
-  // Contenido y adjuntos 
   const content = message.content ?? (message.partial ? "(uncached)" : "(no content)");
 
   const attachments = Array.from(message.attachments?.values?.() ?? []);
@@ -83,9 +78,7 @@ export default async function messageDelete(client, message) {
         { name: "Attachments", value: attachText }
     )
     .setColor(0xed4245)
-    // timestamp del embed = momento del borrado (ahora)
     .setTimestamp()
-    // footer con ID + timestamp del mensaje (o fecha legible si no hay createdTimestamp)
     .setFooter({
         text: footerText,
         iconURL: message.guild.iconURL({ size: 64, extension: "png" }) ?? undefined

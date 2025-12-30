@@ -28,7 +28,6 @@ const client = new Client({
 });
 
 client.commands = new Collection();
-// Almacenar referencias de mensajes de moderación de voz: channelId -> { messageId, channelId, guildId }
 client.voiceModMessages = new Map();
 
 client.once("ready", () => ready(client));

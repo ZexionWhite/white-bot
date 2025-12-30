@@ -4,7 +4,6 @@ import { userStatsEmbed, helpEmbed, configEmbed, voiceModEmbed, createVoiceModCo
 import { updateVoiceModEmbed } from "../utils/voiceMod.js";
 
 export default async function interactionCreate(client, itx) {
-  // slash commands
   if (itx.isChatInputCommand()) {
     const name = itx.commandName;
 
@@ -22,7 +21,6 @@ export default async function interactionCreate(client, itx) {
         booster_announce_channel_id: row.booster_announce_channel_id ?? null,
         welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
         info_channel_id: row.info_channel_id ?? null,
-        // nuevos (preservar)
         message_log_channel_id: row.message_log_channel_id ?? null,
         avatar_log_channel_id: row.avatar_log_channel_id ?? null,
         nickname_log_channel_id: row.nickname_log_channel_id ?? null,
@@ -45,7 +43,6 @@ export default async function interactionCreate(client, itx) {
         booster_announce_channel_id: row.booster_announce_channel_id ?? null,
         welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
         info_channel_id: row.info_channel_id ?? null,
-        // nuevos (preservar)
         message_log_channel_id: row.message_log_channel_id ?? null,
         avatar_log_channel_id: row.avatar_log_channel_id ?? null,
         nickname_log_channel_id: row.nickname_log_channel_id ?? null,
@@ -68,7 +65,6 @@ export default async function interactionCreate(client, itx) {
         booster_announce_channel_id: row.booster_announce_channel_id ?? null,
         welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
         info_channel_id: row.info_channel_id ?? null,
-        // nuevos (preservar)
         message_log_channel_id: row.message_log_channel_id ?? null,
         avatar_log_channel_id: row.avatar_log_channel_id ?? null,
         nickname_log_channel_id: row.nickname_log_channel_id ?? null,
@@ -103,7 +99,6 @@ export default async function interactionCreate(client, itx) {
         booster_announce_channel_id: row.booster_announce_channel_id ?? null,
         welcome_cd_minutes: min,
         info_channel_id: row.info_channel_id ?? null,
-        // nuevos (preservar)
         message_log_channel_id: row.message_log_channel_id ?? null,
         avatar_log_channel_id: row.avatar_log_channel_id ?? null,
         nickname_log_channel_id: row.nickname_log_channel_id ?? null,
@@ -129,7 +124,6 @@ export default async function interactionCreate(client, itx) {
         booster_announce_channel_id: ch.id,
         welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
         info_channel_id: row.info_channel_id ?? null,
-        // nuevos (preservar)
         message_log_channel_id: row.message_log_channel_id ?? null,
         avatar_log_channel_id: row.avatar_log_channel_id ?? null,
         nickname_log_channel_id: row.nickname_log_channel_id ?? null,
@@ -139,7 +133,6 @@ export default async function interactionCreate(client, itx) {
       return itx.reply({ content: `Canal de boosters seteado a <#${ch.id}>`, ephemeral: true });
     }
 
-    // NUEVO: /setmessagelog
     if (name === "setmessagelog") {
       if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild)) {
         return itx.reply({ content: "Sin permisos.", ephemeral: true });
@@ -164,7 +157,6 @@ export default async function interactionCreate(client, itx) {
       return itx.reply({ content: `Message log channel set to <#${ch.id}>`, ephemeral: true });
     }
 
-    // NUEVO: /setavatarlog
     if (name === "setavatarlog") {
       if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild)) {
         return itx.reply({ content: "Sin permisos.", ephemeral: true });
@@ -269,17 +261,13 @@ export default async function interactionCreate(client, itx) {
       const t0 = Date.now();
       await itx.deferReply({ ephemeral: !publico });
 
-      // round-trip
       const rt = Date.now() - t0;
 
-      // API ping (WebSocket)
       const api = Math.round(itx.client.ws.ping);
 
-      // DB ping
       let dbMs = null;
       try { const s = Date.now(); db.prepare("SELECT 1").get(); dbMs = Date.now() - s; } catch { }
 
-      // uptime & mem
       const up = process.uptime(); // segs
       const h = Math.floor(up / 3600), m = Math.floor((up % 3600) / 60), s = Math.floor(up % 60);
       const mem = Math.round(process.memoryUsage().heapUsed / 1024 / 1024); // MB
@@ -316,7 +304,6 @@ export default async function interactionCreate(client, itx) {
         booster_announce_channel_id: row.booster_announce_channel_id ?? null,
         welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
         info_channel_id: ch.id,
-        // nuevos (preservar)
         message_log_channel_id: row.message_log_channel_id ?? null,
         avatar_log_channel_id: row.avatar_log_channel_id ?? null,
         nickname_log_channel_id: row.nickname_log_channel_id ?? null,
@@ -383,10 +370,7 @@ export default async function interactionCreate(client, itx) {
         return itx.editReply({ content: "No encontré ese usuario en el servidor." });
       }
 
-      // Obtener estadísticas
       const stats = getUserStats.get(itx.guild.id, member.id) ?? null;
-
-      // Crear embed
       const embed = userStatsEmbed(member, stats);
       await itx.editReply({ embeds: [embed] });
     }
@@ -397,7 +381,6 @@ export default async function interactionCreate(client, itx) {
     }
 
     if (name === "config") {
-      // Verificar permisos (ManageGuild o ManageRoles)
       if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild) && 
           !itx.memberPermissions.has(PermissionFlagsBits.ManageRoles)) {
         return itx.reply({ 
@@ -412,7 +395,6 @@ export default async function interactionCreate(client, itx) {
     }
 
     if (name === "mod") {
-      // Verificar permisos
       if (!itx.memberPermissions.has(PermissionFlagsBits.MuteMembers) && 
           !itx.memberPermissions.has(PermissionFlagsBits.MoveMembers)) {
         return itx.reply({ 
@@ -426,7 +408,6 @@ export default async function interactionCreate(client, itx) {
       if (subcommand === "voicechat") {
         let targetChannel = itx.options.getChannel("canal");
         
-        // Si no se especificó canal, intentar usar el canal del moderador
         if (!targetChannel) {
           const moderatorVoiceState = itx.member.voice;
           if (moderatorVoiceState?.channel) {
@@ -439,7 +420,6 @@ export default async function interactionCreate(client, itx) {
           }
         }
 
-        // Verificar que sea un canal de voz
         if (!targetChannel.isVoiceBased()) {
           return itx.reply({ 
             content: "❌ El canal especificado no es un canal de voz.", 
@@ -447,7 +427,6 @@ export default async function interactionCreate(client, itx) {
           });
         }
 
-        // Obtener miembros en el canal
         const members = Array.from(targetChannel.members.values());
         if (members.length === 0) {
           return itx.reply({ 
@@ -456,7 +435,6 @@ export default async function interactionCreate(client, itx) {
           });
         }
 
-        // Crear embed
         const embed = voiceModEmbed(targetChannel, members, itx.member, client);
         const components = createVoiceModComponents(targetChannel, members, itx.member, null, client);
 
@@ -467,7 +445,6 @@ export default async function interactionCreate(client, itx) {
           fetchReply: true
         });
 
-        // Guardar referencia del mensaje para actualizaciones
         const key = `${itx.guild.id}_${targetChannel.id}`;
         client.voiceModMessages.set(key, {
           messageId: reply.id,
@@ -494,10 +471,8 @@ export default async function interactionCreate(client, itx) {
           });
         }
 
-        // Obtener todos los miembros del canal
         const members = Array.from(targetChannel.members.values());
         
-        // Crear embed
         const embed = voiceModEmbed(targetChannel, members, itx.member, client);
         const components = createVoiceModComponents(targetChannel, members, itx.member, targetMember, client);
 
@@ -508,7 +483,6 @@ export default async function interactionCreate(client, itx) {
           fetchReply: true
         });
 
-        // Guardar referencia del mensaje para actualizaciones
         const key = `${itx.guild.id}_${targetChannel.id}`;
         client.voiceModMessages.set(key, {
           messageId: reply.id,
@@ -523,7 +497,6 @@ export default async function interactionCreate(client, itx) {
 
   }
 
-  // select menu
   if (itx.isStringSelectMenu() && itx.customId === "color-select") {
     await itx.deferReply({ ephemeral: true });
 
@@ -563,11 +536,9 @@ export default async function interactionCreate(client, itx) {
     }
   }
 
-  // Botones de moderación de voz
   if (itx.isButton()) {
     const customId = itx.customId;
     
-    // Verificar permisos
     if (!itx.memberPermissions.has(PermissionFlagsBits.MuteMembers) && 
         !itx.memberPermissions.has(PermissionFlagsBits.MoveMembers)) {
       return itx.reply({ 
@@ -576,14 +547,12 @@ export default async function interactionCreate(client, itx) {
       });
     }
 
-    // Recargar embed
     if (customId.startsWith("mod_refresh_")) {
       const channelId = customId.replace("mod_refresh_", "");
       await updateVoiceModEmbed(client, channelId, itx.guild.id);
       return itx.deferUpdate();
     }
 
-    // Moverme al canal
     if (customId.startsWith("mod_join_")) {
       const channelId = customId.replace("mod_join_", "");
       const channel = await itx.guild.channels.fetch(channelId).catch(() => null);
@@ -601,7 +570,6 @@ export default async function interactionCreate(client, itx) {
       }
     }
 
-    // Traer usuario específico a mi canal (solo desde voiceuser)
     if (customId.startsWith("mod_bring_") && !customId.includes("_all_")) {
       const userId = customId.replace("mod_bring_", "");
       const targetMember = await itx.guild.members.fetch(userId).catch(() => null);
@@ -627,7 +595,6 @@ export default async function interactionCreate(client, itx) {
       }
     }
 
-    // Traer todos a mi canal
     if (customId.startsWith("mod_bring_all_")) {
       const channelId = customId.replace("mod_bring_all_", "");
       const sourceChannel = await itx.guild.channels.fetch(channelId).catch(() => null);
@@ -661,7 +628,6 @@ export default async function interactionCreate(client, itx) {
       }
     }
 
-    // Mutear/desmutear usuario
     if (customId.startsWith("mod_mute_") && !customId.includes("_all_") && !customId.includes("_unmute_")) {
       const userId = customId.replace("mod_mute_", "");
       const targetMember = await itx.guild.members.fetch(userId).catch(() => null);
@@ -686,7 +652,6 @@ export default async function interactionCreate(client, itx) {
       }
     }
 
-    // Mutear a todos (excepto moderadores)
     if (customId.startsWith("mod_mute_all_")) {
       const channelId = customId.replace("mod_mute_all_", "");
       const channel = await itx.guild.channels.fetch(channelId).catch(() => null);
@@ -715,7 +680,6 @@ export default async function interactionCreate(client, itx) {
       }
     }
 
-    // Desmutear a todos
     if (customId.startsWith("mod_unmute_all_")) {
       const channelId = customId.replace("mod_unmute_all_", "");
       const channel = await itx.guild.channels.fetch(channelId).catch(() => null);
@@ -740,11 +704,9 @@ export default async function interactionCreate(client, itx) {
     }
   }
 
-  // Handler para menú desplegable de moderación
   if (itx.isStringSelectMenu() && itx.customId.startsWith("mod_menu_")) {
     const selectedValue = itx.values[0];
     
-    // Verificar permisos
     if (!itx.memberPermissions.has(PermissionFlagsBits.MuteMembers) && 
         !itx.memberPermissions.has(PermissionFlagsBits.MoveMembers)) {
       return itx.reply({ 
@@ -753,7 +715,6 @@ export default async function interactionCreate(client, itx) {
       });
     }
 
-    // Crear una interacción simulada para reutilizar la lógica de botones
     const fakeItx = {
       ...itx,
       customId: selectedValue,
@@ -762,14 +723,12 @@ export default async function interactionCreate(client, itx) {
 
     const customId = selectedValue;
     
-    // Recargar embed
     if (customId.startsWith("mod_refresh_")) {
       const channelId = customId.replace("mod_refresh_", "");
       await updateVoiceModEmbed(client, channelId, itx.guild.id);
       return itx.deferUpdate();
     }
     
-    // Moverme al canal
     if (customId.startsWith("mod_join_")) {
       const channelId = customId.replace("mod_join_", "");
       const channel = await itx.guild.channels.fetch(channelId).catch(() => null);
@@ -787,7 +746,6 @@ export default async function interactionCreate(client, itx) {
       }
     }
 
-    // Traer usuario específico a mi canal (solo desde voiceuser)
     if (customId.startsWith("mod_bring_") && !customId.includes("_all_")) {
       const userId = customId.replace("mod_bring_", "");
       const targetMember = await itx.guild.members.fetch(userId).catch(() => null);
@@ -813,7 +771,6 @@ export default async function interactionCreate(client, itx) {
       }
     }
 
-    // Traer todos a mi canal
     if (customId.startsWith("mod_bring_all_")) {
       const channelId = customId.replace("mod_bring_all_", "");
       const sourceChannel = await itx.guild.channels.fetch(channelId).catch(() => null);
@@ -848,7 +805,6 @@ export default async function interactionCreate(client, itx) {
       }
     }
 
-    // Mutear/desmutear usuario
     if (customId.startsWith("mod_mute_") && !customId.includes("_all_") && !customId.includes("_unmute_")) {
       const userId = customId.replace("mod_mute_", "");
       const targetMember = await itx.guild.members.fetch(userId).catch(() => null);
@@ -873,7 +829,6 @@ export default async function interactionCreate(client, itx) {
       }
     }
 
-    // Mutear a todos
     if (customId.startsWith("mod_mute_all_")) {
       const channelId = customId.replace("mod_mute_all_", "");
       const channel = await itx.guild.channels.fetch(channelId).catch(() => null);
@@ -903,7 +858,6 @@ export default async function interactionCreate(client, itx) {
       }
     }
 
-    // Desmutear a todos
     if (customId.startsWith("mod_unmute_all_")) {
       const channelId = customId.replace("mod_unmute_all_", "");
       const channel = await itx.guild.channels.fetch(channelId).catch(() => null);

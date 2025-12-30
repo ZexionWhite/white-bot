@@ -40,7 +40,6 @@ export default async function userUpdate(client, oldUser, newUser) {
         iconURL: guild.iconURL({ size: 64, extension: "png" }) ?? undefined
       });
 
-    // Links enmascarados a cada versión
     const linksField = [
       oldUrl ? `**Before:** [open](${oldUrl})` : "**Before:** —",
       newUrl ? `**After:**  [open](${newUrl})` : "**After:** —"
@@ -52,7 +51,6 @@ export default async function userUpdate(client, oldUser, newUser) {
       embed.setImage("attachment://avatar-before-after.png");
       await logCh.send({ embeds: [embed], files: [file] }).catch(() => {});
     } else {
-      // fallback si no se pudo componer (mantener al menos el nuevo)
       const fallback = newUrl ?? oldUrl ?? null;
       if (fallback) embed.setImage(fallback);
       await logCh.send({ embeds: [embed] }).catch(() => {});

@@ -58,7 +58,6 @@ export function boosterEmbed(
 
   const boosts = member.guild.premiumSubscriptionCount ?? 0;
 
-  // Rol “Server Booster”: usa el provisto o detecta el automático del server
   const autoBoosterRole = member.guild.roles.cache.find(r => r.tags?.premiumSubscriberRole);
   const roleIdToMention = boosterRoleId ?? autoBoosterRole?.id ?? null;
   const boosterMention = roleIdToMention ? `<@&${roleIdToMention}>` : "Server Booster";
@@ -100,10 +99,8 @@ export function voiceStateEmbed(oldState, newState, session = null) {
   const oldChannelId = oldChannel?.id ?? null;
   const newChannelId = newChannel?.id ?? null;
 
-  // Determinar tipo de evento
   let eventType, color, title, description, fields = [];
 
-  // JOIN: null → canal
   if (!oldChannel && newChannel) {
     eventType = "join";
     color = 0x2ecc71; // Verde
@@ -115,7 +112,6 @@ export function voiceStateEmbed(oldState, newState, session = null) {
       inline: true
     });
   }
-  // LEAVE: canal → null
   else if (oldChannel && !newChannel) {
     eventType = "leave";
     color = 0xed4245; // Rojo
@@ -127,7 +123,6 @@ export function voiceStateEmbed(oldState, newState, session = null) {
       inline: true
     });
     
-    // Agregar tiempo si tenemos la sesión
     if (session) {
       const now = Date.now();
       const durationSeconds = Math.floor((now - session.join_timestamp) / 1000);
@@ -140,7 +135,6 @@ export function voiceStateEmbed(oldState, newState, session = null) {
       }
     }
   }
-  // MOVE: canal A → canal B
   else if (oldChannel && newChannel && oldChannelId !== newChannelId) {
     eventType = "move";
     color = 0xf1c40f; // Amarillo
@@ -159,7 +153,6 @@ export function voiceStateEmbed(oldState, newState, session = null) {
       }
     );
     
-    // Agregar tiempo en canal anterior si tenemos la sesión
     if (session) {
       const now = Date.now();
       const durationSeconds = Math.floor((now - session.join_timestamp) / 1000);
@@ -172,7 +165,6 @@ export function voiceStateEmbed(oldState, newState, session = null) {
       }
     }
   }
-  // Si no hay cambio relevante, no retornar embed
   else {
     return null;
   }
@@ -188,7 +180,6 @@ export function voiceStateEmbed(oldState, newState, session = null) {
       iconURL: member.guild?.iconURL({ size: 64, extension: "png" }) ?? undefined
     });
 
-  // Thumbnail del usuario
   if (member.user) {
     embed.setThumbnail(member.user.displayAvatarURL({ size: 128 }));
   }
@@ -310,7 +301,6 @@ export function helpEmbed() {
 export function configEmbed(guild, settings) {
   const fields = [];
   
-  // Bienvenidas
   const welcomeCh = settings?.welcome_channel_id 
     ? `<#${settings.welcome_channel_id}>` 
     : "❌ No configurado";
@@ -329,7 +319,6 @@ export function configEmbed(guild, settings) {
     inline: false
   });
 
-  // Autoroles
   const autoroleCh = settings?.autorole_channel_id 
     ? `<#${settings.autorole_channel_id}>` 
     : "❌ No configurado";
@@ -346,7 +335,6 @@ export function configEmbed(guild, settings) {
     inline: false
   });
 
-  // Boosters
   const boosterRole = settings?.booster_role_id 
     ? `<@&${settings.booster_role_id}>` 
     : "❌ No configurado";
@@ -367,7 +355,6 @@ export function configEmbed(guild, settings) {
     inline: false
   });
 
-  // Logs
   const msgLog = settings?.message_log_channel_id 
     ? `<#${settings.message_log_channel_id}>` 
     : "❌ No configurado";
@@ -410,19 +397,15 @@ export function voiceModEmbed(channel, members, moderator, client = null) {
       .setColor(0x95a5a6);
   }
 
-  // Determinar si un usuario es moderador
   const isModerator = (member) => {
     return member.permissions.has(PermissionFlagsBits.MuteMembers) ||
            member.permissions.has(PermissionFlagsBits.MoveMembers) ||
            member.permissions.has(PermissionFlagsBits.ManageGuild);
   };
 
-  // Determinar si es owner
   const isOwner = (member) => {
     return member.id === member.guild.ownerId;
   };
-
-  // Emojis custom en formato markdown
   const UNMUTED_EMOJI = "<:microphone:1455326669803094066>";
   const UNDEAFEN_EMOJI = "<:sound:1455326656959873201>";
   const GUILD_MUTE_EMOJI = "<:guild_mute:1455326680838050004>";
@@ -432,61 +415,33 @@ export function voiceModEmbed(channel, members, moderator, client = null) {
   const STAFF_EMOJI = "<:staff:1455329507623043135>";
   const OWNER_EMOJI = "<:owner:1455329532042022952>";
 
-  // Formatear lista de usuarios
   const memberList = members.map((member) => {
-    // Iconos de estado de voz
-    // Mute: 3 estados posibles
-    // Nota: En Discord.js, cuando alguien está self muted, member.voice.mute puede ser true también
-    // La forma correcta de distinguir es:
-    // - Guild mute: mute=true Y selfMute=false (un mod lo muteó)
-    // - Self mute: selfMute=true (independientemente de mute, porque mute puede ser true cuando está self muted)
-    // - Si ambos son true (mute=true Y selfMute=true): puede ser que esté self muted y luego un mod lo muteó
-    //   En ese caso, guild mute tiene prioridad
-    
     let muteIcon;
-    // Verificar primero si está guild muted (mute=true pero selfMute=false)
     if (member.voice.mute && !member.voice.selfMute) {
-      // Guild mute: un moderador lo muteó
-      muteIcon = GUILD_MUTE_EMOJI;
-    } 
-    // Si mute=true Y selfMute=true, significa que estaba self muted y luego un mod lo muteó
-    // En ese caso, guild mute tiene prioridad
-    else if (member.voice.mute && member.voice.selfMute) {
-      // Ambos true: guild mute tiene prioridad
       muteIcon = GUILD_MUTE_EMOJI;
     }
-    // Si solo está self muted (selfMute=true, mute puede ser true o false)
+    else if (member.voice.mute && member.voice.selfMute) {
+      muteIcon = GUILD_MUTE_EMOJI;
+    }
     else if (member.voice.selfMute) {
-      // Solo self muted
       muteIcon = LOCAL_MUTED_EMOJI;
     } else {
-      // No está muteado
       muteIcon = UNMUTED_EMOJI;
     }
     
-    // Deafen: misma lógica
     let deafIcon;
-    // Verificar primero si está guild deafened (deaf=true pero selfDeaf=false)
     if (member.voice.deaf && !member.voice.selfDeaf) {
-      // Guild deafen: un moderador lo deafened
       deafIcon = GUILD_DEAFEN_EMOJI;
     }
-    // Si deaf=true Y selfDeaf=true, significa que estaba self deafened y luego un mod lo deafened
-    // En ese caso, guild deafen tiene prioridad
     else if (member.voice.deaf && member.voice.selfDeaf) {
-      // Ambos true: guild deafen tiene prioridad
       deafIcon = GUILD_DEAFEN_EMOJI;
     }
-    // Si solo está self deafened (selfDeaf=true, deaf puede ser true o false)
     else if (member.voice.selfDeaf) {
-      // Solo self deafened
       deafIcon = LOCAL_DEAFEN_EMOJI;
     } else {
-      // No está deafened
       deafIcon = UNDEAFEN_EMOJI;
     }
     
-    // Iconos de roles
     let roleIcons = "";
     if (isOwner(member)) {
       roleIcons += OWNER_EMOJI;
@@ -497,7 +452,6 @@ export function voiceModEmbed(channel, members, moderator, client = null) {
     return `${muteIcon}${deafIcon} <@${member.id}> ${roleIcons}`;
   }).join("\n");
 
-  // Primer usuario para el header (el usuario mencionado o el primero del canal)
   const firstMember = members[0];
   const headerText = `<@${firstMember.id}> está en`;
 
@@ -508,12 +462,9 @@ export function voiceModEmbed(channel, members, moderator, client = null) {
   return embed;
 }
 
-// Helper para parsear markdown de emoji y convertir a formato de componente
-// Discord.js necesita { id: string } para emojis custom en componentes
 function parseEmojiMarkdown(markdown, fallback) {
   if (!markdown || typeof markdown !== 'string') return fallback;
   
-  // Formato: <:name:id> o <a:name:id> para animados
   const match = markdown.match(/^<a?:(\w+):(\d+)>$/);
   if (match) {
     return { id: match[2], name: match[1] };
@@ -522,16 +473,13 @@ function parseEmojiMarkdown(markdown, fallback) {
   return fallback;
 }
 
-// Helper para crear componentes de moderación (menú + botones)
 export function createVoiceModComponents(channel, members, moderator, targetMember = null, client = null) {
-  // Emojis custom en formato markdown (para referencia)
   const muteEmojiMarkdown = "<:guild_mute:1455326680838050004>";
   const unmutedEmojiMarkdown = "<:microphone:1455326669803094066>";
   const refreshEmojiMarkdown = "<:refresh:1455329478321373468>";
   const moveOutEmojiMarkdown = "<:move_out:1455333144248058064>";
   const moveInEmojiMarkdown = "<:move_in:1455333134274134119>";
   
-  // Convertir a formato de componente
   const muteEmoji = parseEmojiMarkdown(muteEmojiMarkdown, "🔇");
   const unmutedEmoji = parseEmojiMarkdown(unmutedEmojiMarkdown, "🔊");
   const refreshEmoji = parseEmojiMarkdown(refreshEmojiMarkdown, "🔄");
@@ -571,7 +519,6 @@ export function createVoiceModComponents(channel, members, moderator, targetMemb
     }
   ];
 
-  // Si hay un targetMember (comando voiceuser), agregar opción para moverlo
   if (targetMember && 
       !targetMember.permissions.has(PermissionFlagsBits.MuteMembers) &&
       !targetMember.permissions.has(PermissionFlagsBits.MoveMembers) &&
@@ -584,7 +531,6 @@ export function createVoiceModComponents(channel, members, moderator, targetMemb
     });
   }
 
-  // Agregar opciones por usuario (solo mutear, toggle)
   const nonMods = members.filter(m => 
     !m.permissions.has(PermissionFlagsBits.MuteMembers) &&
     !m.permissions.has(PermissionFlagsBits.MoveMembers) &&
@@ -610,7 +556,6 @@ export function createVoiceModComponents(channel, members, moderator, targetMemb
 
   const menuRow = new ActionRowBuilder().addComponents(menu);
 
-  // Botones rápidos (solo emojis, sin texto) - todos grises
   const quickButtons = new ActionRowBuilder()
     .addComponents(
       new ButtonBuilder()

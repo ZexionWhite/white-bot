@@ -1,10 +1,9 @@
-// src/utils/beforeAfter.js
 import sharp from "sharp";
 
 export async function composeBeforeAfter(leftUrl, rightUrl, {
-  size = 512,      // tamaño de cada lado (cuadrado)
-  gap = 8,         // separación entre imágenes
-  background = "#2b2d31" // color de fondo (Discord dark)
+  size = 512,
+  gap = 8,
+  background = "#2b2d31"
 } = {}) {
   async function fetchAndFit(url) {
     if (!url) return null;

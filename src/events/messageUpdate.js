@@ -9,10 +9,7 @@ function truncate(str, n = 1000) {
 }
 
 export default async function messageUpdate(client, oldMessage, newMessage) {
-  // Solo en guilds
   if (!newMessage?.guild) return;
-
-  // Ignorar bots
   if (newMessage.author?.bot) return;
 
   const cfg = getSettings.get(newMessage.guild.id);
@@ -22,18 +19,15 @@ export default async function messageUpdate(client, oldMessage, newMessage) {
   const logCh = await newMessage.guild.channels.fetch(logId).catch(() => null);
   if (!logCh?.isTextBased()) return;
 
-  // Completar parciales si se puede
   try { if (oldMessage?.partial) oldMessage = await oldMessage.fetch(); } catch {}
   try { if (newMessage?.partial) newMessage = await newMessage.fetch(); } catch {}
 
   const before = oldMessage?.content ?? "(uncached)";
   const after  = newMessage?.content ?? "(no content)";
 
-  // Adjuntos
   const oldAtt = Array.from(oldMessage?.attachments?.values?.() ?? []).map(a => a.url);
   const newAtt = Array.from(newMessage?.attachments?.values?.() ?? []).map(a => a.url);
 
-  // Si no cambió nada relevante, no spamear
   if (before === after && oldAtt.join() === newAtt.join()) return;
 
   const authorTag = newMessage.author?.tag
@@ -64,7 +58,7 @@ export default async function messageUpdate(client, oldMessage, newMessage) {
       { name: "Attachments (after)", value: attachmentsText }
     )
     .setColor(0xf1c40f)
-    .setTimestamp() // momento de la edición
+    .setTimestamp()
     .setFooter({
       text: `Message ID: ${newMessage.id}`,
       iconURL: guildIcon

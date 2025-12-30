@@ -6,7 +6,6 @@ const dbPath = path.join(process.cwd(), "data", "bot.db");
 fs.mkdirSync(path.dirname(dbPath), { recursive: true });
 const db = new Database(dbPath);
 
-// ---------- esquema base ----------
 db.exec(`
   CREATE TABLE IF NOT EXISTS guild_settings (
     guild_id TEXT PRIMARY KEY,
@@ -26,7 +25,6 @@ db.exec(`
     PRIMARY KEY (guild_id, role_id)
   );
 
-  -- cooldowns por evento (e.g. 'welcome')
   CREATE TABLE IF NOT EXISTS cooldowns (
     guild_id TEXT,
     user_id  TEXT,
@@ -35,7 +33,6 @@ db.exec(`
     PRIMARY KEY (guild_id, user_id, event)
   );
 
-  -- sesiones de voz activas (para calcular tiempo)
   CREATE TABLE IF NOT EXISTS voice_sessions (
     guild_id TEXT,
     user_id  TEXT,
@@ -44,7 +41,6 @@ db.exec(`
     PRIMARY KEY (guild_id, user_id)
   );
 
-  -- estadísticas de usuario por servidor
   CREATE TABLE IF NOT EXISTS user_stats (
     guild_id TEXT,
     user_id  TEXT,
@@ -54,7 +50,6 @@ db.exec(`
   );
 `);
 
-// ---------- migraciones idempotentes ----------
 function ensureColumn(table, column, ddl) {
   const cols = db.prepare(`PRAGMA table_info('${table}')`).all().map(c => c.name);
   if (!cols.includes(column)) {
@@ -62,7 +57,6 @@ function ensureColumn(table, column, ddl) {
   }
 }
 
-// nuevas columnas para features
 ensureColumn("guild_settings", "welcome_cd_minutes", "welcome_cd_minutes INTEGER DEFAULT 60");
 ensureColumn("guild_settings", "booster_announce_channel_id", "booster_announce_channel_id TEXT");
 ensureColumn("guild_settings", "info_channel_id", "info_channel_id TEXT");
@@ -71,7 +65,6 @@ ensureColumn("guild_settings", "avatar_log_channel_id", "avatar_log_channel_id T
 ensureColumn("guild_settings", "nickname_log_channel_id", "nickname_log_channel_id TEXT");
 ensureColumn("guild_settings", "voice_log_channel_id", "voice_log_channel_id TEXT");
 
-// ---------- prepared statements ----------
 export const getSettings = db.prepare(`
   SELECT *
   FROM guild_settings
@@ -135,7 +128,6 @@ export const getColorRoles = db.prepare(`
   ORDER BY name;
 `);
 
-// cooldowns
 export const getCooldown = db.prepare(`
   SELECT last_ts
   FROM cooldowns
@@ -149,7 +141,6 @@ export const setCooldown = db.prepare(`
     last_ts = excluded.last_ts;
 `);
 
-// voice sessions
 export const startVoiceSession = db.prepare(`
   INSERT OR REPLACE INTO voice_sessions (guild_id, user_id, channel_id, join_timestamp)
   VALUES (?, ?, ?, ?);
@@ -165,7 +156,6 @@ export const getVoiceSession = db.prepare(`
   WHERE guild_id = ? AND user_id = ?;
 `);
 
-// user stats
 export const getUserStats = db.prepare(`
   SELECT * FROM user_stats
   WHERE guild_id = ? AND user_id = ?;

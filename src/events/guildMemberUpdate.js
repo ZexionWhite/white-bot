@@ -7,7 +7,6 @@ import { composeBeforeAfter } from "../utils/beforeAfter.js";
 export default async function guildMemberUpdate(client, oldM, newM) {
   const cfg = getSettings.get(newM.guild.id) ?? {};
 
-  // ===== 1) Anuncio de BOOST (igual que antes) =====
   const had = Boolean(oldM?.premiumSince);
   const has = Boolean(newM?.premiumSince);
   const started = !had && has;
@@ -28,7 +27,6 @@ export default async function guildMemberUpdate(client, oldM, newM) {
     }
   }
 
-  // ===== 2) Log de SERVER AVATAR (avatar del miembro en este guild) =====
   {
     const serverAvatarChanged = oldM?.avatar !== newM?.avatar;
     if (serverAvatarChanged) {
@@ -56,7 +54,6 @@ export default async function guildMemberUpdate(client, oldM, newM) {
               iconURL: newM.guild.iconURL({ size: 64, extension: "png" }) ?? undefined
             });
 
-          // Links enmascarados a cada versión
           const linksField = [
             oldServerUrl ? `**Before:** [open](${oldServerUrl})` : "**Before:** —",
             newServerUrl ? `**After:**  [open](${newServerUrl})`  : "**After:** —"
@@ -77,7 +74,6 @@ export default async function guildMemberUpdate(client, oldM, newM) {
     }
   }
 
-  // ===== 3) Log de NICKNAME =====
   {
     const oldNick = oldM?.nickname ?? null;
     const newNick = newM?.nickname ?? null;
@@ -87,7 +83,6 @@ export default async function guildMemberUpdate(client, oldM, newM) {
       if (nickLogId) {
         const ch = await newM.guild.channels.fetch(nickLogId).catch(() => null);
         if (ch?.isTextBased()) {
-          // best-effort: quién lo cambió (audit log)
           let executorText = "(unknown)";
           try {
             const logs = await newM.guild.fetchAuditLogs({ type: AuditLogEvent.MemberUpdate, limit: 5 });

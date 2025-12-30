@@ -18,7 +18,6 @@ export default async function postautoroles(itx) {
   const options = colors.slice(0, 25).map(c => ({
     label: c.name + (c.booster_only ? " 💎" : ""),
     value: c.role_id,
-    // description: c.booster_only ? "Solo boosters" : "Disponible para todos"
   }));
 
   const menu = new StringSelectMenuBuilder()
@@ -30,7 +29,6 @@ export default async function postautoroles(itx) {
 
   const row = new ActionRowBuilder().addComponents(menu);
 
-  // Embed de cabecera
   const embed = new EmbedBuilder()
     .setTitle("Autoroles de color")
     .setDescription([
@@ -50,7 +48,6 @@ export default async function postautoroles(itx) {
     } else {
       const ch = itx.channel;
       msg = await ch.send({ embeds: [embed], components: [row] });
-      // guardar ubicación
       const updated = {
         guild_id: itx.guild.id,
         welcome_channel_id: cfg.welcome_channel_id ?? null,

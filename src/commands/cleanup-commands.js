@@ -1,10 +1,9 @@
-// ESM + discord.js v14
 import "dotenv/config";
 import { REST, Routes } from "discord.js";
 
 const rest = new REST({ version: "10" }).setToken(process.env.BOT_TOKEN);
 const appId = process.env.CLIENT_ID;
-const guildId = process.env.GUILD_ID_PRUEBA; // opcional, para limpiar en tu server de pruebas
+const guildId = process.env.GUILD_ID_PRUEBA;
 
 async function wipeGuild() {
   if (!guildId) {

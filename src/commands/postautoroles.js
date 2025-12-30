@@ -2,6 +2,15 @@ import { ActionRowBuilder, StringSelectMenuBuilder, PermissionFlagsBits, EmbedBu
 import { getColorRoles, getSettings, upsertSettings } from "../db.js";
 import { EMOJIS } from "../config/emojis.js";
 
+function parseEmojiMarkdown(markdown) {
+  if (!markdown || typeof markdown !== 'string') return null;
+  const match = markdown.match(/^<a?:(\w+):(\d+)>$/);
+  if (match) {
+    return { id: match[2], name: match[1] };
+  }
+  return null;
+}
+
 export default async function postautoroles(itx) {
   if (!itx.memberPermissions.has(PermissionFlagsBits.ManageRoles))
     return itx.reply({ content: "Sin permisos.", ephemeral: true });
@@ -15,11 +24,18 @@ export default async function postautoroles(itx) {
   if (!colors.length) {
     return itx.reply({ content: "No hay roles de color. Utiliza /setupcolors.", ephemeral: true });
   }
-  const booster = EMOJIS.BOOST.BOOSTER
-  const options = colors.slice(0, 25).map(c => ({
-    label: c.name + (c.booster_only ? ` ${booster}` : ""),
-    value: c.role_id,
-  }));
+  
+  const boosterEmoji = parseEmojiMarkdown(EMOJIS.BOOST.BOOSTER);
+  const options = colors.slice(0, 25).map(c => {
+    const option = {
+      label: c.name,
+      value: c.role_id
+    };
+    if (c.booster_only && boosterEmoji) {
+      option.emoji = boosterEmoji;
+    }
+    return option;
+  });
 
   const menu = new StringSelectMenuBuilder()
     .setCustomId("color-select")
@@ -34,7 +50,7 @@ export default async function postautoroles(itx) {
     .setTitle("Autoroles de color")
     .setDescription([
       "• Selecciona el color que más se adapte a ti.",
-      `• Las opciones que tengan un **${booster}** son **solo para boosters**.`
+      `• Las opciones que tengan un ${EMOJIS.BOOST.BOOSTER} son **solo para boosters**.`
     ].join("\n"))
     .setColor(0x5865f2)
     .setThumbnail(itx.guild.iconURL({ size: 128 }))

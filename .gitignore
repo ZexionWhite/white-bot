@@ -18,6 +18,7 @@ data/*.db
 data/*.sqlite
 data/*.db-shm
 data/*.db-wal
+data/*.json
 
 # --- Editor/OS ---
 .vscode/

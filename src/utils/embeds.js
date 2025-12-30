@@ -436,12 +436,14 @@ export function voiceModEmbed(channel, members, moderator, client = null) {
   const memberList = members.map((member) => {
     // Iconos de estado de voz
     // Mute: 3 estados posibles
-    const isGuildMuted = member.voice.mute; // Mute de servidor
-    const isSelfMuted = member.voice.selfMute; // Mute local (self)
+    // Guild mute tiene prioridad sobre self mute
+    const isGuildMuted = member.voice.mute && !member.voice.selfMute; // Mute de servidor (mute=true pero selfMute=false)
+    const isSelfMuted = member.voice.selfMute && !member.voice.mute; // Mute local (solo selfMute=true, mute=false)
+    // Nota: Si ambos son true, se considera guild mute (prioridad)
     
     let muteIcon;
-    if (isGuildMuted) {
-      // Si está muteado por servidor, usar emoji de guild mute
+    if (isGuildMuted || (member.voice.mute && member.voice.selfMute)) {
+      // Si está muteado por servidor (o ambos), usar emoji de guild mute
       muteIcon = GUILD_MUTE_EMOJI;
     } else if (isSelfMuted) {
       // Si solo está self muted (no guild muted), usar emoji de local mute
@@ -452,12 +454,14 @@ export function voiceModEmbed(channel, members, moderator, client = null) {
     }
     
     // Deafen: 3 estados posibles
-    const isGuildDeafened = member.voice.deaf; // Deafen de servidor
-    const isSelfDeafened = member.voice.selfDeaf; // Deafen local (self)
+    // Guild deafen tiene prioridad sobre self deafen
+    const isGuildDeafened = member.voice.deaf && !member.voice.selfDeaf; // Deafen de servidor (deaf=true pero selfDeaf=false)
+    const isSelfDeafened = member.voice.selfDeaf && !member.voice.deaf; // Deafen local (solo selfDeaf=true, deaf=false)
+    // Nota: Si ambos son true, se considera guild deafen (prioridad)
     
     let deafIcon;
-    if (isGuildDeafened) {
-      // Si está deafened por servidor, usar emoji de guild deafen
+    if (isGuildDeafened || (member.voice.deaf && member.voice.selfDeaf)) {
+      // Si está deafened por servidor (o ambos), usar emoji de guild deafen
       deafIcon = GUILD_DEAFEN_EMOJI;
     } else if (isSelfDeafened) {
       // Si solo está self deafened (no guild deafened), usar emoji de local deafen

@@ -141,7 +141,8 @@ export async function setRandomAvatar(client) {
 
   if (now - lastChangeTimestamp < COOLDOWN_MS) {
     const remainingMinutes = Math.ceil((COOLDOWN_MS - (now - lastChangeTimestamp)) / (60 * 1000));
-    console.log(`[AvatarManager] En cooldown. Esperando ${remainingMinutes} minutos más`);
+    const elapsedMinutes = Math.floor((now - lastChangeTimestamp) / (60 * 1000));
+    console.log(`[AvatarManager] ⏳ En cooldown. Transcurridos: ${elapsedMinutes} min / Requeridos: ${COOLDOWN_MS / (60 * 1000)} min. Esperando ${remainingMinutes} minutos más`);
     return false;
   }
 
@@ -225,11 +226,22 @@ export function startAvatarScheduler(client) {
   console.log(`[AvatarManager] Scheduler iniciado. Intervalo: ${COOLDOWN_MS / (60 * 1000)} minutos`);
 
   const interval = setInterval(async () => {
-    await setRandomAvatar(client);
+    console.log(`[AvatarManager] ⏰ Intervalo ejecutado. Intentando cambiar avatar...`);
+    const result = await setRandomAvatar(client);
+    if (!result) {
+      console.log(`[AvatarManager] ⚠️ No se pudo cambiar el avatar (cooldown, rate limit, o error)`);
+    }
   }, COOLDOWN_MS);
 
-  setRandomAvatar(client).catch(err => {
-    console.error("[AvatarManager] Error en cambio inicial de avatar:", err);
+  console.log(`[AvatarManager] 🔄 Intentando cambio inicial de avatar...`);
+  setRandomAvatar(client).then(result => {
+    if (result) {
+      console.log(`[AvatarManager] ✅ Cambio inicial exitoso`);
+    } else {
+      console.log(`[AvatarManager] ⚠️ Cambio inicial no realizado (cooldown activo o error)`);
+    }
+  }).catch(err => {
+    console.error("[AvatarManager] ❌ Error en cambio inicial de avatar:", err);
   });
 
   return interval;

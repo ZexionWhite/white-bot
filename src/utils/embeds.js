@@ -436,38 +436,53 @@ export function voiceModEmbed(channel, members, moderator, client = null) {
   const memberList = members.map((member) => {
     // Iconos de estado de voz
     // Mute: 3 estados posibles
-    // Guild mute tiene prioridad sobre self mute
-    const isGuildMuted = member.voice.mute && !member.voice.selfMute; // Mute de servidor (mute=true pero selfMute=false)
-    const isSelfMuted = member.voice.selfMute && !member.voice.mute; // Mute local (solo selfMute=true, mute=false)
-    // Nota: Si ambos son true, se considera guild mute (prioridad)
+    // Nota: En Discord.js, cuando alguien está self muted, member.voice.mute puede ser true también
+    // La forma correcta de distinguir es:
+    // - Guild mute: mute=true Y selfMute=false (un mod lo muteó)
+    // - Self mute: selfMute=true (independientemente de mute, porque mute puede ser true cuando está self muted)
+    // - Si ambos son true (mute=true Y selfMute=true): puede ser que esté self muted y luego un mod lo muteó
+    //   En ese caso, guild mute tiene prioridad
     
     let muteIcon;
-    if (isGuildMuted || (member.voice.mute && member.voice.selfMute)) {
-      // Si está muteado por servidor (o ambos), usar emoji de guild mute
+    // Verificar primero si está guild muted (mute=true pero selfMute=false)
+    if (member.voice.mute && !member.voice.selfMute) {
+      // Guild mute: un moderador lo muteó
       muteIcon = GUILD_MUTE_EMOJI;
-    } else if (isSelfMuted) {
-      // Si solo está self muted (no guild muted), usar emoji de local mute
+    } 
+    // Si mute=true Y selfMute=true, significa que estaba self muted y luego un mod lo muteó
+    // En ese caso, guild mute tiene prioridad
+    else if (member.voice.mute && member.voice.selfMute) {
+      // Ambos true: guild mute tiene prioridad
+      muteIcon = GUILD_MUTE_EMOJI;
+    }
+    // Si solo está self muted (selfMute=true, mute puede ser true o false)
+    else if (member.voice.selfMute) {
+      // Solo self muted
       muteIcon = LOCAL_MUTED_EMOJI;
     } else {
-      // Si no está muteado, usar emoji normal
+      // No está muteado
       muteIcon = UNMUTED_EMOJI;
     }
     
-    // Deafen: 3 estados posibles
-    // Guild deafen tiene prioridad sobre self deafen
-    const isGuildDeafened = member.voice.deaf && !member.voice.selfDeaf; // Deafen de servidor (deaf=true pero selfDeaf=false)
-    const isSelfDeafened = member.voice.selfDeaf && !member.voice.deaf; // Deafen local (solo selfDeaf=true, deaf=false)
-    // Nota: Si ambos son true, se considera guild deafen (prioridad)
-    
+    // Deafen: misma lógica
     let deafIcon;
-    if (isGuildDeafened || (member.voice.deaf && member.voice.selfDeaf)) {
-      // Si está deafened por servidor (o ambos), usar emoji de guild deafen
+    // Verificar primero si está guild deafened (deaf=true pero selfDeaf=false)
+    if (member.voice.deaf && !member.voice.selfDeaf) {
+      // Guild deafen: un moderador lo deafened
       deafIcon = GUILD_DEAFEN_EMOJI;
-    } else if (isSelfDeafened) {
-      // Si solo está self deafened (no guild deafened), usar emoji de local deafen
+    }
+    // Si deaf=true Y selfDeaf=true, significa que estaba self deafened y luego un mod lo deafened
+    // En ese caso, guild deafen tiene prioridad
+    else if (member.voice.deaf && member.voice.selfDeaf) {
+      // Ambos true: guild deafen tiene prioridad
+      deafIcon = GUILD_DEAFEN_EMOJI;
+    }
+    // Si solo está self deafened (selfDeaf=true, deaf puede ser true o false)
+    else if (member.voice.selfDeaf) {
+      // Solo self deafened
       deafIcon = LOCAL_DEAFEN_EMOJI;
     } else {
-      // Si no está deafened, usar emoji normal
+      // No está deafened
       deafIcon = UNDEAFEN_EMOJI;
     }
     

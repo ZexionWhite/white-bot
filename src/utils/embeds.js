@@ -427,21 +427,37 @@ export function voiceModEmbed(channel, members, moderator, client = null) {
   const UNDEAFEN_EMOJI = "<:sound:1455326656959873201>";
   const GUILD_MUTE_EMOJI = "<:guild_mute:1455326680838050004>";
   const GUILD_DEAFEN_EMOJI = "<:guild_deafen:1455326695413256203>";
+  const LOCAL_MUTED_EMOJI = "<:local_muted:1455354429522968720>";
+  const LOCAL_DEAFEN_EMOJI = "<:local_deafen:1455354439819857970>";
   const STAFF_EMOJI = "<:staff:1455329507623043135>";
   const OWNER_EMOJI = "<:owner:1455329532042022952>";
 
   // Formatear lista de usuarios
   const memberList = members.map((member) => {
     // Iconos de estado de voz
-    // Mute: distinguir entre mute de servidor y self mute
+    // Mute: distinguir entre mute de servidor (guild) y self mute (local)
     const isGuildMuted = member.voice.mute;
     const isSelfMuted = member.voice.selfMute;
-    const muteIcon = (isGuildMuted || isSelfMuted) ? GUILD_MUTE_EMOJI : UNMUTED_EMOJI;
+    let muteIcon;
+    if (isGuildMuted) {
+      muteIcon = GUILD_MUTE_EMOJI; // Mute de servidor tiene prioridad
+    } else if (isSelfMuted) {
+      muteIcon = LOCAL_MUTED_EMOJI; // Mute local (self)
+    } else {
+      muteIcon = UNMUTED_EMOJI; // No muteado
+    }
     
-    // Deafen: distinguir entre deafen de servidor y self deafen
+    // Deafen: distinguir entre deafen de servidor (guild) y self deafen (local)
     const isGuildDeafened = member.voice.deaf;
     const isSelfDeafened = member.voice.selfDeaf;
-    const deafIcon = (isGuildDeafened || isSelfDeafened) ? GUILD_DEAFEN_EMOJI : UNDEAFEN_EMOJI;
+    let deafIcon;
+    if (isGuildDeafened) {
+      deafIcon = GUILD_DEAFEN_EMOJI; // Deafen de servidor tiene prioridad
+    } else if (isSelfDeafened) {
+      deafIcon = LOCAL_DEAFEN_EMOJI; // Deafen local (self)
+    } else {
+      deafIcon = UNDEAFEN_EMOJI; // No deafened
+    }
     
     // Iconos de roles
     let roleIcons = "";

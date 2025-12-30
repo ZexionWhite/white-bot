@@ -5,7 +5,9 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const AVATARS_DIR = path.join(__dirname, "../assets/avatars");
+const AVATARS_DIR = process.env.AVATARS_DIR 
+  ? path.resolve(process.env.AVATARS_DIR)
+  : path.join(__dirname, "../assets/avatars");
 const STATE_FILE = path.join(process.cwd(), "data", "avatar-state.json");
 const COOLDOWN_MS = 60 * 60 * 1000;
 const RATE_LIMIT_BACKOFF_MS = 6 * 60 * 60 * 1000;
@@ -57,7 +59,10 @@ function saveState() {
 function loadAvatarFiles() {
   try {
     if (!fs.existsSync(AVATARS_DIR)) {
-      console.warn(`[AvatarManager] Directorio no encontrado: ${AVATARS_DIR}`);
+      console.error(`[AvatarManager] ❌ CRÍTICO: Directorio de avatares NO EXISTE`);
+      console.error(`[AvatarManager] Ruta buscada: ${AVATARS_DIR}`);
+      console.error(`[AvatarManager] process.cwd(): ${process.cwd()}`);
+      console.error(`[AvatarManager] AVATARS_DIR env: ${process.env.AVATARS_DIR || "(no definida)"}`);
       return [];
     }
 
@@ -74,10 +79,26 @@ function loadAvatarFiles() {
       })
       .map(file => path.join(AVATARS_DIR, file));
 
-    console.log(`[AvatarManager] Cargados ${avatarFiles.length} avatares`);
+    if (avatarFiles.length === 0) {
+      console.error(`[AvatarManager] ❌ CRÍTICO: No se encontraron avatares válidos`);
+      console.error(`[AvatarManager] Directorio: ${AVATARS_DIR}`);
+      console.error(`[AvatarManager] Archivos encontrados en directorio: ${files.length}`);
+      if (files.length > 0) {
+        console.error(`[AvatarManager] Ejemplos de archivos: ${files.slice(0, 5).join(", ")}`);
+        console.error(`[AvatarManager] Los archivos deben empezar con "capy-" y tener extensión .png/.jpg/.jpeg/.webp`);
+      } else {
+        console.error(`[AvatarManager] El directorio está vacío`);
+      }
+    } else {
+      const exampleNames = avatarFiles.slice(0, 3).map(f => path.basename(f));
+      console.log(`[AvatarManager] ✅ Cargados ${avatarFiles.length} avatares`);
+      console.log(`[AvatarManager] Ejemplos: ${exampleNames.join(", ")}`);
+    }
+
     return avatarFiles;
   } catch (error) {
-    console.error(`[AvatarManager] Error al cargar avatares:`, error);
+    console.error(`[AvatarManager] ❌ Error al cargar avatares:`, error.message);
+    console.error(`[AvatarManager] Stack:`, error.stack);
     return [];
   }
 }
@@ -127,7 +148,8 @@ export async function setRandomAvatar(client) {
   if (avatarFiles.length === 0) {
     loadAvatarFiles();
     if (avatarFiles.length === 0) {
-      console.warn("[AvatarManager] No hay avatares disponibles");
+      console.error("[AvatarManager] ❌ No hay avatares disponibles para cambiar");
+      console.error(`[AvatarManager] Verifica que el directorio ${AVATARS_DIR} contiene archivos capy-*.{png,jpg,jpeg,webp}`);
       return false;
     }
   }
@@ -166,6 +188,12 @@ export async function setRandomAvatar(client) {
 }
 
 export function startAvatarScheduler(client) {
+  console.log(`[AvatarManager] ===== INICIALIZACIÓN =====`);
+  console.log(`[AvatarManager] process.cwd(): ${process.cwd()}`);
+  console.log(`[AvatarManager] AVATARS_DIR (env): ${process.env.AVATARS_DIR || "(no definida, usando default)"}`);
+  console.log(`[AvatarManager] AVATARS_DIR (resuelto): ${AVATARS_DIR}`);
+  console.log(`[AvatarManager] fs.existsSync(AVATARS_DIR): ${fs.existsSync(AVATARS_DIR)}`);
+
   const state = loadState();
   lastChangeTimestamp = state.lastChangeTimestamp;
   rateLimitUntil = state.rateLimitUntil;
@@ -185,7 +213,12 @@ export function startAvatarScheduler(client) {
   }
 
   if (avatarFiles.length === 0) {
-    console.warn("[AvatarManager] No se puede iniciar el scheduler: no hay avatares");
+    console.error(`[AvatarManager] ❌ CRÍTICO: No se puede iniciar el scheduler - NO HAY AVATARES DISPONIBLES`);
+    console.error(`[AvatarManager] Verifica que:`);
+    console.error(`[AvatarManager]   1. El directorio ${AVATARS_DIR} existe`);
+    console.error(`[AvatarManager]   2. Contiene archivos que empiezan con "capy-"`);
+    console.error(`[AvatarManager]   3. Los archivos tienen extensión .png, .jpg, .jpeg o .webp`);
+    console.error(`[AvatarManager]   4. Si usas Docker, verifica que src/assets/avatars/ esté incluido en la imagen`);
     return null;
   }
 

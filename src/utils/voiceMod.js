@@ -6,13 +6,24 @@ export async function updateVoiceModEmbed(client, channelId, guildId) {
   if (!ref) return;
 
   try {
-    const channel = await client.guilds.cache.get(guildId)?.channels.fetch(channelId).catch(() => null);
+    const guild = client.guilds.cache.get(guildId);
+    if (!guild) {
+      client.voiceModMessages.delete(key);
+      return;
+    }
+
+    const channel = await guild.channels.fetch(channelId).catch(() => null);
     if (!channel?.isVoiceBased()) {
       client.voiceModMessages.delete(key);
       return;
     }
 
-    const members = Array.from(channel.members.values());
+    const memberIds = Array.from(channel.members.keys());
+    const refreshedMembers = await Promise.all(
+      memberIds.map(id => guild.members.fetch({ user: id, force: true }).catch(() => null))
+    );
+    const members = refreshedMembers.filter(m => m && m.voice?.channel?.id === channelId);
+    
     if (members.length === 0) {
       client.voiceModMessages.delete(key);
       return;

@@ -57,8 +57,8 @@ export default async function voiceStateUpdate(client, oldState, newState) {
   } else if (oldChannelId === newChannelId && oldChannelId) {
     const key = `${guildId}_${oldChannelId}`;
     if (client.voiceModMessages.has(key) && updateVoiceModEmbed) {
-      const muteChanged = oldState.mute !== newState.mute || oldState.selfMute !== newState.selfMute;
-      const deafChanged = oldState.deaf !== newState.deaf || oldState.selfDeaf !== newState.selfDeaf;
+      const muteChanged = oldState.serverMute !== newState.serverMute || oldState.selfMute !== newState.selfMute;
+      const deafChanged = oldState.serverDeaf !== newState.serverDeaf || oldState.selfDeaf !== newState.selfDeaf;
       if (muteChanged || deafChanged) {
         await updateVoiceModEmbed(client, oldChannelId, guildId).catch(() => {});
       }

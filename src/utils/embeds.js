@@ -417,10 +417,7 @@ export function voiceModEmbed(channel, members, moderator, client = null) {
 
   const memberList = members.map((member) => {
     let muteIcon;
-    if (member.voice.mute && !member.voice.selfMute) {
-      muteIcon = GUILD_MUTE_EMOJI;
-    }
-    else if (member.voice.mute && member.voice.selfMute) {
+    if (member.voice.serverMute) {
       muteIcon = GUILD_MUTE_EMOJI;
     }
     else if (member.voice.selfMute) {
@@ -430,10 +427,7 @@ export function voiceModEmbed(channel, members, moderator, client = null) {
     }
     
     let deafIcon;
-    if (member.voice.deaf && !member.voice.selfDeaf) {
-      deafIcon = GUILD_DEAFEN_EMOJI;
-    }
-    else if (member.voice.deaf && member.voice.selfDeaf) {
+    if (member.voice.serverDeaf) {
       deafIcon = GUILD_DEAFEN_EMOJI;
     }
     else if (member.voice.selfDeaf) {
@@ -538,11 +532,11 @@ export function createVoiceModComponents(channel, members, moderator, targetMemb
   );
 
   nonMods.slice(0, 21).forEach(member => {
-    const isMuted = member.voice.mute || member.voice.selfMute;
+    const isServerMuted = member.voice.serverMute;
     menuOptions.push({
-      label: `${isMuted ? "Desmutear" : "Mutear"} ${member.user.username}`,
+      label: `${isServerMuted ? "Desmutear" : "Mutear"} ${member.user.username}`,
       value: `mod_mute_${member.id}`,
-      description: `${isMuted ? "Desmutear" : "Mutear"} a ${member.user.username}`,
+      description: `${isServerMuted ? "Desmutear" : "Mutear"} a ${member.user.username}`,
       emoji: muteEmoji
     });
   });

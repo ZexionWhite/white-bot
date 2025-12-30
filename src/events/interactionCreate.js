@@ -427,7 +427,12 @@ export default async function interactionCreate(client, itx) {
           });
         }
 
-        const members = Array.from(targetChannel.members.values());
+        const memberIds = Array.from(targetChannel.members.keys());
+        const refreshedMembers = await Promise.all(
+          memberIds.map(id => itx.guild.members.fetch({ user: id, force: true }).catch(() => null))
+        );
+        const members = refreshedMembers.filter(m => m && m.voice?.channel?.id === targetChannel.id);
+        
         if (members.length === 0) {
           return itx.reply({ 
             content: "❌ No hay usuarios en ese canal de voz.", 
@@ -471,7 +476,11 @@ export default async function interactionCreate(client, itx) {
           });
         }
 
-        const members = Array.from(targetChannel.members.values());
+        const memberIds = Array.from(targetChannel.members.keys());
+        const refreshedMembers = await Promise.all(
+          memberIds.map(id => itx.guild.members.fetch({ user: id, force: true }).catch(() => null))
+        );
+        const members = refreshedMembers.filter(m => m && m.voice?.channel?.id === targetChannel.id);
         
         const embed = voiceModEmbed(targetChannel, members, itx.member, client);
         const components = createVoiceModComponents(targetChannel, members, itx.member, targetMember, client);
@@ -643,7 +652,7 @@ export default async function interactionCreate(client, itx) {
       const channelId = targetMember.voice.channel.id;
 
       try {
-        const newMuteState = !targetMember.voice.mute;
+        const newMuteState = !targetMember.voice.serverMute;
         await targetMember.voice.setMute(newMuteState);
         await updateVoiceModEmbed(client, channelId, itx.guild.id);
         return itx.deferUpdate();
@@ -665,7 +674,7 @@ export default async function interactionCreate(client, itx) {
         !m.permissions.has(PermissionFlagsBits.MuteMembers) &&
         !m.permissions.has(PermissionFlagsBits.MoveMembers) &&
         m.id !== itx.guild.ownerId &&
-        !m.voice.mute // Solo los que no están muteados
+        !m.voice.serverMute
       );
 
       if (nonMods.length === 0) {
@@ -689,7 +698,7 @@ export default async function interactionCreate(client, itx) {
       }
 
       const members = Array.from(channel.members.values());
-      const muted = members.filter(m => m.voice.mute);
+      const muted = members.filter(m => m.voice.serverMute);
 
       if (muted.length === 0) {
         return itx.reply({ content: "❌ No hay usuarios muteados en ese canal.", ephemeral: true });
@@ -697,6 +706,7 @@ export default async function interactionCreate(client, itx) {
 
       try {
         await Promise.all(muted.map(m => m.voice.setMute(false)));
+        await updateVoiceModEmbed(client, channelId, itx.guild.id);
         return itx.deferUpdate();
       } catch (error) {
         return itx.reply({ content: "❌ No pude desmutear algunos usuarios. Verifica permisos.", ephemeral: true });
@@ -820,7 +830,7 @@ export default async function interactionCreate(client, itx) {
       const channelId = targetMember.voice.channel.id;
 
       try {
-        const newMuteState = !targetMember.voice.mute;
+        const newMuteState = !targetMember.voice.serverMute;
         await targetMember.voice.setMute(newMuteState);
         await updateVoiceModEmbed(client, channelId, itx.guild.id);
         return itx.deferUpdate();
@@ -842,7 +852,7 @@ export default async function interactionCreate(client, itx) {
         !m.permissions.has(PermissionFlagsBits.MuteMembers) &&
         !m.permissions.has(PermissionFlagsBits.MoveMembers) &&
         m.id !== itx.guild.ownerId &&
-        !m.voice.mute
+        !m.voice.serverMute
       );
 
       if (nonMods.length === 0) {
@@ -867,7 +877,7 @@ export default async function interactionCreate(client, itx) {
       }
 
       const members = Array.from(channel.members.values());
-      const muted = members.filter(m => m.voice.mute);
+      const muted = members.filter(m => m.voice.serverMute);
 
       if (muted.length === 0) {
         return itx.reply({ content: "❌ No hay usuarios muteados en ese canal.", ephemeral: true });

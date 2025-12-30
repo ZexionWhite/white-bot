@@ -1,244 +1,531 @@
-# White-Bot — Discord.js v14 + SQLite
+# Capybot — Discord.js v14 + SQLite
 
-A lean, production-ready Discord bot for **Welcome messages**, **Color Autoroles**, and **Boost announcements**—with **per-user cooldown**, admin logs, and a small set of slash commands for configuration.
+A feature-rich, production-ready Discord bot built with **Discord.js v14** and **SQLite**. Capybot provides comprehensive server management tools including welcome messages, color autoroles, boost announcements, comprehensive logging, voice moderation, and user statistics tracking.
 
 ---
 
 ## ✨ Features
 
-- **Welcome**
-  - Clean embed: server title, the user’s name (no mention inside embed), avatar (thumbnail), a large GIF, and localized join time in the footer.
-  - **Per-user cooldown** to avoid spam when someone joins/leaves repeatedly (persisted in SQLite).
-  - Public welcome mention outside the embed for guaranteed notification.
+### 🎉 Welcome System
+- **Customizable welcome embeds** with server branding, user avatars, and animated GIFs
+- **Per-user cooldown system** to prevent spam when members join/leave repeatedly
+- **Public welcome mentions** outside the embed for guaranteed notifications
+- **Localized timestamps** using configurable timezone settings
+- **Admin join logs** (separate from public welcomes, no cooldown)
 
-- **Admin Logs**
-  - Join log (always, no cooldown).
-  - Leave log (recommended: enable `guildMemberRemove` event).
+### 🎨 Color Autoroles
+- **Interactive select menu** with up to 25 color options per menu (Discord limit)
+- **Toggle-based UX**: select a color to apply it; select the same color again to remove it
+- **Automatic role management**: selecting a new color removes previous color roles
+- **Booster-only colors**: optional gating based on server Booster role
+- **Helper embed** explaining how the system works
 
-- **Color Autoroles**
-  - Select menu with up to **25** options per menu (Discord limit).
-  - **Toggle UX**: pick a color to apply; pick the same color again to remove it.
-  - **Booster-only colors**: optional gate based on a server Booster role you configure.
-  - Helper embed above the menu to explain how it works.
+### 💎 Boost Announcements
+- **Automatic boost detection** when members start boosting
+- **Rich embeds** with custom GIFs, boost count, and localized timestamps
+- **Configurable announcement channel**
+- **Preview command** to test embeds without actual boosting
 
-- **Boost Announcements**
-  - Embed when a member **starts boosting** (with your GIF, join time, and current boost count in the footer).
+### 📝 Comprehensive Logging System
 
-- **Slash Commands**
-  - Setup: `/setwelcome`, `/setlog`, `/setboosterrole`
-  - Autoroles: `/setupcolors`, `/postautoroles`
-  - Config: `/setwelcomecd`, `/setboostchannel`
-  - Utilities: `/ping` (latency, uptime, memory), `/previewboost` (safe preview without boosting)
+#### Message Logs
+- **Message deletion tracking** with content, attachments, and deleter information
+- **Message edit tracking** with before/after content comparison
+- **Audit log integration** to identify who deleted messages
+- **Attachment tracking** for deleted/edited messages
+
+#### Avatar Logs
+- **Global avatar changes** (user profile picture updates)
+- **Server avatar changes** (guild-specific avatar updates)
+- **Before/after image composition** showing side-by-side comparison
+- **Direct links** to both avatar versions
+
+#### Nickname Logs
+- **Nickname change tracking** with before/after values
+- **Audit log integration** to identify who changed nicknames
+- **User and executor information**
+
+#### Voice State Logs
+- **Join/leave/move tracking** for voice channels
+- **Time tracking**: calculates and displays how long users spent in channels
+- **Rich embeds** with channel information, user details, and timestamps
+- **Bot filtering** to keep logs clean
+
+### 📊 User Statistics
+- **Voice time tracking**: accumulated time spent in voice channels per server
+- **Message counting**: total messages sent in the server
+- **User stats command**: display statistics with formatted duration and counts
+- **Per-server tracking**: statistics are tracked independently per guild
+
+### 🎤 Voice Moderation
+- **Real-time voice channel moderation** with live embed updates
+- **Two moderation modes**:
+  - `/mod voicechat [channel]`: Moderate all users in a voice channel
+  - `/mod voiceuser [user]`: Moderate a specific user in voice
+- **Visual status indicators**:
+  - Server mute/deafen (guild-applied)
+  - Self mute/deafen (user-applied)
+  - Unmuted/undeafened states
+- **Interactive controls**:
+  - Move yourself to the channel
+  - Bring users to your channel
+  - Mute/unmute individual users (toggle)
+  - Mute/unmute all non-moderators
+  - Manual refresh button
+- **Auto-updating embeds**: automatically refreshes when users join/leave or change mute/deafen status
+- **Moderator identification**: special icons for staff and server owners
+- **Permission-based access**: requires `MuteMembers` or `MoveMembers` permissions
+
+### 🛠️ Utility Commands
+- **`/help`**: Comprehensive command list with descriptions
+- **`/config`**: View current server configuration (moderator-only)
+- **`/ping`**: Bot latency, API ping, database ping, uptime, and memory usage
+- **`/preview`**: Preview embeds (boost, welcome) before they're sent
+- **`/userstats`**: View user statistics (voice time, message count)
 
 ---
 
 ## 🧱 Tech Stack
 
 - **Node.js** (ES Modules / `"type": "module"`)
-- **discord.js v14**
-- **better-sqlite3** (embedded SQLite, zero external services)
+- **discord.js v14** — Modern Discord API wrapper
+- **better-sqlite3** — Embedded SQLite database (zero external services)
+- **sharp** — Image processing for avatar before/after compositions
+- **dotenv** — Environment variable management
 
 ---
 
 ## ✅ Requirements
 
-- **Node 18+** (LTS recommended).
-- **Discord Application Settings**
+- **Node.js 18+** (LTS recommended)
+- **Discord Application Settings**:
   - **Scopes** for invite: `bot`, `applications.commands`
-  - **Privileged Intents**: enable **Server Members Intent**.
-  - (Optional) Message Content Intent is **not** required for this bot.
-- **Bot Permissions** (minimum)
-  - `Manage Roles`, `Send Messages`, `Embed Links`, `View Channels`, `Read Message History`
-- **Role Hierarchy**
-  - The bot’s highest role must sit **above** all color roles it will assign.
+  - **Privileged Intents**: 
+    - ✅ **Server Members Intent** (required)
+    - ✅ **Message Content Intent** (required for message logging)
+    - ✅ **Guild Voice States Intent** (required for voice moderation)
+- **Bot Permissions** (minimum):
+  - `Manage Roles` (for autoroles)
+  - `Send Messages`
+  - `Embed Links`
+  - `View Channels`
+  - `Read Message History`
+  - `Mute Members` (for voice moderation)
+  - `Move Members` (for voice moderation)
+  - `View Audit Log` (for enhanced logging)
+- **Role Hierarchy**:
+  - The bot's highest role must be **above** all color roles it will assign
+  - The bot's role must be **above** users it needs to mute/move in voice channels
 
 ---
 
-## 🗂 Project Structure
+## 🗂️ Project Structure
 
-- src/
-- commands/
-- register-commands.js
-- setupcolors.js
-- postautoroles.js
-# (optional) other command handlers you add
-- events/
-- ready.js
-- guildMemberAdd.js
-- guildMemberRemove.js # recommended
-- guildMemberUpdate.js # boost announce
-- interactionCreate.js
-- utils/
-- embeds.js
-- config.js
-- db.js
-- index.js
-- data/ # SQLite database lives here
+```
+src/
+├── commands/
+│   ├── register-commands.js    # Slash command registration
+│   ├── setupcolors.js          # Color role setup handler
+│   ├── postautoroles.js        # Autorole menu posting
+│   └── cleanup-commands.js     # Command cleanup utility
+├── events/
+│   ├── ready.js                # Bot ready event
+│   ├── guildMemberAdd.js       # Welcome & join logs
+│   ├── guildMemberRemove.js    # Leave logs
+│   ├── guildMemberUpdate.js    # Boost & server avatar/nickname logs
+│   ├── userUpdate.js           # Global avatar logs
+│   ├── messageCreate.js        # Message counting
+│   ├── messageUpdate.js        # Message edit logs
+│   ├── messageDelete.js        # Message delete logs
+│   ├── voiceStateUpdate.js     # Voice logs & time tracking
+│   └── interactionCreate.js    # Slash command handler
+├── utils/
+│   ├── embeds.js               # Embed builders
+│   ├── voiceMod.js             # Voice moderation utilities
+│   ├── beforeAfter.js          # Avatar composition utility
+│   ├── time.js                 # Time formatting utilities
+│   └── colors.js               # Color utilities
+├── config.js                   # Configuration (timezone, GIFs)
+├── db.js                       # Database schema & prepared statements
+└── index.js                    # Bot entry point
+data/
+└── bot.db                      # SQLite database (auto-created)
+```
 
 ---
 
 ## ⚙️ Configuration
 
-Create `.env` (never commit it):
+### Environment Variables
 
-.env
-BOT_TOKEN=your_token_here
+Create a `.env` file (never commit it):
+
+```env
+BOT_TOKEN=your_bot_token_here
 CLIENT_ID=your_application_id_here
-GUILD_ID_PRUEBA=your_test_guild_id   # optional, speeds up command propagation
+GUILD_ID_PRUEBA=your_test_guild_id  # Optional: speeds up command registration
+```
 
-package.json should include:
+### Bot Configuration
 
+Edit `src/config.js`:
+
+```javascript
+export const TZ = "America/Argentina/Cordoba"; // IANA timezone for date formatting
+
+// Welcome GIF URL
+export const WELCOME_GIF_URL = "https://your.cdn/welcome.gif";
+
+// Boost GIF URL
+export const BOOST_GIF_URL = "https://your.cdn/boost.gif";
+```
+
+**Tip**: Upload GIFs to a private channel in your server and use the Discord CDN URL for stability.
+
+### Package.json
+
+Ensure your `package.json` includes:
+
+```json
 {
   "type": "module",
   "scripts": {
-    "dev": "nodemon --watch src src/index.js",
-    "register": "node src/commands/register-commands.js"
+    "start": "node src/index.js",
+    "dev": "node src/index.js",
+    "register": "node src/commands/register-commands.js",
+    "clean:guild": "node src/commands/cleanup-commands.js guild",
+    "clean:global": "node src/commands/cleanup-commands.js global",
+    "clean:both": "node src/commands/cleanup-commands.js"
   }
 }
-
-src/config.js example:
-
-export const TZ = "America/Argentina/Cordoba"; // IANA timezone for date formatting
-
-// Welcome GIF
-export const WELCOME_GIF_URL = "https://your.cdn/welcome.gif";
-
-// Boost GIF (capybara-in-water or your choice)
-export const BOOST_GIF_URL = "https://your.cdn/boost.gif";
-
-Tip: Upload GIFs to a private channel in your server and use the Discord CDN URL for stability.
+```
 
 ---
 
-## 📦 Install & Setup
+## 📦 Installation & Setup
 
-npm install
-npm run register   # registers slash commands (guild-scoped if GUILD_ID_PRUEBA is set)
-npm run dev        # start the bot in dev mode (nodemon)
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-# Then in your server (as an admin):
+2. **Register slash commands**:
+   ```bash
+   npm run register
+   ```
+   - If `GUILD_ID_PRUEBA` is set, commands appear instantly on that guild
+   - Global commands can take up to ~1 hour to propagate
 
-- /setwelcome #welcome-channel
+3. **Start the bot**:
+   ```bash
+   npm start
+   # or for development:
+   npm run dev
+   ```
 
-- /setlog #admin-logs
+4. **Configure your server** (as an admin):
 
-- /setupcolors (creates/saves color roles)
+   **Basic Setup**:
+   ```
+   /setwelcome #welcome-channel
+   /setlog #admin-logs
+   ```
 
-- /postautoroles (posts/updates the color select menu)
+   **Color Autoroles**:
+   ```
+   /setupcolors
+   /postautoroles
+   ```
 
-- /setboosterrole @Boosters (if you use a custom booster role)
+   **Boost System**:
+   ```
+   /setboosterrole @Boosters  (if using custom booster role)
+   /setboostchannel #boosts
+   /setinfochannel #server-info  (optional, for boost embed)
+   ```
 
-- /setwelcomecd 60 (example: 60 minutes)
+   **Logging**:
+   ```
+   /setmessagelog #message-logs
+   /setavatarlog #avatar-logs
+   /setnicklog #nickname-logs
+   /setvoicelog #voice-logs
+   ```
 
-- /setboostchannel #boosts (where boost announcements go)
+   **Advanced**:
+   ```
+   /setwelcomecd 60  (cooldown in minutes)
+   ```
 
 ---
 
 ## 🧠 How It Works
-Welcome flow
 
-On guildMemberAdd, bot logs the join (no cooldown).
+### Welcome Flow
 
-The public welcome checks the cooldown (per user, persisted).
+1. On `guildMemberAdd`, the bot logs the join (admin log, no cooldown)
+2. The public welcome checks the per-user cooldown (persisted in SQLite)
+3. If not on cooldown, bot sends:
+   - Public mention (outside embed)
+   - Rich embed with server title, user avatar, GIF, and localized timestamp
+4. Cooldown timestamp is saved to prevent repeated welcomes
 
-If not on cooldown, bot sends: mention (outside embed) + a clean embed (title, short hook, one helpful tip bullet, user avatar thumbnail, GIF, localized time).
+### Autoroles Flow
 
-Cooldown timestamp is saved in SQLite (cooldowns table) to prevent repeated welcomes.
+1. `/setupcolors` creates color roles and stores them in the database
+2. `/postautoroles` posts an embed + select menu (up to 25 options)
+3. When a user selects a color:
+   - If they already have it → toggle off (remove)
+   - Otherwise → remove any other color from the palette and add the selected one
+4. Booster-only colors are enforced if configured
 
-Autoroles flow
+### Boost Announcement Flow
 
-- /setupcolors creates the color roles and stores them in color_roles.
+1. On `guildMemberUpdate`, when `premiumSince` transitions from `null` → a date
+2. Bot sends a boost embed to the configured channel
+3. Embed includes custom GIF, boost count, and localized timestamp
 
-- /postautoroles posts an embed + select menu (up to 25 options).
+### Logging Flow
 
-When a user picks a color:
+- **Message logs**: Track edits and deletions with before/after content
+- **Avatar logs**: Detect global and server avatar changes, compose before/after images
+- **Nickname logs**: Track nickname changes with audit log integration
+- **Voice logs**: Track join/leave/move events, calculate time spent in channels
 
-If they already have it → toggle off (remove).
+### Voice Moderation Flow
 
-Otherwise → remove any other color from the palette and add the selected one.
+1. Moderator uses `/mod voicechat` or `/mod voiceuser`
+2. Bot creates an interactive embed showing all users in the channel
+3. Embed displays real-time mute/deafen status (server vs self)
+4. Actions update the embed automatically
+5. Embed refreshes when users join/leave or change voice states
 
-Booster-only colors are enforced if configured.
+### Statistics Tracking
 
-Boost announce
+- **Voice time**: Tracked when users join/leave voice channels, accumulated per server
+- **Message count**: Incremented for each non-bot message sent
+- Statistics are stored per guild and user, accessible via `/userstats`
 
-On guildMemberUpdate, when premiumSince transitions from null → a date, the bot sends a boost embed to your configured channel with a GIF and current boost count.
+---
 
-## 🔧 Commands (Summary)
-# Setup
+## 🔧 Commands Reference
 
-- /setwelcome #channel — set the public welcome channel
+### Setup Commands
 
-- /setlog #channel — set the admin logs channel
+| Command | Description | Permission |
+|---------|-------------|------------|
+| `/setwelcome #channel` | Set the public welcome channel | Manage Guild |
+| `/setlog #channel` | Set the admin logs channel | Manage Guild |
+| `/setwelcomecd <minutes>` | Set per-user cooldown for welcome messages | Manage Guild |
 
-- /setboosterrole @role — set the Booster role (for gated colors)
+### Autorole Commands
 
-# Autoroles
+| Command | Description | Permission |
+|---------|-------------|------------|
+| `/setupcolors` | Create and store default color roles | Manage Roles |
+| `/postautoroles` | Post/update the color select menu | Manage Roles |
 
-- /setupcolors — create and store your default color roles
+### Boost Commands
 
-- /postautoroles — post/update the color select message (with helper embed)
+| Command | Description | Permission |
+|---------|-------------|------------|
+| `/setboosterrole @role` | Set the Booster role (for gated colors) | Manage Roles |
+| `/setboostchannel #channel` | Set the boost announcement channel | Manage Guild |
+| `/setinfochannel #channel` | Set the info/perks channel (for boost embed) | Manage Guild |
+| `/preview boost` | Preview the boost embed without boosting | Manage Guild |
+| `/preview welcome` | Preview the welcome embed | Manage Guild |
 
-# Config
+### Logging Commands
 
-- /setwelcomecd <minutes> — set per-user cooldown for the public welcome
+| Command | Description | Permission |
+|---------|-------------|------------|
+| `/setmessagelog #channel` | Set channel for message edit/delete logs | Manage Guild |
+| `/setavatarlog #channel` | Set channel for avatar change logs | Manage Guild |
+| `/setnicklog #channel` | Set channel for nickname change logs | Manage Guild |
+| `/setvoicelog #channel` | Set channel for voice state logs | Manage Guild |
 
-- /setboostchannel #channel — set the boost announcement channel
+### Moderation Commands
 
-# Utilities
+| Command | Description | Permission |
+|---------|-------------|------------|
+| `/mod voicechat [channel]` | Moderate users in a voice channel | Mute Members / Move Members |
+| `/mod voiceuser [user]` | Moderate a specific user in voice | Mute Members / Move Members |
 
-- /ping — WS/API latency, round-trip, DB ping, uptime, memory
+### Utility Commands
 
-- /previewboost [usuario] [publico] [boosts] — preview the boost embed without real boosting
+| Command | Description | Permission |
+|---------|-------------|------------|
+| `/help` | Show all available commands | Everyone |
+| `/config` | View current server configuration | Manage Guild |
+| `/ping` | Show bot latency, uptime, and memory | Everyone |
+| `/userstats [user]` | View user statistics (voice time, messages) | Everyone |
 
-Note: Slash commands are registered via npm run register. If run with GUILD_ID_PRUEBA, they appear instantly on that guild; globally they can take up to ~1 hour.
+---
 
-## 🗃 Database Model (SQLite)
-guild_settings(guild_id, welcome_channel_id, log_channel_id, autorole_channel_id, autorole_message_id, booster_role_id, booster_announce_channel_id, welcome_cd_minutes)
+## 🗃️ Database Schema
 
-color_roles(guild_id, role_id, name, hex, booster_only)
+### `guild_settings`
+Stores per-guild configuration:
+- `guild_id` (PRIMARY KEY)
+- `welcome_channel_id`
+- `log_channel_id`
+- `autorole_channel_id`
+- `autorole_message_id`
+- `booster_role_id`
+- `booster_announce_channel_id`
+- `welcome_cd_minutes`
+- `info_channel_id`
+- `message_log_channel_id`
+- `avatar_log_channel_id`
+- `nickname_log_channel_id`
+- `voice_log_channel_id`
 
-cooldowns(guild_id, user_id, event, last_ts) — used for the welcome cooldown
+### `color_roles`
+Stores color role definitions:
+- `guild_id`, `role_id` (PRIMARY KEY)
+- `name`
+- `hex`
+- `booster_only` (INTEGER, 0 or 1)
 
-Migrations are idempotent; the db.js helper ensures columns exist even if you update the bot later.
+### `cooldowns`
+Tracks per-user cooldowns:
+- `guild_id`, `user_id`, `event` (PRIMARY KEY)
+- `last_ts` (timestamp)
+
+### `voice_sessions`
+Tracks active voice sessions for time calculation:
+- `guild_id`, `user_id` (PRIMARY KEY)
+- `channel_id`
+- `join_timestamp`
+
+### `user_stats`
+Stores accumulated user statistics:
+- `guild_id`, `user_id` (PRIMARY KEY)
+- `total_voice_seconds` (accumulated voice time)
+- `message_count` (total messages sent)
+
+**Note**: Migrations are idempotent; the `db.js` helper ensures columns exist even if you update the bot later.
+
+---
 
 ## 🧪 Testing Tips
-Welcome cooldown: join/leave under the cooldown → no new welcome; after cooldown → welcome appears.
 
-Autoroles
+### Welcome System
+- Join/leave under the cooldown → no new welcome
+- After cooldown expires → welcome appears
+- Check admin logs for all joins (no cooldown)
 
-Pick a color → applies.
+### Autoroles
+- Select a color → role applies
+- Select the same color again → role removes (toggle)
+- Try a 💎 Booster-only color without Booster role → blocked
 
-Pick the same color → removes (toggle off).
+### Boost Announcements
+- Use `/preview boost` to see the exact embed without actually boosting
+- Test with different boost counts
 
-Try a 💎 Booster-only color without Booster role → blocked.
+### Logging
+- Edit a message → check message log channel
+- Delete a message → check message log channel (includes deleter if available)
+- Change avatar → check avatar log channel (before/after image)
+- Change nickname → check nickname log channel
+- Join/leave voice → check voice log channel (includes time spent)
 
-Boost announce: use /previewboost to see the exact embed without actually boosting.
+### Voice Moderation
+- Use `/mod voicechat` → see all users in channel
+- Mute a user → embed updates automatically
+- User joins/leaves → embed refreshes automatically
+- Test with server mute vs self mute to see different icons
 
-Ping: /ping should show reasonable WS ping and DB ping values; uptime should increase over time.
+### Statistics
+- Use `/userstats` to view accumulated voice time and message count
+- Join voice channels to accumulate time
+- Send messages to increment count
+
+### Ping
+- `/ping` should show reasonable WS ping and DB ping values
+- Uptime should increase over time
+- Memory usage should be stable
+
+---
 
 ## 🛟 Troubleshooting
-No color applied/removed
 
-Ensure the bot’s role is above all color roles.
+### No color applied/removed
+- ✅ Ensure the bot's role is **above** all color roles in hierarchy
+- ✅ The select menu can't exceed 25 options (Discord limit)
+- ✅ Check bot has `Manage Roles` permission
 
-The select menu can’t exceed 25 options (Discord limit); split into multiple menus/messages if needed.
+### No welcome message
+- ✅ Check **Server Members Intent** is enabled in Discord Developer Portal
+- ✅ Confirm the configured welcome channel exists
+- ✅ Verify bot has `Send Messages` and `Embed Links` permissions
+- ✅ Check cooldown hasn't expired (use `/setwelcomecd` to adjust)
 
-No welcome message
+### No boost announcements
+- ✅ Set the boost channel with `/setboostchannel`
+- ✅ Ensure bot can send embeds in that channel
+- ✅ Check boost actually occurred (not just preview)
 
-Check Server Members Intent is enabled.
+### Logs not working
+- ✅ Verify the log channel is configured correctly
+- ✅ Check bot has `View Audit Log` permission (for enhanced logging)
+- ✅ Ensure bot has `Read Message History` for message logs
+- ✅ Check bot has `View Channels` permission
 
-Confirm the configured welcome channel exists and the bot can Send Messages and Embed Links.
+### Voice moderation not working
+- ✅ Verify bot has `Mute Members` and/or `Move Members` permissions
+- ✅ Check bot's role is above users it needs to moderate
+- ✅ Ensure **Guild Voice States Intent** is enabled
+- ✅ Try refreshing the embed manually
 
-If a membership screening is enabled, you may want to wait for member.pending === false before sending.
+### Statistics not updating
+- ✅ Voice time only tracks when users are in voice channels
+- ✅ Message count only tracks non-bot messages
+- ✅ Statistics are per-server (not global)
 
-No boost announcements
+### Database errors
+- ✅ Make sure you're using the provided `db.js` (schema & prepares happen in order)
+- ✅ In development, you can delete `data/bot.db` to regenerate a clean database
+- ✅ Ensure the `data/` directory is writable
 
-Set the boost channel with /setboostchannel.
+---
 
-Ensure the bot can send embeds in that channel.
+## 📝 Notes
 
-Database errors
+- All timestamps use the timezone configured in `src/config.js`
+- Voice time tracking only counts time when users are actually in voice channels
+- Message counting excludes bot messages and system messages
+- Voice moderation embeds auto-update when voice states change
+- Color autoroles automatically remove previous colors when selecting a new one
+- Booster-only colors require the user to have the configured Booster role
 
-Make sure you use the provided db.js (schema & prepares happen in order).
+---
 
-In dev, you can delete data/bot.db to regenerate a clean DB.
+## 🔄 Migration from White-Bot
+
+If you're migrating from the previous "White-Bot" name:
+
+1. **Repository**: You can simply rebrand this repository (rename, update README, etc.) or create a new one. For a clean slate, a new repository is recommended, but rebranding works fine too.
+
+2. **Database**: The existing `data/bot.db` will continue to work - no migration needed.
+
+3. **Configuration**: All existing settings will be preserved.
+
+4. **Commands**: Slash commands will need to be re-registered if you change the bot's application name, but the command structure remains the same.
+
+---
+
+## 📄 License
+
+This project is provided as-is for educational and personal use.
+
+---
+
+## 🤝 Contributing
+
+This is a personal project, but suggestions and improvements are welcome!
+
+---
+
+**Made with ❤️ using Discord.js v14**

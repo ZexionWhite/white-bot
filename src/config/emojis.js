@@ -8,7 +8,8 @@ export const EMOJIS = {
   },
   
   BOOST: {
-    DEV_WHITEBOOSTER: "<:dev_whitebooster:1404272356905713674>"
+    DEV_WHITEBOOSTER: "<:dev_whitebooster:1404272356905713674>",
+    BOOSTER: "<:boost:1455669101652476070>"
   },
   
   VOICE: {

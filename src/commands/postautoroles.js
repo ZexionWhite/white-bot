@@ -1,5 +1,6 @@
 import { ActionRowBuilder, StringSelectMenuBuilder, PermissionFlagsBits, EmbedBuilder } from "discord.js";
 import { getColorRoles, getSettings, upsertSettings } from "../db.js";
+import { EMOJIS } from "../config/emojis.js";
 
 export default async function postautoroles(itx) {
   if (!itx.memberPermissions.has(PermissionFlagsBits.ManageRoles))
@@ -14,9 +15,9 @@ export default async function postautoroles(itx) {
   if (!colors.length) {
     return itx.reply({ content: "No hay roles de color. Utiliza /setupcolors.", ephemeral: true });
   }
-
+  const booster = EMOJIS.BOOST.BOOSTER
   const options = colors.slice(0, 25).map(c => ({
-    label: c.name + (c.booster_only ? " 💎" : ""),
+    label: c.name + (c.booster_only ? ` ${booster}` : ""),
     value: c.role_id,
   }));
 
@@ -33,7 +34,7 @@ export default async function postautoroles(itx) {
     .setTitle("Autoroles de color")
     .setDescription([
       "• Selecciona el color que más se adapte a ti.",
-      "• Las opciones que tengan un **💎** son **solo para boosters**."
+      `• Las opciones que tengan un **${booster}** son **solo para boosters**.`
     ].join("\n"))
     .setColor(0x5865f2)
     .setThumbnail(itx.guild.iconURL({ size: 128 }))

@@ -1,7 +1,10 @@
 import { ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, EmbedBuilder, ChannelType } from "discord.js";
-import db, { getSettings, upsertSettings, getColorRoles, getUserStats } from "../db.js";
-import { userStatsEmbed, helpEmbed, configEmbed, voiceModEmbed, createVoiceModComponents } from "../utils/embeds.js";
+import db, { getSettings, getColorRoles } from "../db.js";
+import { voiceModEmbed, createVoiceModComponents } from "../utils/embeds.js";
 import { updateVoiceModEmbed } from "../utils/voiceMod.js";
+import * as configModule from "../modules/config/index.js";
+import * as moderationModule from "../modules/moderation/index.js";
+import * as utilitiesModule from "../modules/utilities/index.js";
 
 export default async function interactionCreate(client, itx) {
   try {
@@ -9,517 +12,70 @@ export default async function interactionCreate(client, itx) {
       const name = itx.commandName;
       console.log(`[interactionCreate] Comando ejecutado: ${name} por ${itx.user.tag} en ${itx.guild?.name || "DM"}`);
 
-      if (name === "setwelcome") {
-        if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild)) {
-          console.warn(`[interactionCreate] setwelcome: Sin permisos - ${itx.user.tag} en ${itx.guild.name}`);
-          return itx.reply({ content: "Sin permisos.", ephemeral: true });
+      if (name === "set") {
+        const subcommand = itx.options.getSubcommand();
+        
+        if (subcommand === "welcome") {
+          return configModule.handleSetWelcome(itx);
         }
-        const channel = itx.options.getChannel("canal", true);
-        const row = getSettings.get(itx.guild.id) ?? {};
-        try {
-          upsertSettings.run({
-            guild_id: itx.guild.id,
-            welcome_channel_id: channel.id,
-            log_channel_id: row.log_channel_id ?? null,
-            autorole_channel_id: row.autorole_channel_id ?? null,
-            autorole_message_id: row.autorole_message_id ?? null,
-            booster_role_id: row.booster_role_id ?? null,
-            booster_announce_channel_id: row.booster_announce_channel_id ?? null,
-            welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
-            info_channel_id: row.info_channel_id ?? null,
-            message_log_channel_id: row.message_log_channel_id ?? null,
-            avatar_log_channel_id: row.avatar_log_channel_id ?? null,
-            nickname_log_channel_id: row.nickname_log_channel_id ?? null,
-            voice_log_channel_id: row.voice_log_channel_id ?? null
-          });
-          console.log(`[interactionCreate] setwelcome: Canal configurado a ${channel.name} (${channel.id}) en ${itx.guild.name}`);
-        } catch (err) {
-          console.error(`[interactionCreate] setwelcome: Error al guardar configuración:`, err.message);
+        if (subcommand === "join-log") {
+          return configModule.handleSetJoinLog(itx);
         }
-        return itx.reply({ content: `Canal de bienvenida seteado a <#${channel.id}>`, ephemeral: true });
-      }
-
-      if (name === "setlog") {
-        if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild)) {
-          console.warn(`[interactionCreate] setlog: Sin permisos - ${itx.user.tag} en ${itx.guild.name}`);
-          return itx.reply({ content: "Sin permisos.", ephemeral: true });
+        if (subcommand === "message-log") {
+          return configModule.handleSetMessageLog(itx);
         }
-        const channel = itx.options.getChannel("canal", true);
-        const row = getSettings.get(itx.guild.id) ?? {};
-        try {
-          upsertSettings.run({
-            guild_id: itx.guild.id,
-            welcome_channel_id: row.welcome_channel_id ?? null,
-            log_channel_id: channel.id,
-            autorole_channel_id: row.autorole_channel_id ?? null,
-            autorole_message_id: row.autorole_message_id ?? null,
-            booster_role_id: row.booster_role_id ?? null,
-            booster_announce_channel_id: row.booster_announce_channel_id ?? null,
-            welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
-            info_channel_id: row.info_channel_id ?? null,
-            message_log_channel_id: row.message_log_channel_id ?? null,
-            avatar_log_channel_id: row.avatar_log_channel_id ?? null,
-            nickname_log_channel_id: row.nickname_log_channel_id ?? null,
-            voice_log_channel_id: row.voice_log_channel_id ?? null
-          });
-          console.log(`[interactionCreate] setlog: Canal configurado a ${channel.name} (${channel.id}) en ${itx.guild.name}`);
-        } catch (err) {
-          console.error(`[interactionCreate] setlog: Error al guardar configuración:`, err.message);
+        if (subcommand === "avatar-log") {
+          return configModule.handleSetAvatarLog(itx);
         }
-        return itx.reply({ content: `Canal de logs seteado a <#${channel.id}>`, ephemeral: true });
-      }
-
-      if (name === "setboosterrole") {
-        if (!itx.memberPermissions.has(PermissionFlagsBits.ManageRoles)) return itx.reply({ content: "Sin permisos.", ephemeral: true });
-        const role = itx.options.getRole("rol", true);
-        const row = getSettings.get(itx.guild.id) ?? {};
-        upsertSettings.run({
-          guild_id: itx.guild.id,
-          welcome_channel_id: row.welcome_channel_id ?? null,
-          log_channel_id: row.log_channel_id ?? null,
-          autorole_channel_id: row.autorole_channel_id ?? null,
-          autorole_message_id: row.autorole_message_id ?? null,
-          booster_role_id: role.id,
-          booster_announce_channel_id: row.booster_announce_channel_id ?? null,
-          welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
-          info_channel_id: row.info_channel_id ?? null,
-          message_log_channel_id: row.message_log_channel_id ?? null,
-          avatar_log_channel_id: row.avatar_log_channel_id ?? null,
-          nickname_log_channel_id: row.nickname_log_channel_id ?? null,
-          voice_log_channel_id: row.voice_log_channel_id ?? null
-        });
-        return itx.reply({ content: `Rol de boosters seteado a **@${role.name}**`, ephemeral: true });
+        if (subcommand === "nickname-log") {
+          return configModule.handleSetNicknameLog(itx);
+        }
+        if (subcommand === "voice-log") {
+          return configModule.handleSetVoiceLog(itx);
+        }
+        if (subcommand === "boost-channel") {
+          return configModule.handleSetBoostChannel(itx);
+        }
+        if (subcommand === "info-channel") {
+          return configModule.handleSetInfoChannel(itx);
+        }
+        if (subcommand === "booster-role") {
+          return configModule.handleSetBoosterRole(itx);
+        }
       }
 
       if (name === "setupcolors") {
-        const mod = await import("../commands/setupcolors.js");
+        const mod = await import("../commands/setupColors.js");
         return mod.default(itx);
       }
 
-      if (name === "postautoroles") {
-        const mod = await import("../commands/postautoroles.js");
+      if (name === "color-menu") {
+        const mod = await import("../commands/colorMenu.js");
         return mod.default(itx);
-      }
-
-      if (name === "setwelcomecd") {
-        if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild)) {
-          return itx.reply({ content: "Sin permisos.", ephemeral: true });
-        }
-        const min = itx.options.getInteger("minutos", true);
-        const row = getSettings.get(itx.guild.id) ?? {};
-        upsertSettings.run({
-          guild_id: itx.guild.id,
-          welcome_channel_id: row.welcome_channel_id ?? null,
-          log_channel_id: row.log_channel_id ?? null,
-          autorole_channel_id: row.autorole_channel_id ?? null,
-          autorole_message_id: row.autorole_message_id ?? null,
-          booster_role_id: row.booster_role_id ?? null,
-          booster_announce_channel_id: row.booster_announce_channel_id ?? null,
-          welcome_cd_minutes: min,
-          info_channel_id: row.info_channel_id ?? null,
-          message_log_channel_id: row.message_log_channel_id ?? null,
-          avatar_log_channel_id: row.avatar_log_channel_id ?? null,
-          nickname_log_channel_id: row.nickname_log_channel_id ?? null,
-          voice_log_channel_id: row.voice_log_channel_id ?? null
-        });
-        return itx.reply({ content: `Cooldown de welcome fijado en **${min} min**.`, ephemeral: true });
-      }
-
-      if (name === "setboostchannel") {
-        if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild)) {
-          return itx.reply({ content: "Sin permisos.", ephemeral: true });
-        }
-        const ch = itx.options.getChannel("canal", true);
-        const row = getSettings.get(itx.guild.id) ?? {};
-
-        upsertSettings.run({
-          guild_id: itx.guild.id,
-          welcome_channel_id: row.welcome_channel_id ?? null,
-          log_channel_id: row.log_channel_id ?? null,
-          autorole_channel_id: row.autorole_channel_id ?? null,
-          autorole_message_id: row.autorole_message_id ?? null,
-          booster_role_id: row.booster_role_id ?? null,
-          booster_announce_channel_id: ch.id,
-          welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
-          info_channel_id: row.info_channel_id ?? null,
-          message_log_channel_id: row.message_log_channel_id ?? null,
-          avatar_log_channel_id: row.avatar_log_channel_id ?? null,
-          nickname_log_channel_id: row.nickname_log_channel_id ?? null,
-          voice_log_channel_id: row.voice_log_channel_id ?? null
-        });
-
-        return itx.reply({ content: `Canal de boosters seteado a <#${ch.id}>`, ephemeral: true });
-      }
-
-      if (name === "setmessagelog") {
-        if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild)) {
-          return itx.reply({ content: "Sin permisos.", ephemeral: true });
-        }
-        const ch = itx.options.getChannel("channel", true);
-        const row = getSettings.get(itx.guild.id) ?? {};
-        upsertSettings.run({
-          guild_id: itx.guild.id,
-          welcome_channel_id: row.welcome_channel_id ?? null,
-          log_channel_id: row.log_channel_id ?? null,
-          autorole_channel_id: row.autorole_channel_id ?? null,
-          autorole_message_id: row.autorole_message_id ?? null,
-          booster_role_id: row.booster_role_id ?? null,
-          booster_announce_channel_id: row.booster_announce_channel_id ?? null,
-          welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
-          info_channel_id: row.info_channel_id ?? null,
-          message_log_channel_id: ch.id,
-          avatar_log_channel_id: row.avatar_log_channel_id ?? null,
-          nickname_log_channel_id: row.nickname_log_channel_id ?? null,
-          voice_log_channel_id: row.voice_log_channel_id ?? null
-        });
-        return itx.reply({ content: `Message log channel set to <#${ch.id}>`, ephemeral: true });
-      }
-
-      if (name === "setavatarlog") {
-        if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild)) {
-          return itx.reply({ content: "Sin permisos.", ephemeral: true });
-        }
-        const ch = itx.options.getChannel("channel", true);
-        const row = getSettings.get(itx.guild.id) ?? {};
-        upsertSettings.run({
-          guild_id: itx.guild.id,
-          welcome_channel_id: row.welcome_channel_id ?? null,
-          log_channel_id: row.log_channel_id ?? null,
-          autorole_channel_id: row.autorole_channel_id ?? null,
-          autorole_message_id: row.autorole_message_id ?? null,
-          booster_role_id: row.booster_role_id ?? null,
-          booster_announce_channel_id: row.booster_announce_channel_id ?? null,
-          welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
-          info_channel_id: row.info_channel_id ?? null,
-          message_log_channel_id: row.message_log_channel_id ?? null,
-          avatar_log_channel_id: ch.id,
-          nickname_log_channel_id: row.nickname_log_channel_id ?? null,
-          voice_log_channel_id: row.voice_log_channel_id ?? null
-        });
-        return itx.reply({ content: `Avatar log channel set to <#${ch.id}>`, ephemeral: true });
       }
 
       if (name === "preview") {
-        if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild)) {
-          return itx.reply({ content: "Sin permisos.", ephemeral: true });
-        }
-
-        const subcommand = itx.options.getSubcommand();
-        const { welcomeEmbed, boosterEmbed } = await import("../utils/embeds.js");
-        const { getSettings } = await import("../db.js");
-
-        const targetUser = itx.options.getUser("usuario") ?? itx.user;
-        const member = await itx.guild.members.fetch(targetUser.id).catch(() => null);
-        if (!member) return itx.reply({ content: "No encontré ese miembro.", ephemeral: true });
-
-        const publico = itx.options.getBoolean("publico") ?? false;
-
-        if (subcommand === "boost") {
-          const embed = boosterEmbed(member, {
-            boosterRoleId: getSettings.get(itx.guild.id)?.booster_role_id ?? null,
-            infoChannelId: getSettings.get(itx.guild.id)?.info_channel_id ?? null
-          });
-
-          const forced = itx.options.getInteger("boosts");
-          if (forced !== null) {
-            const when = new Intl.DateTimeFormat("es-AR", {
-              dateStyle: "short", timeStyle: "short", timeZone: "America/Argentina/Cordoba"
-            }).format(new Date());
-            embed.setFooter({
-              text: `${forced} boosts actuales • ${when}`,
-              iconURL: member.guild.iconURL({ size: 64, extension: "png" }) ?? undefined
-            });
-          }
-
-          if (!publico) {
-            return itx.reply({ embeds: [embed], ephemeral: true });
-          }
-
-          const cfg = getSettings.get(itx.guild.id);
-          let ch = null;
-          if (cfg?.booster_announce_channel_id) {
-            ch = await itx.guild.channels.fetch(cfg.booster_announce_channel_id).catch(() => null);
-          }
-          if (!ch?.isTextBased()) ch = itx.channel;
-
-          await ch.send({ embeds: [embed] }).catch(() => { });
-          return itx.reply({ content: "Preview de boost enviada ✅", ephemeral: true });
-        }
-
-        if (subcommand === "welcome") {
-          const cfg = getSettings.get(itx.guild.id);
-          const embed = welcomeEmbed(member, {
-            autorolesChannelId: cfg?.autorole_channel_id ?? null
-          });
-
-          if (!publico) {
-            return itx.reply({ 
-              content: `¡Bienvenido/a <@${member.id}>!`,
-              embeds: [embed], 
-              ephemeral: true 
-            });
-          }
-
-          const welcomeCh = cfg?.welcome_channel_id 
-            ? await itx.guild.channels.fetch(cfg.welcome_channel_id).catch(() => null)
-            : null;
-          const ch = welcomeCh?.isTextBased() ? welcomeCh : itx.channel;
-
-          await ch.send({ 
-            content: `¡Bienvenido/a <@${member.id}>!`,
-            embeds: [embed] 
-          }).catch(() => { });
-          return itx.reply({ content: "Preview de bienvenida enviada ✅", ephemeral: true });
-        }
+        return utilitiesModule.handlePreview(itx);
       }
 
       if (name === "ping") {
-      const publico = itx.options.getBoolean("publico") ?? false;
-
-      const t0 = Date.now();
-      await itx.deferReply({ ephemeral: !publico });
-
-      const rt = Date.now() - t0;
-
-      const api = Math.round(itx.client.ws.ping);
-
-      let dbMs = null;
-      try { const s = Date.now(); db.prepare("SELECT 1").get(); dbMs = Date.now() - s; } catch { }
-
-      const up = process.uptime(); // segs
-      const h = Math.floor(up / 3600), m = Math.floor((up % 3600) / 60), s = Math.floor(up % 60);
-      const mem = Math.round(process.memoryUsage().heapUsed / 1024 / 1024); // MB
-
-      const embed = new EmbedBuilder()
-        .setTitle("🏓 Pong")
-        .addFields(
-          { name: "API (WS)", value: `${api} ms`, inline: true },
-          { name: "Round-trip", value: `${rt} ms`, inline: true },
-          { name: "DB", value: dbMs !== null ? `${dbMs} ms` : "–", inline: true },
-          { name: "Uptime", value: `${h}h ${m}m ${s}s`, inline: true },
-          { name: "Memoria", value: `${mem} MB`, inline: true },
-          { name: "Guilds", value: `${itx.client.guilds.cache.size}`, inline: true }
-        )
-        .setColor(0x5865f2)
-        .setTimestamp();
-
-      await itx.editReply({ embeds: [embed] });
-    }
-
-      if (name === "setinfochannel") {
-        if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild)) {
-          return itx.reply({ content: "Sin permisos.", ephemeral: true });
-        }
-        const ch = itx.options.getChannel("channel", true);
-        const row = getSettings.get(itx.guild.id) ?? {};
-        upsertSettings.run({
-          guild_id: itx.guild.id,
-          welcome_channel_id: row.welcome_channel_id ?? null,
-          log_channel_id: row.log_channel_id ?? null,
-          autorole_channel_id: row.autorole_channel_id ?? null,
-          autorole_message_id: row.autorole_message_id ?? null,
-          booster_role_id: row.booster_role_id ?? null,
-          booster_announce_channel_id: row.booster_announce_channel_id ?? null,
-          welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
-          info_channel_id: ch.id,
-          message_log_channel_id: row.message_log_channel_id ?? null,
-          avatar_log_channel_id: row.avatar_log_channel_id ?? null,
-          nickname_log_channel_id: row.nickname_log_channel_id ?? null,
-          voice_log_channel_id: row.voice_log_channel_id ?? null
-        });
-        return itx.reply({ content: `Info channel set to <#${ch.id}>`, ephemeral: true });
+        return utilitiesModule.handlePing(itx);
       }
 
-      if (name === "setnicklog") {
-        if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild)) {
-          return itx.reply({ content: "Sin permisos.", ephemeral: true });
-        }
-        const ch = itx.options.getChannel("channel", true);
-        const row = getSettings.get(itx.guild.id) ?? {};
-        upsertSettings.run({
-          guild_id: itx.guild.id,
-          welcome_channel_id:          row.welcome_channel_id ?? null,
-          log_channel_id:              row.log_channel_id ?? null,
-          autorole_channel_id:         row.autorole_channel_id ?? null,
-          autorole_message_id:         row.autorole_message_id ?? null,
-          booster_role_id:             row.booster_role_id ?? null,
-          booster_announce_channel_id: row.booster_announce_channel_id ?? null,
-          welcome_cd_minutes:          row.welcome_cd_minutes ?? 60,
-          info_channel_id:             row.info_channel_id ?? null,
-          message_log_channel_id:      row.message_log_channel_id ?? null,
-          avatar_log_channel_id:       row.avatar_log_channel_id ?? null,
-          nickname_log_channel_id:     ch.id,
-          voice_log_channel_id:        row.voice_log_channel_id ?? null
-        });
-        return itx.reply({ content: `Nickname log channel set to <#${ch.id}>`, ephemeral: true });
-      }
-
-      if (name === "setvoicelog") {
-        if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild)) {
-          return itx.reply({ content: "Sin permisos.", ephemeral: true });
-        }
-        const ch = itx.options.getChannel("channel", true);
-        const row = getSettings.get(itx.guild.id) ?? {};
-        upsertSettings.run({
-          guild_id: itx.guild.id,
-          welcome_channel_id:          row.welcome_channel_id ?? null,
-          log_channel_id:              row.log_channel_id ?? null,
-          autorole_channel_id:         row.autorole_channel_id ?? null,
-          autorole_message_id:         row.autorole_message_id ?? null,
-          booster_role_id:             row.booster_role_id ?? null,
-          booster_announce_channel_id: row.booster_announce_channel_id ?? null,
-          welcome_cd_minutes:          row.welcome_cd_minutes ?? 60,
-          info_channel_id:             row.info_channel_id ?? null,
-          message_log_channel_id:      row.message_log_channel_id ?? null,
-          avatar_log_channel_id:       row.avatar_log_channel_id ?? null,
-          nickname_log_channel_id:     row.nickname_log_channel_id ?? null,
-          voice_log_channel_id:        ch.id
-        });
-        return itx.reply({ content: `Voice log channel set to <#${ch.id}>`, ephemeral: true });
-      }
-
-      if (name === "userstats") {
-        await itx.deferReply({ ephemeral: false });
-
-        const targetUser = itx.options.getUser("usuario") ?? itx.user;
-        const member = await itx.guild.members.fetch(targetUser.id).catch(() => null);
-        
-        if (!member) {
-          return itx.editReply({ content: "No encontré ese usuario en el servidor." });
-        }
-
-        const stats = getUserStats.get(itx.guild.id, member.id) ?? null;
-        const embed = userStatsEmbed(member, stats);
-        await itx.editReply({ embeds: [embed] });
+      if (name === "stats") {
+        return utilitiesModule.handleStats(itx);
       }
 
       if (name === "help") {
-        const embed = helpEmbed();
-        return itx.reply({ embeds: [embed], ephemeral: false });
+        return utilitiesModule.handleHelp(itx);
       }
 
       if (name === "config") {
-        if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild) && 
-            !itx.memberPermissions.has(PermissionFlagsBits.ManageRoles)) {
-          return itx.reply({ 
-            content: "❌ No tienes permisos para ver la configuración. Se requiere `ManageGuild` o `ManageRoles`.", 
-            ephemeral: true 
-          });
-        }
-
-        const settings = getSettings.get(itx.guild.id) ?? {};
-        const embed = configEmbed(itx.guild, settings);
-        return itx.reply({ embeds: [embed], ephemeral: true });
+        return utilitiesModule.handleConfig(itx);
       }
 
-      if (name === "mod") {
-        if (!itx.memberPermissions.has(PermissionFlagsBits.MuteMembers) && 
-            !itx.memberPermissions.has(PermissionFlagsBits.MoveMembers)) {
-          return itx.reply({ 
-            content: "❌ No tienes permisos. Se requiere `MuteMembers` o `MoveMembers`.", 
-            ephemeral: true 
-          });
-        }
-
-        const subcommand = itx.options.getSubcommand();
-        
-        if (subcommand === "voicechat") {
-          let targetChannel = itx.options.getChannel("canal");
-          
-          if (!targetChannel) {
-            const moderatorVoiceState = itx.member.voice;
-            if (moderatorVoiceState?.channel) {
-              targetChannel = moderatorVoiceState.channel;
-            } else {
-              return itx.reply({ 
-                content: "❌ No especificaste un canal y no estás en ningún canal de voz.", 
-                ephemeral: true 
-              });
-            }
-          }
-
-          if (!targetChannel.isVoiceBased()) {
-            return itx.reply({ 
-              content: "❌ El canal especificado no es un canal de voz.", 
-              ephemeral: true 
-            });
-          }
-
-          const memberIds = Array.from(targetChannel.members.keys());
-          const refreshedMembers = await Promise.all(
-            memberIds.map(id => itx.guild.members.fetch({ user: id, force: true }).catch(() => null))
-          );
-          const members = refreshedMembers.filter(m => m && m.voice?.channel?.id === targetChannel.id);
-          
-          if (members.length === 0) {
-            return itx.reply({ 
-              content: "❌ No hay usuarios en ese canal de voz.", 
-              ephemeral: true 
-            });
-          }
-
-          const embed = voiceModEmbed(targetChannel, members, itx.member, client);
-          const components = createVoiceModComponents(targetChannel, members, itx.member, null, client);
-
-          const reply = await itx.reply({ 
-            embeds: [embed], 
-            components, 
-            ephemeral: false,
-            fetchReply: true
-          });
-
-          const key = `${itx.guild.id}_${targetChannel.id}`;
-          client.voiceModMessages.set(key, {
-            messageId: reply.id,
-            channelId: reply.channel.id,
-            guildId: itx.guild.id,
-            voiceChannelId: targetChannel.id,
-            moderatorId: itx.member.id
-          });
-        }
-
-        if (subcommand === "voiceuser") {
-          const targetUser = itx.options.getUser("usuario", true);
-          const targetMember = await itx.guild.members.fetch(targetUser.id).catch(() => null);
-          
-          if (!targetMember) {
-            return itx.reply({ content: "❌ No encontré ese usuario en el servidor.", ephemeral: true });
-          }
-
-          const targetChannel = targetMember.voice?.channel;
-          if (!targetChannel) {
-            return itx.reply({ 
-              content: `❌ **${targetUser.tag}** no está en ningún canal de voz.`, 
-              ephemeral: true 
-            });
-          }
-
-          const memberIds = Array.from(targetChannel.members.keys());
-          const refreshedMembers = await Promise.all(
-            memberIds.map(id => itx.guild.members.fetch({ user: id, force: true }).catch(() => null))
-          );
-          const members = refreshedMembers.filter(m => m && m.voice?.channel?.id === targetChannel.id);
-          
-          const embed = voiceModEmbed(targetChannel, members, itx.member, client);
-          const components = createVoiceModComponents(targetChannel, members, itx.member, targetMember, client);
-
-          const reply = await itx.reply({ 
-            embeds: [embed], 
-            components, 
-            ephemeral: false,
-            fetchReply: true
-          });
-
-          const key = `${itx.guild.id}_${targetChannel.id}`;
-          client.voiceModMessages.set(key, {
-            messageId: reply.id,
-            channelId: reply.channel.id,
-            guildId: itx.guild.id,
-            voiceChannelId: targetChannel.id,
-            moderatorId: itx.member.id,
-            targetMemberId: targetMember.id // Guardar el usuario objetivo para voiceuser
-          });
-        }
+      if (name === "voice-mod") {
+        return moderationModule.handleVoiceMod(client, itx);
       }
     }
 

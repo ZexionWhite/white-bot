@@ -7,11 +7,17 @@ export function helpEmbed() {
     .setColor(0x5865f2)
     .addFields(
       {
-        name: "👋 Bienvenidas",
+        name: "⚙️ Configuración",
         value: [
-          "`/setwelcome` - Define el canal de bienvenida (Admin)",
-          "`/setlog` - Define el canal de logs de ingresos (Admin)",
-          "`/setwelcomecd` - Define el cooldown del mensaje de bienvenida (Admin)"
+          "`/set welcome [canal] [cooldown]` - Canal de bienvenida y cooldown (Admin)",
+          "`/set join-log [canal]` - Canal de logs de ingresos (Admin)",
+          "`/set message-log [canal]` - Canal para logs de mensajes (Admin)",
+          "`/set avatar-log [canal]` - Canal para logs de avatares (Admin)",
+          "`/set nickname-log [canal]` - Canal para logs de apodos (Admin)",
+          "`/set voice-log [canal]` - Canal para logs de voz (Admin)",
+          "`/set boost-channel [canal]` - Canal de anuncios de boost (Admin)",
+          "`/set info-channel [canal]` - Canal de información/perks (Admin)",
+          "`/set booster-role [rol]` - Rol de boosters (Admin)"
         ].join("\n"),
         inline: false
       },
@@ -19,41 +25,16 @@ export function helpEmbed() {
         name: "🎨 Autoroles de color",
         value: [
           "`/setupcolors` - Crea los roles de colores (Admin)",
-          "`/postautoroles` - Publica el menú de selección de color (Admin)"
-        ].join("\n"),
-        inline: false
-      },
-      {
-        name: "💎 Boosters",
-        value: [
-          "`/setboosterrole` - Define el rol de boosters (Admin)",
-          "`/setboostchannel` - Define el canal de anuncios de boost (Admin)",
-          "`/preview boost` - Previsualiza el embed de boost (Admin)",
-          "`/preview welcome` - Previsualiza el embed de bienvenida (Admin)"
-        ].join("\n"),
-        inline: false
-      },
-      {
-        name: "📝 Logs",
-        value: [
-          "`/setmessagelog` - Canal para logs de mensajes (Admin)",
-          "`/setavatarlog` - Canal para logs de avatares (Admin)",
-          "`/setnicklog` - Canal para logs de apodos (Admin)",
-          "`/setvoicelog` - Canal para logs de voz (Admin)"
-        ].join("\n"),
-        inline: false
-      },
-      {
-        name: "⚙️ Configuración",
-        value: [
-          "`/setinfochannel` - Canal de información/perks (Admin)"
+          "`/color-menu` - Publica el menú de selección de color (Admin)"
         ].join("\n"),
         inline: false
       },
       {
         name: "📊 Utilidades",
         value: [
-          "`/userstats [usuario]` - Muestra estadísticas de un usuario",
+          "`/preview boost [usuario]` - Previsualiza el embed de boost (Admin)",
+          "`/preview welcome [usuario]` - Previsualiza el embed de bienvenida (Admin)",
+          "`/stats [usuario]` - Muestra estadísticas de un usuario",
           "`/ping` - Mide latencia y estado del bot",
           "`/help` - Muestra este mensaje",
           "`/config` - Muestra la configuración del servidor (Admin)"
@@ -63,13 +44,13 @@ export function helpEmbed() {
       {
         name: "🛡️ Moderación",
         value: [
-          "`/mod voicechat [canal]` - Modera usuarios en un canal de voz (Mod)",
-          "`/mod voiceuser [usuario]` - Modera un usuario específico en voz (Mod)"
+          "`/voice-mod channel [canal]` - Modera usuarios en un canal de voz (Mod)",
+          "`/voice-mod user [usuario]` - Modera un usuario específico en voz (Mod)"
         ].join("\n"),
         inline: false
       }
     )
-    .setFooter({ text: "Los comandos marcados con (Admin) requieren permisos de administrador" })
+    .setFooter({ text: "Los comandos marcados con (Admin) requieren permisos de administrador. (Mod) requiere MuteMembers o MoveMembers" })
     .setTimestamp();
 }
 

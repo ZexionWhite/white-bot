@@ -1,0 +1,9 @@
+export { default as handleSetWelcome } from "./welcome.js";
+export { default as handleSetJoinLog } from "./joinLog.js";
+export { default as handleSetMessageLog } from "./messageLog.js";
+export { default as handleSetAvatarLog } from "./avatarLog.js";
+export { default as handleSetNicknameLog } from "./nicknameLog.js";
+export { default as handleSetVoiceLog } from "./voiceLog.js";
+export { default as handleSetBoostChannel } from "./boostChannel.js";
+export { default as handleSetInfoChannel } from "./infoChannel.js";
+export { default as handleSetBoosterRole } from "./boosterRole.js";

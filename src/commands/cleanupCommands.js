@@ -19,7 +19,7 @@ async function wipeGlobal() {
   console.log("✅ Wiped GLOBAL commands (may take ~1h to disappear everywhere)");
 }
 
-const mode = process.argv[2]; // "guild" | "global" | "both"
+const mode = process.argv[2];
 const run = async () => {
   if (mode === "guild") return wipeGuild();
   if (mode === "global") return wipeGlobal();
@@ -27,3 +27,4 @@ const run = async () => {
   await wipeGlobal().catch(() => {});
 };
 run().catch(console.error);
+

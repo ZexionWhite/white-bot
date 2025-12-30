@@ -11,13 +11,13 @@ function parseEmojiMarkdown(markdown) {
   return null;
 }
 
-export default async function postautoroles(itx) {
+export default async function colorMenu(itx) {
   if (!itx.memberPermissions.has(PermissionFlagsBits.ManageRoles))
     return itx.reply({ content: "Sin permisos.", ephemeral: true });
 
   const cfg = getSettings.get(itx.guild.id);
   if (!cfg?.welcome_channel_id) {
-    return itx.reply({ content: "Primero configurá canales con /setwelcome y /setlog.", ephemeral: true });
+    return itx.reply({ content: "Primero configurá canales con /set welcome y /set join-log.", ephemeral: true });
   }
 
   const colors = getColorRoles.all(itx.guild.id);
@@ -88,3 +88,4 @@ export default async function postautoroles(itx) {
 
   return itx.reply({ content: "Menú de autoroles publicado/actualizado.", ephemeral: true });
 }
+

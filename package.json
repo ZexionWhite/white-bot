@@ -6,10 +6,10 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "node src/index.js",
-    "register": "node src/commands/register-commands.js",
-    "clean:guild": "node src/commands/cleanup-commands.js guild",
-    "clean:global": "node src/commands/cleanup-commands.js global",
-    "clean:both": "node src/commands/cleanup-commands.js"
+    "register": "node src/commands/registerCommands.js",
+    "clean:guild": "node src/commands/cleanupCommands.js guild",
+    "clean:global": "node src/commands/cleanupCommands.js global",
+    "clean:both": "node src/commands/cleanupCommands.js"
   },
   "dependencies": {
     "better-sqlite3": "^9.4.0",

@@ -5,12 +5,56 @@ import { updateVoiceModEmbed } from "../utils/voiceMod.js";
 import * as configModule from "../modules/config/index.js";
 import * as moderationModule from "../modules/moderation/index.js";
 import * as utilitiesModule from "../modules/utilities/index.js";
+import { commandHandlers, componentHandlers, autocompleteHandlers } from "../modules/registry.js";
 
 export default async function interactionCreate(client, itx) {
   try {
+    if (itx.isAutocomplete()) {
+      const name = itx.commandName;
+      if (autocompleteHandlers[name]) {
+        return autocompleteHandlers[name](itx);
+      }
+      return itx.respond([]);
+    }
+
+    if (itx.isModalSubmit()) {
+      const customId = itx.customId;
+      
+      if (customId.startsWith("pending:")) {
+        // Route to appropriate modal handler
+        const { handleModerationModal } = await import("../modules/moderation/modals/handlers.js");
+        const { handleBlacklistModal } = await import("../modules/blacklist/modals/handlers.js");
+        
+        // Determine which handler to use based on the pending action
+        const actionId = parseInt(customId.replace("pending:", ""));
+        if (!isNaN(actionId)) {
+          const { getPendingAction } = await import("../modules/moderation/modals/helpers.js");
+          const pendingAction = getPendingAction(actionId);
+          
+          if (pendingAction) {
+            if (pendingAction.command.startsWith("blacklist.")) {
+              return handleBlacklistModal(itx);
+            } else {
+              return handleModerationModal(itx);
+            }
+          }
+        }
+      }
+      
+      return itx.reply({ content: "Unknown modal", ephemeral: true });
+    }
+    
     if (itx.isChatInputCommand()) {
       const name = itx.commandName;
       console.log(`[interactionCreate] Comando ejecutado: ${name} por ${itx.user.tag} en ${itx.guild?.name || "DM"}`);
+      
+      if (!itx.inGuild() && name !== "test") {
+        return itx.reply({ content: "Este comando solo funciona en servidores.", ephemeral: true });
+      }
+
+      if (commandHandlers[name]) {
+        return commandHandlers[name](itx);
+      }
 
       if (name === "set") {
         const subcommand = itx.options.getSubcommand();
@@ -62,16 +106,24 @@ export default async function interactionCreate(client, itx) {
         return utilitiesModule.handlePing(itx);
       }
 
-      if (name === "stats") {
-        return utilitiesModule.handleStats(itx);
-      }
-
       if (name === "help") {
-        return utilitiesModule.handleHelp(itx);
+        return utilitiesModule.handleHelp(itx, client);
       }
 
       if (name === "config") {
         return utilitiesModule.handleConfig(itx);
+      }
+
+      if (name === "test") {
+        try {
+          return utilitiesModule.handleTest(itx, client);
+        } catch (error) {
+          console.error("[interactionCreate] Error en comando test:", error);
+          return itx.reply({ 
+            content: `❌ Error al ejecutar el comando: ${error.message}`, 
+            ephemeral: true 
+          }).catch(() => {});
+        }
       }
 
       if (name === "voice-mod") {
@@ -79,47 +131,82 @@ export default async function interactionCreate(client, itx) {
       }
     }
 
-    if (itx.isStringSelectMenu() && itx.customId === "color-select") {
-      await itx.deferReply({ ephemeral: true });
+    if (itx.isStringSelectMenu()) {
+      const customId = itx.customId;
+      
+      if (customId === "color-select") {
+        await itx.deferReply({ ephemeral: true });
 
-      const cfg = getSettings.get(itx.guild.id);
-      const all = getColorRoles.all(itx.guild.id);
+        const cfg = getSettings.get(itx.guild.id);
+        const all = getColorRoles.all(itx.guild.id);
 
-      const selectedId = itx.values[0];
-      const chosen = all.find(r => r.role_id === selectedId);
-      if (!chosen) return itx.editReply({ content: "Opción inválida." });
+        const selectedId = itx.values[0];
+        const chosen = all.find(r => r.role_id === selectedId);
+        if (!chosen) return itx.editReply({ content: "Opción inválida." });
 
-      const member = await itx.guild.members.fetch(itx.user.id);
+        const member = await itx.guild.members.fetch(itx.user.id);
 
-      const togglingOff = member.roles.cache.has(selectedId);
+        const togglingOff = member.roles.cache.has(selectedId);
 
-      if (!togglingOff && chosen.booster_only) {
-        const boosterRoleId = cfg?.booster_role_id;
-        const hasBooster = boosterRoleId ? member.roles.cache.has(boosterRoleId) : false;
-        if (!hasBooster) return itx.editReply({ content: "Este color es solo para boosters." });
+        if (!togglingOff && chosen.booster_only) {
+          const boosterRoleId = cfg?.booster_role_id;
+          const hasBooster = boosterRoleId ? member.roles.cache.has(boosterRoleId) : false;
+          if (!hasBooster) return itx.editReply({ content: "Este color es solo para boosters." });
+        }
+
+        const paletteIds = new Set(all.map(r => r.role_id));
+        const toRemove = member.roles.cache.filter(r => paletteIds.has(r.id) && r.id !== selectedId);
+
+        try {
+          await (
+            togglingOff
+              ? member.roles.remove(selectedId)
+              : (async () => {
+                  if (toRemove.size) await member.roles.remove([...toRemove.keys()]);
+                  await member.roles.add(selectedId);
+                })()
+          );
+
+          return itx.editReply({ content: togglingOff ? "Color quitado ✅" : "Color aplicado ✅" });
+        } catch {
+          return itx.editReply({ content: "No pude cambiar el rol. Revisá permisos/jerarquía del bot." });
+        }
       }
 
-      const paletteIds = new Set(all.map(r => r.role_id));
-      const toRemove = member.roles.cache.filter(r => paletteIds.has(r.id) && r.id !== selectedId);
+      if (customId.startsWith("help:")) {
+        const action = customId.split(":")[1];
+        if (action === "select") {
+          const helpModule = await import("../modules/utilities/help/help.handler.js");
+          return helpModule.handleHelpSelect(itx, client);
+        }
+      }
 
-      try {
-        await (
-          togglingOff
-            ? member.roles.remove(selectedId) // quitar si ya lo tiene
-            : (async () => {                  // agregar: primero limpiar, luego asignar
-                if (toRemove.size) await member.roles.remove([...toRemove.keys()]);
-                await member.roles.add(selectedId);
-              })()
-        );
+      if (customId.startsWith("test:")) {
+        const action = customId.split(":")[1];
+        if (action === "select") {
+          const testModule = await import("../modules/utilities/test/test.handler.js");
+          return testModule.handleTestSelect(itx, client);
+        }
+      }
 
-        return itx.editReply({ content: togglingOff ? "Color quitado ✅" : "Color aplicado ✅" });
-      } catch {
-        return itx.editReply({ content: "No pude cambiar el rol. Revisá permisos/jerarquía del bot." });
+      if (componentHandlers[customId.split(":")[0]]) {
+        const parts = customId.split(":");
+        return componentHandlers[parts[0]](itx, customId);
       }
     }
 
     if (itx.isButton()) {
       const customId = itx.customId;
+
+      if (customId === "help:close") {
+        const helpModule = await import("../modules/utilities/help/help.handler.js");
+        return helpModule.handleHelpClose(itx);
+      }
+
+      if (componentHandlers[customId.split(":")[0]]) {
+        const parts = customId.split(":");
+        return componentHandlers[parts[0]](itx, customId);
+      }
       
       if (!itx.memberPermissions.has(PermissionFlagsBits.MuteMembers) && 
           !itx.memberPermissions.has(PermissionFlagsBits.MoveMembers)) {

@@ -1,5 +1,6 @@
 import { getSettings, startVoiceSession, endVoiceSession, getVoiceSession, incrementVoiceTime } from "../db.js";
 import { voiceStateEmbed } from "../utils/embeds.js";
+import * as VoiceRepo from "../modules/moderation/db/voice.repo.js";
 
 export default async function voiceStateUpdate(client, oldState, newState) {
   try {
@@ -46,8 +47,28 @@ export default async function voiceStateUpdate(client, oldState, newState) {
     if (newChannelId) {
       try {
         startVoiceSession.run(guildId, userId, newChannelId, now);
+        VoiceRepo.insertVoiceActivity.run(guildId, userId, "JOIN", newChannelId, now);
+        VoiceRepo.cleanupOldVoiceActivity.run(guildId, userId, guildId, userId);
       } catch (err) {
         console.error(`[voiceStateUpdate] Error al iniciar sesión de voz para ${member.user.tag} en ${guild.name}:`, err.message);
+      }
+    }
+
+    if (oldChannelId && newChannelId && oldChannelId !== newChannelId) {
+      try {
+        VoiceRepo.insertVoiceActivity.run(guildId, userId, "MOVE", newChannelId, now);
+        VoiceRepo.cleanupOldVoiceActivity.run(guildId, userId, guildId, userId);
+      } catch (err) {
+        console.error(`[voiceStateUpdate] Error al registrar movimiento de voz:`, err.message);
+      }
+    }
+
+    if (oldChannelId && !newChannelId) {
+      try {
+        VoiceRepo.insertVoiceActivity.run(guildId, userId, "LEAVE", oldChannelId, now);
+        VoiceRepo.cleanupOldVoiceActivity.run(guildId, userId, guildId, userId);
+      } catch (err) {
+        console.error(`[voiceStateUpdate] Error al registrar salida de voz:`, err.message);
       }
     }
 

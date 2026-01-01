@@ -64,7 +64,7 @@ export default async function guildMemberUpdate(client, oldM, newM) {
           const embed = new EmbedBuilder()
             .setTitle(`${EMOJIS.LOGS.USER_PICTURE} Avatar updated`)
             .setDescription(`**User:** ${newM.user?.tag ?? "(unknown)"} (\`${newM.id}\`)`)
-            .setColor(0x9b59b6)
+            .setColor(0x393a41)
             .setFooter({
               text: `Actualizado el ${when}`,
               iconURL: newM.guild.iconURL({ size: 64, extension: "png" }) ?? undefined
@@ -144,7 +144,7 @@ export default async function guildMemberUpdate(client, oldM, newM) {
               { name: "Before", value: oldNick ? `\`${oldNick}\`` : "—", inline: true },
               { name: "After",  value: newNick ? `\`${newNick}\`` : "—", inline: true }
             )
-            .setColor(0x3498db)
+            .setColor(0x393a41)
             .setTimestamp()
             .setFooter({
               text: `Nick update`,

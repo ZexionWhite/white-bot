@@ -1,7 +1,8 @@
 import "dotenv/config";
 import { REST, Routes, SlashCommandBuilder, PermissionFlagsBits, ChannelType } from "discord.js";
+import { allSlashCommands } from "../modules/registry.js";
 
-const commands = [
+const existingCommands = [
   new SlashCommandBuilder()
     .setName("set")
     .setDescription("Configuración del servidor")
@@ -148,14 +149,6 @@ const commands = [
     ),
 
   new SlashCommandBuilder()
-    .setName("stats")
-    .setDescription("Muestra estadísticas de un usuario (tiempo en voz, mensajes, etc.)")
-    .addUserOption(o =>
-      o.setName("usuario")
-       .setDescription("Usuario a consultar (default: tú mismo)")
-    ),
-
-  new SlashCommandBuilder()
     .setName("help")
     .setDescription("Muestra información sobre todos los comandos disponibles"),
 
@@ -189,14 +182,46 @@ const commands = [
 
 ].map(c => c.toJSON());
 
+const allCommands = [...existingCommands, ...allSlashCommands.map(c => c.toJSON())];
+
+// Comando /test solo para guild de pruebas
+const testCommand = new SlashCommandBuilder()
+  .setName("test")
+  .setDescription("🧪 Testea todos los embeds del bot (solo servidor de pruebas)")
+  .toJSON();
+
+const TEST_GUILD_ID = "1053040188445704253";
+
 const rest = new REST({ version: "10" }).setToken(process.env.BOT_TOKEN);
 
 const guildId = process.env.GUILD_ID_PRUEBA;
 if (guildId) {
-  await rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, guildId), { body: commands });
-  console.log("Comandos cargados (guild).");
+  // Si la guild de prueba configurada es la misma que la de /test, incluir /test en el registro
+  if (guildId === TEST_GUILD_ID) {
+    await rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, guildId), { 
+      body: [...allCommands, testCommand] 
+    });
+    console.log("Comandos cargados (guild) incluyendo /test.");
+  } else {
+    // Registrar comandos normales en la guild de prueba configurada
+    await rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, guildId), { body: allCommands });
+    console.log("Comandos cargados (guild).");
+    
+    // Registrar /test solo en la guild de pruebas específica
+    await rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, TEST_GUILD_ID), { 
+      body: [testCommand] 
+    });
+    console.log("Comando /test registrado solo en guild de pruebas.");
+  }
 } else {
-  await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: commands });
+  // Registro global de comandos normales
+  await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: allCommands });
   console.log("Comandos cargados (global). (tardan hasta 1h)");
+  
+  // Registrar /test solo en la guild de pruebas específica
+  await rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, TEST_GUILD_ID), { 
+    body: [testCommand] 
+  });
+  console.log("Comando /test registrado solo en guild de pruebas.");
 }
 

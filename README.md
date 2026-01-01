@@ -1,10 +1,42 @@
 # Capybot — Discord.js v14 + SQLite
 
-A feature-rich, production-ready Discord bot built with **Discord.js v14** and **SQLite**. Capybot provides comprehensive server management tools including welcome messages, color autoroles, boost announcements, comprehensive logging, voice moderation, and user statistics tracking.
+A feature-rich, production-ready Discord bot built with **Discord.js v14** and **SQLite**. Capybot provides comprehensive server management tools including welcome messages, color autoroles, boost announcements, comprehensive logging, voice moderation, **complete moderation system**, **blacklist management**, **user information tracking**, and user statistics tracking.
 
 ---
 
 ## ✨ Features
+
+### 🛡️ Complete Moderation System
+- **Comprehensive sanction system**: warn, mute, unmute, timeout, untimeout, kick, ban, tempban, softban, unban
+- **Case management**: view, edit, delete, and track all moderation actions with full history
+- **Automatic expiration**: temporary bans, mutes, and timeouts are automatically lifted when duration expires
+- **Modlog integration**: all sanctions are logged to a dedicated channel with formatted embeds
+- **DM notifications**: users receive direct messages about sanctions applied to them
+- **Modal-based reasons**: all moderation commands use modals for collecting detailed reasons
+- **Role hierarchy protection**: users cannot moderate others with equal or higher roles
+- **Minimalist embed design**: clean, compact embeds for all moderation actions
+
+### 🚫 Blacklist System
+- **Persistent blacklist**: track problematic users with severity levels (LOW, MEDIUM, HIGH, CRITICAL)
+- **Evidence support**: attach evidence (links, message IDs) to blacklist entries
+- **Full history tracking**: view complete blacklist history for any user
+- **Editable entries**: modify reason, evidence, and severity of existing entries
+- **Separate from sanctions**: blacklist is independent from the moderation case system
+
+### 👤 Advanced User Information
+- **Comprehensive user profiles**: view detailed information about any user
+- **Multi-view system**: Overview, Sanctions History, Blacklist History, Voice Activity, Recent Messages, Permissions/Overrides, Statistics
+- **Trust score calculation**: 0-100 score based on recent sanctions and behavior
+- **Permission overrides**: see all custom permission policies (module and command-level)
+- **Activity tracking**: recent voice activity and message history
+- **Statistics**: voice time and message count tracking
+
+### 🔐 Advanced Permission System
+- **Module-level permissions**: control access to entire modules (Moderation, Blacklist, Info, Config, Utilities)
+- **Command-level permissions**: fine-grained control over individual commands
+- **User and role-based policies**: apply permissions to specific users or roles
+- **Discord native fallback**: uses Discord's native permissions when no custom policy exists
+- **Easy configuration**: `/modconfig` command with intuitive subcommands for managing permissions
 
 ### 🎉 Welcome System
 - **Customizable welcome embeds** with server branding, user avatars, and animated GIFs
@@ -60,8 +92,8 @@ A feature-rich, production-ready Discord bot built with **Discord.js v14** and *
 ### 🎤 Voice Moderation
 - **Real-time voice channel moderation** with live embed updates
 - **Two moderation modes**:
-  - `/mod voicechat [channel]`: Moderate all users in a voice channel
-  - `/mod voiceuser [user]`: Moderate a specific user in voice
+  - `/voice-mod channel [channel]`: Moderate all users in a voice channel
+  - `/voice-mod user [user]`: Moderate a specific user in voice
 - **Visual status indicators**:
   - Server mute/deafen (guild-applied)
   - Self mute/deafen (user-applied)
@@ -77,11 +109,11 @@ A feature-rich, production-ready Discord bot built with **Discord.js v14** and *
 - **Permission-based access**: requires `MuteMembers` or `MoveMembers` permissions
 
 ### 🛠️ Utility Commands
-- **`/help`**: Comprehensive command list with descriptions
+- **`/help`**: Interactive help system with categorized command list
 - **`/config`**: View current server configuration (moderator-only)
 - **`/ping`**: Bot latency, API ping, database ping, uptime, and memory usage
 - **`/preview`**: Preview embeds (boost, welcome) before they're sent
-- **`/userstats`**: View user statistics (voice time, message count)
+- **`/user [user]`**: Comprehensive user information with multiple views
 
 ---
 
@@ -105,17 +137,23 @@ A feature-rich, production-ready Discord bot built with **Discord.js v14** and *
     - ✅ **Message Content Intent** (required for message logging)
     - ✅ **Guild Voice States Intent** (required for voice moderation)
 - **Bot Permissions** (minimum):
-  - `Manage Roles` (for autoroles)
+  - `Manage Roles` (for autoroles and mute role)
+  - `Manage Channels` (for lock/unlock/slowmode)
+  - `Manage Messages` (for clear command)
+  - `Moderate Members` (for warn, timeout, history, case commands)
+  - `Kick Members` (for kick command)
+  - `Ban Members` (for ban, tempban, softban, unban commands)
   - `Send Messages`
   - `Embed Links`
   - `View Channels`
   - `Read Message History`
-  - `Mute Members` (for voice moderation)
+  - `Mute Members` (for voice moderation and mute command)
   - `Move Members` (for voice moderation)
   - `View Audit Log` (for enhanced logging)
 - **Role Hierarchy**:
   - The bot's highest role must be **above** all color roles it will assign
   - The bot's role must be **above** users it needs to mute/move in voice channels
+  - The bot's role must be **above** the mute role for mute/unmute commands to work
 
 ---
 
@@ -123,33 +161,70 @@ A feature-rich, production-ready Discord bot built with **Discord.js v14** and *
 
 ```
 src/
+├── modules/
+│   ├── moderation/          # Moderation system
+│   │   ├── commands/        # Slash command handlers
+│   │   ├── services/        # Business logic
+│   │   ├── db/              # Database repositories
+│   │   ├── ui/              # Embeds and components
+│   │   ├── modals/          # Modal handlers and helpers
+│   │   └── slash.js         # Slash command definitions
+│   ├── blacklist/           # Blacklist system
+│   │   ├── commands/
+│   │   ├── services/
+│   │   ├── db/
+│   │   ├── ui/
+│   │   ├── modals/
+│   │   └── slash.js
+│   ├── info/                # User information system
+│   │   ├── commands/
+│   │   ├── services/
+│   │   ├── ui/
+│   │   └── slash.js
+│   ├── permissions/         # Permission management
+│   │   ├── commands/
+│   │   └── slash.js
+│   ├── config/              # Configuration commands
+│   ├── utilities/           # Utility commands
+│   │   ├── help/            # Interactive help system
+│   │   ├── test/            # Testing utilities
+│   │   └── ...
+│   └── registry.js          # Centralized command/component registry
 ├── commands/
-│   ├── register-commands.js    # Slash command registration
-│   ├── setupcolors.js          # Color role setup handler
-│   ├── postautoroles.js        # Autorole menu posting
-│   └── cleanup-commands.js     # Command cleanup utility
+│   ├── registerCommands.js  # Slash command registration
+│   ├── setupColors.js       # Color role setup handler
+│   ├── colorMenu.js         # Autorole menu posting
+│   └── cleanupCommands.js   # Command cleanup utility
 ├── events/
-│   ├── ready.js                # Bot ready event
-│   ├── guildMemberAdd.js       # Welcome & join logs
-│   ├── guildMemberRemove.js    # Leave logs
-│   ├── guildMemberUpdate.js    # Boost & server avatar/nickname logs
-│   ├── userUpdate.js           # Global avatar logs
-│   ├── messageCreate.js        # Message counting
-│   ├── messageUpdate.js        # Message edit logs
-│   ├── messageDelete.js        # Message delete logs
-│   ├── voiceStateUpdate.js     # Voice logs & time tracking
-│   └── interactionCreate.js    # Slash command handler
+│   ├── ready.js             # Bot ready event
+│   ├── guildMemberAdd.js    # Welcome & join logs
+│   ├── guildMemberRemove.js # Leave logs
+│   ├── guildMemberUpdate.js # Boost & server avatar/nickname logs
+│   ├── userUpdate.js        # Global avatar logs
+│   ├── messageCreate.js     # Message counting
+│   ├── messageUpdate.js     # Message edit logs
+│   ├── messageDelete.js     # Message delete logs
+│   ├── voiceStateUpdate.js  # Voice logs & time tracking
+│   └── interactionCreate.js # Slash command handler
 ├── utils/
-│   ├── embeds.js               # Embed builders
-│   ├── voiceMod.js             # Voice moderation utilities
-│   ├── beforeAfter.js          # Avatar composition utility
-│   ├── time.js                 # Time formatting utilities
-│   └── colors.js               # Color utilities
-├── config.js                   # Configuration (timezone, GIFs)
-├── db.js                       # Database schema & prepared statements
-└── index.js                    # Bot entry point
+│   ├── embeds.js            # Embed builders
+│   ├── voiceMod.js          # Voice moderation utilities
+│   ├── beforeAfter.js       # Avatar composition utility
+│   ├── time.js              # Time formatting utilities
+│   ├── duration.js          # Duration parsing and formatting
+│   ├── colors.js            # Color utilities
+│   ├── avatarManager.js     # Avatar change tracking
+│   ├── sanctionScheduler.js # Temporary sanction expiration handler
+│   ├── activityRotator.js   # Bot activity rotation
+│   └── apiTracker.js        # API request tracking
+├── embeds/                  # Legacy embed utilities
+├── config/
+│   └── emojis.js            # Custom emoji definitions
+├── config.js                # Configuration (timezone, GIFs)
+├── db.js                    # Database schema & prepared statements
+└── index.js                 # Bot entry point
 data/
-└── bot.db                      # SQLite database (auto-created)
+└── bot.db                   # SQLite database (auto-created)
 ```
 
 ---
@@ -192,10 +267,10 @@ Ensure your `package.json` includes:
   "scripts": {
     "start": "node src/index.js",
     "dev": "node src/index.js",
-    "register": "node src/commands/register-commands.js",
-    "clean:guild": "node src/commands/cleanup-commands.js guild",
-    "clean:global": "node src/commands/cleanup-commands.js global",
-    "clean:both": "node src/commands/cleanup-commands.js"
+    "register": "node src/commands/registerCommands.js",
+    "clean:guild": "node src/commands/cleanupCommands.js guild",
+    "clean:global": "node src/commands/cleanupCommands.js global",
+    "clean:both": "node src/commands/cleanupCommands.js"
   }
 }
 ```
@@ -227,39 +302,68 @@ Ensure your `package.json` includes:
 
    **Basic Setup**:
    ```
-   /setwelcome #welcome-channel
-   /setlog #admin-logs
+   /set welcome #welcome-channel [cooldown]
+   /set join-log #admin-logs
    ```
 
    **Color Autoroles**:
    ```
    /setupcolors
-   /postautoroles
+   /color-menu
    ```
 
    **Boost System**:
    ```
-   /setboosterrole @Boosters  (if using custom booster role)
-   /setboostchannel #boosts
-   /setinfochannel #server-info  (optional, for boost embed)
+   /set booster-role @Boosters  (if using custom booster role)
+   /set boost-channel #boosts
+   /set info-channel #server-info  (optional, for boost embed)
    ```
 
    **Logging**:
    ```
-   /setmessagelog #message-logs
-   /setavatarlog #avatar-logs
-   /setnicklog #nickname-logs
-   /setvoicelog #voice-logs
+   /set message-log #message-logs
+   /set avatar-log #avatar-logs
+   /set nickname-log #nickname-logs
+   /set voice-log #voice-logs
    ```
 
-   **Advanced**:
+   **Moderation Setup**:
    ```
-   /setwelcomecd 60  (cooldown in minutes)
+   /setmodlog #modlog-channel
+   /setblacklistchannel #blacklist-channel
+   /createmuterole  (creates and configures mute role automatically)
+   # OR
+   /setmuterole @Muted  (use existing role)
    ```
 
 ---
 
 ## 🧠 How It Works
+
+### Moderation Flow
+
+1. Moderator executes a moderation command (e.g., `/warn @user`)
+2. Bot validates permissions and role hierarchy
+3. Bot opens a modal for the moderator to enter a reason
+4. On modal submission, the sanction is applied
+5. A case is created in the database
+6. Modlog embed is sent to the configured modlog channel
+7. DM notification is attempted (user may have DMs disabled)
+8. Confirmation message is sent to the command executor
+
+### Temporary Sanctions
+
+- Temporary bans, mutes, and timeouts are tracked with expiration timestamps
+- A scheduler checks every minute for expired sanctions
+- When a sanction expires, it's automatically removed and an "un" case is created
+- The automatic action is logged to the modlog channel
+
+### Permission System
+
+1. Check for explicit command-level policy (DENY → reject, ALLOW → approve)
+2. Check for module-level policy (DENY → reject, ALLOW → approve)
+3. Fall back to Discord's native permissions
+4. Users cannot moderate others with equal or higher roles (except server owner)
 
 ### Welcome Flow
 
@@ -273,7 +377,7 @@ Ensure your `package.json` includes:
 ### Autoroles Flow
 
 1. `/setupcolors` creates color roles and stores them in the database
-2. `/postautoroles` posts an embed + select menu (up to 25 options)
+2. `/color-menu` posts an embed + select menu (up to 25 options)
 3. When a user selects a color:
    - If they already have it → toggle off (remove)
    - Otherwise → remove any other color from the palette and add the selected one
@@ -294,7 +398,7 @@ Ensure your `package.json` includes:
 
 ### Voice Moderation Flow
 
-1. Moderator uses `/mod voicechat` or `/mod voiceuser`
+1. Moderator uses `/voice-mod channel` or `/voice-mod user`
 2. Bot creates an interactive embed showing all users in the channel
 3. Embed displays real-time mute/deafen status (server vs self)
 4. Actions update the embed automatically
@@ -304,61 +408,120 @@ Ensure your `package.json` includes:
 
 - **Voice time**: Tracked when users join/leave voice channels, accumulated per server
 - **Message count**: Incremented for each non-bot message sent
-- Statistics are stored per guild and user, accessible via `/userstats`
+- Statistics are stored per guild and user, accessible via `/user` command
 
 ---
 
 ## 🔧 Commands Reference
 
-### Setup Commands
+### Configuration Commands
 
 | Command | Description | Permission |
 |---------|-------------|------------|
-| `/setwelcome #channel` | Set the public welcome channel | Manage Guild |
-| `/setlog #channel` | Set the admin logs channel | Manage Guild |
-| `/setwelcomecd <minutes>` | Set per-user cooldown for welcome messages | Manage Guild |
+| `/set welcome [channel] [cooldown]` | Set the public welcome channel | Manage Guild |
+| `/set join-log [channel]` | Set the admin logs channel | Manage Guild |
+| `/setmodlog [channel]` | Set the moderation log channel | Manage Guild |
+| `/setblacklistchannel [channel]` | Set the blacklist channel | Manage Guild |
+| `/createmuterole` | Create and configure mute role automatically | Manage Guild |
+| `/setmuterole [role]` | Set an existing role as mute role | Manage Guild |
 
 ### Autorole Commands
 
 | Command | Description | Permission |
 |---------|-------------|------------|
 | `/setupcolors` | Create and store default color roles | Manage Roles |
-| `/postautoroles` | Post/update the color select menu | Manage Roles |
+| `/color-menu` | Post/update the color select menu | Manage Roles |
 
 ### Boost Commands
 
 | Command | Description | Permission |
 |---------|-------------|------------|
-| `/setboosterrole @role` | Set the Booster role (for gated colors) | Manage Roles |
-| `/setboostchannel #channel` | Set the boost announcement channel | Manage Guild |
-| `/setinfochannel #channel` | Set the info/perks channel (for boost embed) | Manage Guild |
-| `/preview boost` | Preview the boost embed without boosting | Manage Guild |
-| `/preview welcome` | Preview the welcome embed | Manage Guild |
+| `/set booster-role [role]` | Set the Booster role (for gated colors) | Manage Roles |
+| `/set boost-channel [channel]` | Set the boost announcement channel | Manage Guild |
+| `/set info-channel [channel]` | Set the info/perks channel (for boost embed) | Manage Guild |
+| `/preview boost [user]` | Preview the boost embed without boosting | Manage Guild |
+| `/preview welcome [user]` | Preview the welcome embed | Manage Guild |
 
 ### Logging Commands
 
 | Command | Description | Permission |
 |---------|-------------|------------|
-| `/setmessagelog #channel` | Set channel for message edit/delete logs | Manage Guild |
-| `/setavatarlog #channel` | Set channel for avatar change logs | Manage Guild |
-| `/setnicklog #channel` | Set channel for nickname change logs | Manage Guild |
-| `/setvoicelog #channel` | Set channel for voice state logs | Manage Guild |
+| `/set message-log [channel]` | Set channel for message edit/delete logs | Manage Guild |
+| `/set avatar-log [channel]` | Set channel for avatar change logs | Manage Guild |
+| `/set nickname-log [channel]` | Set channel for nickname change logs | Manage Guild |
+| `/set voice-log [channel]` | Set channel for voice state logs | Manage Guild |
 
 ### Moderation Commands
 
 | Command | Description | Permission |
 |---------|-------------|------------|
-| `/mod voicechat [channel]` | Moderate users in a voice channel | Mute Members / Move Members |
-| `/mod voiceuser [user]` | Moderate a specific user in voice | Mute Members / Move Members |
+| `/warn [user]` | Warn a user (modal for reason) | Moderate Members |
+| `/mute [user] [duration]` | Mute a user with mute role (modal for reason) | Manage Roles |
+| `/unmute [user]` | Remove mute from user (modal for reason) | Manage Roles |
+| `/timeout [user] [duration]` | Apply Discord timeout (modal for reason) | Moderate Members |
+| `/untimeout [user]` | Remove timeout (modal for reason) | Moderate Members |
+| `/kick [user]` | Kick a user (modal for reason) | Kick Members |
+| `/ban [user] [days]` | Ban a user permanently (modal for reason) | Ban Members |
+| `/tempban [user] [duration]` | Temporarily ban a user (modal for reason) | Ban Members |
+| `/softban [user] [days]` | Ban and immediately unban (modal for reason) | Ban Members |
+| `/unban [user]` | Unban a user (modal for reason) | Ban Members |
+
+### Case Management Commands
+
+| Command | Description | Permission |
+|---------|-------------|------------|
+| `/history [user] [type] [limit]` | View user's sanction history | Moderate Members |
+| `/case [id]` | View a specific case | Moderate Members |
+| `/editcase [id]` | Edit a case's reason (modal for new reason) | Moderate Members |
+| `/remove [id] [reason]` | Delete/revert a case | Moderate Members |
+
+### Channel Management Commands
+
+| Command | Description | Permission |
+|---------|-------------|------------|
+| `/clear [amount] [user]` | Delete messages from channel | Manage Messages |
+| `/lock [channel] [reason]` | Lock a channel | Manage Channels |
+| `/unlock [channel] [reason]` | Unlock a channel | Manage Channels |
+| `/slowmode [seconds] [channel]` | Set slowmode | Manage Channels |
+
+### Blacklist Commands
+
+| Command | Description | Permission |
+|---------|-------------|------------|
+| `/blacklist add [user] [severity]` | Add user to blacklist (modal for reason/evidence) | Moderate Members |
+| `/blacklist history [user]` | View user's blacklist history | Moderate Members |
+| `/blacklist edit [caseid] [newseverity]` | Edit blacklist entry (modal for reason/evidence) | Moderate Members |
+| `/blacklist remove [caseid] [reason]` | Remove blacklist entry | Moderate Members |
+
+### Information Commands
+
+| Command | Description | Permission |
+|---------|-------------|------------|
+| `/user [user]` | View comprehensive user information (Overview, Sanctions, Blacklist, Voice Activity, Recent Messages, Permissions, Statistics) | Moderate Members |
+
+### Voice Moderation Commands
+
+| Command | Description | Permission |
+|---------|-------------|------------|
+| `/voice-mod channel [channel]` | Moderate users in a voice channel | Mute Members / Move Members |
+| `/voice-mod user [user]` | Moderate a specific user in voice | Mute Members / Move Members |
+
+### Permission Management Commands
+
+| Command | Description | Permission |
+|---------|-------------|------------|
+| `/modconfig view [type] [user/role]` | View current permission policies | Manage Guild |
+| `/modconfig module [module] [effect] [user/role]` | Configure permissions for entire module | Manage Guild |
+| `/modconfig command [command] [effect] [user/role]` | Configure permissions for specific command | Manage Guild |
+| `/modconfig reset [confirm]` | Reset all permission policies | Manage Guild |
 
 ### Utility Commands
 
 | Command | Description | Permission |
 |---------|-------------|------------|
-| `/help` | Show all available commands | Everyone |
+| `/help` | Interactive help system with categorized commands | Everyone |
 | `/config` | View current server configuration | Manage Guild |
 | `/ping` | Show bot latency, uptime, and memory | Everyone |
-| `/userstats [user]` | View user statistics (voice time, messages) | Everyone |
 
 ---
 
@@ -379,6 +542,10 @@ Stores per-guild configuration:
 - `avatar_log_channel_id`
 - `nickname_log_channel_id`
 - `voice_log_channel_id`
+- `modlog_channel_id`
+- `blacklist_channel_id`
+- `mute_role_id`
+- `dm_on_punish`
 
 ### `color_roles`
 Stores color role definitions:
@@ -404,11 +571,72 @@ Stores accumulated user statistics:
 - `total_voice_seconds` (accumulated voice time)
 - `message_count` (total messages sent)
 
-**Note**: Migrations are idempotent; the `db.js` helper ensures columns exist even if you update the bot later.
+### `mod_cases`
+Stores moderation cases:
+- `id` (PRIMARY KEY, AUTOINCREMENT)
+- `guild_id`, `type`, `target_id`, `moderator_id`, `reason`
+- `created_at`, `expires_at`
+- `active` (INTEGER, 0 or 1)
+- `deleted_at`, `deleted_by`, `deleted_reason`
+- `metadata` (TEXT, JSON string)
+
+### `mod_policy`
+Stores permission override policies:
+- `guild_id`, `command_key`, `subject_type`, `subject_id` (PRIMARY KEY)
+- `effect` (ALLOW or DENY)
+- `created_at`, `created_by`
+
+### `blacklist`
+Stores blacklist entries:
+- `id` (PRIMARY KEY, AUTOINCREMENT)
+- `guild_id`, `user_id`, `moderator_id`
+- `reason`, `evidence`, `severity`
+- `created_at`, `updated_at`, `updated_by`
+- `deleted_at`, `deleted_by`, `deleted_reason`
+
+### `voice_activity`
+Tracks voice channel activity:
+- `id` (PRIMARY KEY, AUTOINCREMENT)
+- `guild_id`, `user_id`, `action`, `channel_id`, `at`
+
+### `message_log`
+Tracks recent messages:
+- `id` (PRIMARY KEY, AUTOINCREMENT)
+- `guild_id`, `user_id`, `channel_id`, `message_id`
+- `content`, `at`
+
+### `pending_actions`
+Stores context for modal interactions:
+- `id` (PRIMARY KEY, AUTOINCREMENT)
+- `guild_id`, `author_id`, `command`
+- `payload_json` (TEXT, JSON string)
+- `created_at`
+
+**Note**: Migrations are idempotent; the `db.js` helper ensures columns and tables exist even if you update the bot later.
 
 ---
 
 ## 🧪 Testing Tips
+
+### Moderation System
+- Test all sanction types (warn, mute, timeout, kick, ban, etc.)
+- Verify modlog entries are created correctly
+- Check DM notifications are sent (if user has DMs enabled)
+- Test temporary sanctions expire correctly
+- Verify role hierarchy protection works (users can't moderate equal/higher roles)
+
+### Blacklist System
+- Add users to blacklist with different severity levels
+- Edit blacklist entries
+- Verify blacklist is separate from sanctions history
+- Check blacklist channel logging
+
+### Permission System
+- Configure module-level permissions
+- Configure command-level permissions
+- Test DENY policies override ALLOW policies
+- Verify Discord native permissions work as fallback
+- Test `/modconfig view` to see current policies
 
 ### Welcome System
 - Join/leave under the cooldown → no new welcome
@@ -432,13 +660,13 @@ Stores accumulated user statistics:
 - Join/leave voice → check voice log channel (includes time spent)
 
 ### Voice Moderation
-- Use `/mod voicechat` → see all users in channel
+- Use `/voice-mod channel` → see all users in channel
 - Mute a user → embed updates automatically
 - User joins/leaves → embed refreshes automatically
 - Test with server mute vs self mute to see different icons
 
 ### Statistics
-- Use `/userstats` to view accumulated voice time and message count
+- Use `/user` command to view comprehensive user information
 - Join voice channels to accumulate time
 - Send messages to increment count
 
@@ -451,6 +679,13 @@ Stores accumulated user statistics:
 
 ## 🛟 Troubleshooting
 
+### Moderation commands not working
+- ✅ Ensure bot has required permissions (Moderate Members, Manage Roles, Ban Members, etc.)
+- ✅ Verify mute role is configured (`/createmuterole` or `/setmuterole`)
+- ✅ Check bot's role is above target user's highest role
+- ✅ Verify modlog channel is configured (`/setmodlog`)
+- ✅ Check permission policies in `/modconfig view`
+
 ### No color applied/removed
 - ✅ Ensure the bot's role is **above** all color roles in hierarchy
 - ✅ The select menu can't exceed 25 options (Discord limit)
@@ -460,10 +695,10 @@ Stores accumulated user statistics:
 - ✅ Check **Server Members Intent** is enabled in Discord Developer Portal
 - ✅ Confirm the configured welcome channel exists
 - ✅ Verify bot has `Send Messages` and `Embed Links` permissions
-- ✅ Check cooldown hasn't expired (use `/setwelcomecd` to adjust)
+- ✅ Check cooldown hasn't expired (use `/set welcome` to adjust)
 
 ### No boost announcements
-- ✅ Set the boost channel with `/setboostchannel`
+- ✅ Set the boost channel with `/set boost-channel`
 - ✅ Ensure bot can send embeds in that channel
 - ✅ Check boost actually occurred (not just preview)
 
@@ -499,20 +734,30 @@ Stores accumulated user statistics:
 - Voice moderation embeds auto-update when voice states change
 - Color autoroles automatically remove previous colors when selecting a new one
 - Booster-only colors require the user to have the configured Booster role
+- Moderation commands use modals for collecting reasons (better UX)
+- Temporary sanctions automatically expire and create "un" cases
+- Permission system supports both module and command-level control
+- Blacklist is completely separate from the moderation case system
 
 ---
 
-## 🔄 Migration from White-Bot
+## 🔄 Migration from v1.x
 
-If you're migrating from the previous "White-Bot" name:
+If you're migrating from v1.x:
 
-1. **Repository**: You can simply rebrand this repository (rename, update README, etc.) or create a new one. For a clean slate, a new repository is recommended, but rebranding works fine too.
+1. **Database**: The existing `data/bot.db` will continue to work - new tables and columns are added automatically.
 
-2. **Database**: The existing `data/bot.db` will continue to work - no migration needed.
+2. **Commands**: Some commands have been restructured:
+   - `/setwelcome` → `/set welcome`
+   - `/postautoroles` → `/color-menu`
+   - Old moderation commands replaced with new modal-based system
 
-3. **Configuration**: All existing settings will be preserved.
+3. **Configuration**: All existing settings will be preserved, but you'll need to configure:
+   - Modlog channel (`/setmodlog`)
+   - Blacklist channel (`/setblacklistchannel`)
+   - Mute role (`/createmuterole` or `/setmuterole`)
 
-4. **Commands**: Slash commands will need to be re-registered if you change the bot's application name, but the command structure remains the same.
+4. **Permissions**: New permission system is backward compatible - existing Discord permissions continue to work.
 
 ---
 

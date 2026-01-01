@@ -1,5 +1,7 @@
 import { startAvatarScheduler } from "../utils/avatarManager.js";
 import { showBanner } from "../utils/consoleBanner.js";
+import { startTempbanScheduler } from "../utils/tempbanScheduler.js";
+import { startActivityRotator } from "../utils/activityRotator.js";
 
 let avatarInterval = null;
 
@@ -25,4 +27,6 @@ export default function ready(client) {
   console.log("╚════════════════════════════════════════════════════════════╝\n");
   
   avatarInterval = startAvatarScheduler(client);
+  startTempbanScheduler(client);
+  startActivityRotator(client);
 }

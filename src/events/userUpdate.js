@@ -2,6 +2,7 @@ import { EmbedBuilder, AttachmentBuilder } from "discord.js";
 import { getSettings } from "../db.js";
 import { TZ } from "../config.js";
 import { composeBeforeAfter } from "../utils/beforeAfter.js";
+import { EMOJIS } from "../config/emojis.js";
 
 function fmtNow() {
   return new Intl.DateTimeFormat("es-AR", {
@@ -41,9 +42,9 @@ export default async function userUpdate(client, oldUser, newUser) {
     const when = fmtNow();
 
     const embed = new EmbedBuilder()
-      .setTitle("🖼️ Avatar cambiado")
+      .setTitle(`${EMOJIS.LOGS.USER_PICTURE} Avatar updated`)
       .setDescription(`**User:** ${newUser.tag} (\`${newUser.id}\`)`)
-      .setColor(0x5865f2)
+      .setColor(0x393a41)
       .setFooter({
         text: `Actualizado el ${when}`,
         iconURL: guild.iconURL({ size: 64, extension: "png" }) ?? undefined

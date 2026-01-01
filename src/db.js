@@ -48,6 +48,77 @@ db.exec(`
     message_count INTEGER DEFAULT 0,
     PRIMARY KEY (guild_id, user_id)
   );
+
+  CREATE TABLE IF NOT EXISTS mod_cases (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    type TEXT NOT NULL,
+    target_id TEXT NOT NULL,
+    moderator_id TEXT NOT NULL,
+    reason TEXT,
+    created_at INTEGER NOT NULL,
+    expires_at INTEGER,
+    active INTEGER DEFAULT 1,
+    deleted_at INTEGER,
+    deleted_by TEXT,
+    deleted_reason TEXT,
+    metadata TEXT
+  );
+
+  CREATE TABLE IF NOT EXISTS mod_policy (
+    guild_id TEXT NOT NULL,
+    command_key TEXT NOT NULL,
+    subject_type TEXT NOT NULL,
+    subject_id TEXT NOT NULL,
+    effect TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    created_by TEXT NOT NULL,
+    PRIMARY KEY (guild_id, command_key, subject_type, subject_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS voice_activity (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    action TEXT NOT NULL,
+    channel_id TEXT,
+    at INTEGER NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS message_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    channel_id TEXT NOT NULL,
+    message_id TEXT NOT NULL,
+    content TEXT,
+    at INTEGER NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS blacklist (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    moderator_id TEXT NOT NULL,
+    reason TEXT,
+    evidence TEXT,
+    severity TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER,
+    updated_by TEXT,
+    deleted_at INTEGER,
+    deleted_by TEXT,
+    deleted_reason TEXT
+  );
+
+  CREATE TABLE IF NOT EXISTS pending_actions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    author_id TEXT NOT NULL,
+    command TEXT NOT NULL,
+    payload_json TEXT NOT NULL,
+    created_at INTEGER NOT NULL
+  );
 `);
 
 function ensureColumn(table, column, ddl) {
@@ -64,6 +135,10 @@ ensureColumn("guild_settings", "message_log_channel_id", "message_log_channel_id
 ensureColumn("guild_settings", "avatar_log_channel_id", "avatar_log_channel_id TEXT");
 ensureColumn("guild_settings", "nickname_log_channel_id", "nickname_log_channel_id TEXT");
 ensureColumn("guild_settings", "voice_log_channel_id", "voice_log_channel_id TEXT");
+ensureColumn("guild_settings", "modlog_channel_id", "modlog_channel_id TEXT");
+ensureColumn("guild_settings", "blacklist_channel_id", "blacklist_channel_id TEXT");
+ensureColumn("guild_settings", "mute_role_id", "mute_role_id TEXT");
+ensureColumn("guild_settings", "dm_on_punish", "dm_on_punish INTEGER DEFAULT 1");
 
 export const getSettings = db.prepare(`
   SELECT *
@@ -85,7 +160,11 @@ export const upsertSettings = db.prepare(`
     message_log_channel_id,
     avatar_log_channel_id,
     nickname_log_channel_id,
-    voice_log_channel_id
+    voice_log_channel_id,
+    modlog_channel_id,
+    blacklist_channel_id,
+    mute_role_id,
+    dm_on_punish
   )
   VALUES (
     @guild_id,
@@ -100,7 +179,11 @@ export const upsertSettings = db.prepare(`
     @message_log_channel_id,
     @avatar_log_channel_id,
     @nickname_log_channel_id,
-    @voice_log_channel_id
+    @voice_log_channel_id,
+    @modlog_channel_id,
+    @blacklist_channel_id,
+    @mute_role_id,
+    @dm_on_punish
   )
   ON CONFLICT(guild_id) DO UPDATE SET
     welcome_channel_id           = excluded.welcome_channel_id,
@@ -114,7 +197,11 @@ export const upsertSettings = db.prepare(`
     message_log_channel_id       = excluded.message_log_channel_id,
     avatar_log_channel_id        = excluded.avatar_log_channel_id,
     nickname_log_channel_id      = excluded.nickname_log_channel_id,
-    voice_log_channel_id         = excluded.voice_log_channel_id;
+    voice_log_channel_id         = excluded.voice_log_channel_id,
+    modlog_channel_id            = excluded.modlog_channel_id,
+    blacklist_channel_id         = excluded.blacklist_channel_id,
+    mute_role_id                 = excluded.mute_role_id,
+    dm_on_punish                 = excluded.dm_on_punish;
 `);
 
 export const insertColorRole = db.prepare(`

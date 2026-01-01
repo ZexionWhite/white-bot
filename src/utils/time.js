@@ -1,6 +1,3 @@
-/**
- * Formatea segundos en formato legible (ej: "2h 30m 15s" o "45m 20s")
- */
 export function formatDuration(seconds) {
   if (!seconds || seconds < 0) return "0s";
   

@@ -1,62 +1,10 @@
 import { EmbedBuilder } from "discord.js";
-
-export function helpEmbed() {
-  return new EmbedBuilder()
-    .setTitle("📚 Comandos disponibles")
-    .setDescription("Lista de todos los comandos del bot y su descripción")
-    .setColor(0x5865f2)
-    .addFields(
-      {
-        name: "⚙️ Configuración",
-        value: [
-          "`/set welcome [canal] [cooldown]` - Canal de bienvenida y cooldown (Admin)",
-          "`/set join-log [canal]` - Canal de logs de ingresos (Admin)",
-          "`/set message-log [canal]` - Canal para logs de mensajes (Admin)",
-          "`/set avatar-log [canal]` - Canal para logs de avatares (Admin)",
-          "`/set nickname-log [canal]` - Canal para logs de apodos (Admin)",
-          "`/set voice-log [canal]` - Canal para logs de voz (Admin)",
-          "`/set boost-channel [canal]` - Canal de anuncios de boost (Admin)",
-          "`/set info-channel [canal]` - Canal de información/perks (Admin)",
-          "`/set booster-role [rol]` - Rol de boosters (Admin)"
-        ].join("\n"),
-        inline: false
-      },
-      {
-        name: "🎨 Autoroles de color",
-        value: [
-          "`/setupcolors` - Crea los roles de colores (Admin)",
-          "`/color-menu` - Publica el menú de selección de color (Admin)"
-        ].join("\n"),
-        inline: false
-      },
-      {
-        name: "📊 Utilidades",
-        value: [
-          "`/preview boost [usuario]` - Previsualiza el embed de boost (Admin)",
-          "`/preview welcome [usuario]` - Previsualiza el embed de bienvenida (Admin)",
-          "`/stats [usuario]` - Muestra estadísticas de un usuario",
-          "`/ping` - Mide latencia y estado del bot",
-          "`/help` - Muestra este mensaje",
-          "`/config` - Muestra la configuración del servidor (Admin)"
-        ].join("\n"),
-        inline: false
-      },
-      {
-        name: "🛡️ Moderación",
-        value: [
-          "`/voice-mod channel [canal]` - Modera usuarios en un canal de voz (Mod)",
-          "`/voice-mod user [usuario]` - Modera un usuario específico en voz (Mod)"
-        ].join("\n"),
-        inline: false
-      }
-    )
-    .setFooter({ text: "Los comandos marcados con (Admin) requieren permisos de administrador. (Mod) requiere MuteMembers o MoveMembers" })
-    .setTimestamp();
-}
+import { EMOJIS } from "../config/emojis.js";
 
 export function configEmbed(guild, settings) {
   const fields = [];
   
+  // Bienvenidas
   const welcomeCh = settings?.welcome_channel_id 
     ? `<#${settings.welcome_channel_id}>` 
     : "❌ No configurado";
@@ -66,7 +14,7 @@ export function configEmbed(guild, settings) {
   const welcomeCd = settings?.welcome_cd_minutes ?? 60;
   
   fields.push({
-    name: "👋 Bienvenidas",
+    name: `${EMOJIS.LOGS.USER_JOINED} Bienvenidas`,
     value: [
       `**Canal de bienvenida:** ${welcomeCh}`,
       `**Canal de logs:** ${logCh}`,
@@ -75,6 +23,7 @@ export function configEmbed(guild, settings) {
     inline: false
   });
 
+  // Autoroles de color
   const autoroleCh = settings?.autorole_channel_id 
     ? `<#${settings.autorole_channel_id}>` 
     : "❌ No configurado";
@@ -83,7 +32,7 @@ export function configEmbed(guild, settings) {
     : "❌ No publicado";
   
   fields.push({
-    name: "🎨 Autoroles de color",
+    name: `${EMOJIS.BOOST.BOOSTER} Autoroles de color`,
     value: [
       `**Canal:** ${autoroleCh}`,
       `**Mensaje:** ${autoroleMsg}`
@@ -91,6 +40,7 @@ export function configEmbed(guild, settings) {
     inline: false
   });
 
+  // Boosters
   const boosterRole = settings?.booster_role_id 
     ? `<@&${settings.booster_role_id}>` 
     : "❌ No configurado";
@@ -102,7 +52,7 @@ export function configEmbed(guild, settings) {
     : "❌ No configurado";
   
   fields.push({
-    name: "💎 Boosters",
+    name: `${EMOJIS.BOOST.DEV_WHITEBOOSTER} Boosters`,
     value: [
       `**Rol de boosters:** ${boosterRole}`,
       `**Canal de anuncios:** ${boostCh}`,
@@ -111,6 +61,7 @@ export function configEmbed(guild, settings) {
     inline: false
   });
 
+  // Logs
   const msgLog = settings?.message_log_channel_id 
     ? `<#${settings.message_log_channel_id}>` 
     : "❌ No configurado";
@@ -125,7 +76,7 @@ export function configEmbed(guild, settings) {
     : "❌ No configurado";
   
   fields.push({
-    name: "📝 Logs",
+    name: `${EMOJIS.UTILS.AUDIT} Logs`,
     value: [
       `**Mensajes:** ${msgLog}`,
       `**Avatares:** ${avatarLog}`,
@@ -135,13 +86,37 @@ export function configEmbed(guild, settings) {
     inline: false
   });
 
+  // Moderación
+  const modlogCh = settings?.modlog_channel_id 
+    ? `<#${settings.modlog_channel_id}>` 
+    : "❌ No configurado";
+  const blacklistCh = settings?.blacklist_channel_id 
+    ? `<#${settings.blacklist_channel_id}>` 
+    : "❌ No configurado";
+  const muteRole = settings?.mute_role_id 
+    ? `<@&${settings.mute_role_id}>` 
+    : "❌ No configurado";
+  const dmOnPunish = settings?.dm_on_punish !== undefined 
+    ? (settings.dm_on_punish ? "✅ Activado" : "❌ Desactivado")
+    : "❌ No configurado";
+  
+  fields.push({
+    name: `${EMOJIS.UTILS.REPORT} Moderación`,
+    value: [
+      `**Canal de modlog:** ${modlogCh}`,
+      `**Canal de blacklist:** ${blacklistCh}`,
+      `**Rol de mute:** ${muteRole}`,
+      `**DM al sancionar:** ${dmOnPunish}`
+    ].join("\n"),
+    inline: false
+  });
+
   return new EmbedBuilder()
-    .setTitle("⚙️ Configuración del servidor")
+    .setTitle(`${EMOJIS.UTILS.CONFIG} Configuración del servidor`)
     .setDescription(`Configuración actual de **${guild.name}**`)
-    .setColor(0x5865f2)
+    .setColor(0x393a41)
     .addFields(fields)
     .setThumbnail(guild.iconURL({ size: 128 }))
     .setFooter({ text: `ID del servidor: ${guild.id}` })
     .setTimestamp();
 }
-

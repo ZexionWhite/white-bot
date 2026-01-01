@@ -1,7 +1,6 @@
-import { helpEmbed } from "../../utils/embeds.js";
+import { handleHelpCommand } from "./help/help.handler.js";
 
-export default async function handleHelp(itx) {
-  const embed = helpEmbed();
-  return itx.reply({ embeds: [embed], ephemeral: false });
+export default async function handleHelp(itx, client) {
+  return handleHelpCommand(itx, client);
 }
 

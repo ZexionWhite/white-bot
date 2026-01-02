@@ -83,7 +83,7 @@ export default async function voiceStateUpdate(client, oldState, newState) {
         const key = `${guildId}_${oldChannelId}`;
         if (client.voiceModMessages.has(key) && updateVoiceModEmbed) {
           await updateVoiceModEmbed(client, oldChannelId, guildId).catch((err) => {
-            console.error(`[voiceStateUpdate] Error al actualizar embed de moderación (canal anterior) en ${guild.name}:`, err.message);
+            log.error("voiceStateUpdate", `Error al actualizar embed de moderación (canal anterior ${oldChannelId}) en ${guild.name}:`, err.message);
           });
         }
       }
@@ -92,7 +92,7 @@ export default async function voiceStateUpdate(client, oldState, newState) {
         const key = `${guildId}_${newChannelId}`;
         if (client.voiceModMessages.has(key) && updateVoiceModEmbed) {
           await updateVoiceModEmbed(client, newChannelId, guildId).catch((err) => {
-            console.error(`[voiceStateUpdate] Error al actualizar embed de moderación (canal nuevo) en ${guild.name}:`, err.message);
+            log.error("voiceStateUpdate", `Error al actualizar embed de moderación (canal nuevo ${newChannelId}) en ${guild.name}:`, err.message);
           });
         }
       }
@@ -103,7 +103,7 @@ export default async function voiceStateUpdate(client, oldState, newState) {
         const deafChanged = oldState.serverDeaf !== newState.serverDeaf || oldState.selfDeaf !== newState.selfDeaf;
         if (muteChanged || deafChanged) {
           await updateVoiceModEmbed(client, oldChannelId, guildId).catch((err) => {
-            console.error(`[voiceStateUpdate] Error al actualizar embed de moderación (mute/deafen) en ${guild.name}:`, err.message);
+            log.error("voiceStateUpdate", `Error al actualizar embed de moderación (mute/deafen) en canal ${oldChannelId} de ${guild.name}:`, err.message);
           });
         }
       }

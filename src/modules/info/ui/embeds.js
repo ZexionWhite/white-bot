@@ -61,8 +61,8 @@ export async function createUserinfoOverview(member, guild) {
   return embed;
 }
 
-export function createUserinfoSanctions(member, guild) {
-  const sanctions = UserinfoService.getUserSanctions(guild.id, member.id);
+export async function createUserinfoSanctions(member, guild) {
+  const sanctions = await UserinfoService.getUserSanctions(guild.id, member.id);
 
   const embed = new EmbedBuilder()
     .setColor(0xff0000)
@@ -130,8 +130,8 @@ export async function createUserinfoVoice(member, guild) {
   return embed;
 }
 
-export function createUserinfoMessages(member, guild) {
-  const messages = UserinfoService.getUserMessages(guild.id, member.id);
+export async function createUserinfoMessages(member, guild) {
+  const messages = await UserinfoService.getUserMessages(guild.id, member.id);
 
   const embed = new EmbedBuilder()
     .setColor(0x0099ff)

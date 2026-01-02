@@ -1,5 +1,6 @@
 import { PermissionFlagsBits } from "discord.js";
 import { updateVoiceModEmbed } from "./utils.js";
+import { log } from "../../../core/logger/index.js";
 
 export async function handleVoiceModComponent(client, itx, customId) {
   if (!itx.memberPermissions.has(PermissionFlagsBits.MuteMembers) && 
@@ -165,7 +166,7 @@ export async function handleVoiceModComponent(client, itx, customId) {
       await updateVoiceModEmbed(client, channelId, itx.guild.id);
       return itx.deferUpdate();
     } catch (error) {
-      console.error(`[voiceModHandlers] Error al desmutear usuarios:`, error.message);
+      log.error("voiceModHandlers", `Error al desmutear usuarios en canal ${channelId}:`, error.message);
       return itx.reply({ content: "❌ No pude desmutear algunos usuarios. Verifica permisos.", ephemeral: true });
     }
   }

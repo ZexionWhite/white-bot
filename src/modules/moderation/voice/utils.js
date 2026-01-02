@@ -1,4 +1,5 @@
 import { voiceModEmbed, createVoiceModComponents } from "./embeds.js";
+import { log } from "../../../core/logger/index.js";
 
 export async function updateVoiceModEmbed(client, channelId, guildId) {
   const key = `${guildId}_${channelId}`;
@@ -53,6 +54,7 @@ export async function updateVoiceModEmbed(client, channelId, guildId) {
 
     await message.edit({ embeds: [embed], components });
   } catch (error) {
+    log.error("voiceMod", `Error al actualizar embed de moderación de voz para canal ${channelId} en guild ${guildId}:`, error);
     client.voiceModMessages.delete(key);
   }
 }

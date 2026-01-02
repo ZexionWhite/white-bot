@@ -144,7 +144,7 @@ export function createCaseEmbed(case_, target, moderator) {
   return embed;
 }
 
-export function createHistoryEmbed(cases, target, page, totalPages, type = null) {
+export function createHistoryEmbed(cases, target, page, totalPages, type = null, counts = null) {
   const targetName = target.tag || target.username || "Unknown";
   const targetDisplay = `${targetName} (${target.id})`;
   
@@ -153,26 +153,39 @@ export function createHistoryEmbed(cases, target, page, totalPages, type = null)
     .setAuthor({ 
       name: targetDisplay,
       iconURL: target.displayAvatarURL?.() || target.avatarURL?.() || null 
-    })
-    .setFooter({ text: `Page ${page}/${totalPages}` });
+    });
 
   if (cases.length === 0) {
     embed.setDescription("No sanctions recorded");
+    if (counts) {
+      const footerText = `Warned: ${counts.warned} | Muted: ${counts.muted} | Timeouted: ${counts.timeouted} | Kicked: ${counts.kicked} | Banned: ${counts.banned}`;
+      embed.setFooter({ text: footerText });
+    } else {
+      embed.setFooter({ text: `Page ${page}/${totalPages}` });
+    }
     return embed;
   }
 
+  // Limitar a 10 casos por página
   const fields = cases.slice(0, 10).map(c => {
     const actionName = c.type ? (TYPE_NAMES[c.type] || c.type.toLowerCase()) : "unknown";
-    const actionCapitalized = actionName.charAt(0).toUpperCase() + actionName.slice(1);
     
     return {
-      name: `${actionCapitalized} • Case #${c.id}`,
-      value: `${c.reason || "No reason"}\n<t:${Math.floor(c.created_at / 1000)}:R>`,
+      name: `Case #${c.id} - ${actionName}`,
+      value: c.reason || "No reason",
       inline: false
     };
   });
 
   embed.addFields(fields);
+
+  // Footer con conteos si están disponibles, sino solo página
+  if (counts) {
+    const footerText = `Warned: ${counts.warned} | Muted: ${counts.muted} | Timeouted: ${counts.timeouted} | Kicked: ${counts.kicked} | Banned: ${counts.banned}`;
+    embed.setFooter({ text: footerText });
+  } else {
+    embed.setFooter({ text: `Page ${page}/${totalPages}` });
+  }
 
   return embed;
 }

@@ -45,20 +45,39 @@ export const componentHandlers = {
   history: async (itx, customId) => {
     const [_, userId, type, action, page] = customId.split(":");
     const newPage = action === "next" ? parseInt(page) + 1 : parseInt(page) - 1;
-    const cases = await import("./moderation/services/cases.service.js").then(m => 
-      m.getUserCases(itx.guild.id, userId, type === "all" ? null : type, 10, (newPage - 1) * 10)
-    );
-    const totalCases = await import("./moderation/services/cases.service.js").then(m => 
-      m.countUserCases(itx.guild.id, userId)
-    );
+    const CasesService = await import("./moderation/services/cases.service.js");
+    
+    // Obtener casos paginados (10 por página)
+    const cases = await CasesService.getUserCases(itx.guild.id, userId, type === "all" ? null : type, 10, (newPage - 1) * 10);
+    
+    // Obtener todos los casos para contar por tipo (sin paginación, solo para contar)
+    const allCases = await CasesService.getUserCases(itx.guild.id, userId, null, 10000, 0);
+    
+    // Contar por tipo
+    const counts = {
+      warned: 0,
+      muted: 0,
+      timeouted: 0,
+      kicked: 0,
+      banned: 0
+    };
+
+    allCases.forEach(c => {
+      const caseType = c.type?.toUpperCase();
+      if (caseType === "WARN") counts.warned++;
+      else if (caseType === "MUTE") counts.muted++;
+      else if (caseType === "TIMEOUT") counts.timeouted++;
+      else if (caseType === "KICK") counts.kicked++;
+      else if (caseType === "BAN" || caseType === "TEMPBAN" || caseType === "SOFTBAN") counts.banned++;
+    });
+    
+    const totalCases = await CasesService.countUserCases(itx.guild.id, userId);
     const totalPages = Math.max(1, Math.ceil(totalCases / 10));
     const target = await itx.client.users.fetch(userId).catch(() => ({ id: userId }));
-    const embed = await import("./moderation/ui/embeds.js").then(m => 
-      m.createHistoryEmbed(cases, target, newPage, totalPages, type === "all" ? null : type)
-    );
-    const components = await import("./moderation/ui/components.js").then(m => 
-      m.createPaginationComponents(newPage, totalPages, `history:${userId}:${type}`)
-    );
+    const { createHistoryEmbed } = await import("./moderation/ui/embeds.js");
+    const embed = createHistoryEmbed(cases, target, newPage, totalPages, type === "all" ? null : type, counts);
+    const { createPaginationComponents } = await import("./moderation/ui/components.js");
+    const components = createPaginationComponents(newPage, totalPages, `history:${userId}:${type}`);
     return itx.update({ embeds: [embed], components });
   },
   user: async (itx, customId) => {

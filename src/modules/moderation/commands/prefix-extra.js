@@ -70,11 +70,34 @@ export async function registerModerationExtraPrefixCommands() {
         const totalCases = await CasesService.countUserCases(ctx.guild.id, userId);
         const totalPages = Math.max(1, Math.ceil(totalCases / CASES_PER_PAGE));
         const page = 1;
+        
+        // Obtener casos paginados (10 por página)
         const cases = await CasesService.getUserCases(ctx.guild.id, userId, null, CASES_PER_PAGE, 0);
+
+        // Obtener todos los casos para contar por tipo (sin paginación, solo para contar)
+        const allCases = await CasesService.getUserCases(ctx.guild.id, userId, null, 10000, 0);
         
-        const embed = createHistoryEmbed(cases, target, page, totalPages, null);
+        // Contar por tipo
+        const counts = {
+          warned: 0,
+          muted: 0,
+          timeouted: 0,
+          kicked: 0,
+          banned: 0
+        };
+
+        allCases.forEach(c => {
+          const caseType = c.type?.toUpperCase();
+          if (caseType === "WARN") counts.warned++;
+          else if (caseType === "MUTE") counts.muted++;
+          else if (caseType === "TIMEOUT") counts.timeouted++;
+          else if (caseType === "KICK") counts.kicked++;
+          else if (caseType === "BAN" || caseType === "TEMPBAN" || caseType === "SOFTBAN") counts.banned++;
+        });
+
+        const embed = createHistoryEmbed(cases, target, page, totalPages, null, counts);
         const components = totalPages > 1 ? createPaginationComponents(page, totalPages, `history:${userId}:all`) : [];
-        
+
         return ctx.reply({ embeds: [embed], components });
       }
     },

@@ -3,6 +3,20 @@ import { updateVoiceModEmbed } from "./utils.js";
 import { log } from "../../../core/logger/index.js";
 
 export async function handleVoiceModComponent(client, itx, customId) {
+  if (!itx.inGuild()) {
+    return itx.reply({ 
+      content: "❌ Este comando solo funciona en servidores.", 
+      flags: MessageFlags.Ephemeral
+    });
+  }
+
+  if (!itx.guild) {
+    return itx.reply({ 
+      content: "❌ No se pudo obtener información del servidor.", 
+      flags: MessageFlags.Ephemeral
+    });
+  }
+
   if (!itx.memberPermissions.has(PermissionFlagsBits.MuteMembers) && 
       !itx.memberPermissions.has(PermissionFlagsBits.MoveMembers)) {
     return itx.reply({ 
@@ -84,11 +98,12 @@ export async function handleVoiceModComponent(client, itx, customId) {
     }
 
     try {
-      await Promise.all(nonMods.map(m => m.voice.setChannel(moderatorChannel)));
+      await Promise.all(nonMods.map(m => m?.voice?.setChannel(moderatorChannel).catch(() => null)));
       await updateVoiceModEmbed(client, channelId, itx.guild.id);
       if (moderatorChannel.id !== channelId) await updateVoiceModEmbed(client, moderatorChannel.id, itx.guild.id);
       return itx.deferUpdate();
     } catch (error) {
+      log.error("voiceModHandlers", `Error al mover usuarios en canal ${channelId}:`, error.message);
       return itx.reply({ content: "❌ No pude mover algunos usuarios. Verifica permisos.", flags: MessageFlags.Ephemeral });
     }
   }
@@ -101,11 +116,12 @@ export async function handleVoiceModComponent(client, itx, customId) {
       return itx.reply({ content: "❌ Usuario no encontrado.", flags: MessageFlags.Ephemeral });
     }
 
-    if (!targetMember.voice.channel) {
+    const targetVoiceChannel = targetMember.voice?.channel;
+    if (!targetVoiceChannel) {
       return itx.reply({ content: "❌ El usuario no está en un canal de voz.", flags: MessageFlags.Ephemeral });
     }
 
-    const channelId = targetMember.voice.channel.id;
+    const channelId = targetVoiceChannel.id;
 
     try {
       const newMuteState = !targetMember.voice.serverMute;
@@ -125,12 +141,17 @@ export async function handleVoiceModComponent(client, itx, customId) {
       return itx.reply({ content: "❌ Canal no encontrado.", flags: MessageFlags.Ephemeral });
     }
 
-    const members = Array.from(channel.members.values());
+    const members = Array.from(channel.members?.values() || []);
+    if (members.length === 0) {
+      return itx.reply({ content: "❌ No hay usuarios en ese canal.", flags: MessageFlags.Ephemeral });
+    }
+
     const nonMods = members.filter(m => 
+      m && 
       !m.permissions.has(PermissionFlagsBits.MuteMembers) &&
       !m.permissions.has(PermissionFlagsBits.MoveMembers) &&
       m.id !== itx.guild.ownerId &&
-      !m.voice.serverMute
+      !m.voice?.serverMute
     );
 
     if (nonMods.length === 0) {
@@ -162,7 +183,7 @@ export async function handleVoiceModComponent(client, itx, customId) {
     }
 
     try {
-      await Promise.all(muted.map(m => m.voice.setMute(false)));
+      await Promise.all(muted.map(m => m?.voice?.setMute(false).catch(() => null)));
       await updateVoiceModEmbed(client, channelId, itx.guild.id);
       return itx.deferUpdate();
     } catch (error) {

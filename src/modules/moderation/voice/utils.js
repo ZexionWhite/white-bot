@@ -30,7 +30,7 @@ export async function updateVoiceModEmbed(client, channelId, guildId) {
       return;
     }
 
-    const messageChannel = await client.guilds.cache.get(guildId)?.channels.fetch(ref.channelId).catch(() => null);
+    const messageChannel = await guild.channels.fetch(ref.channelId).catch(() => null);
     if (!messageChannel?.isTextBased()) {
       client.voiceModMessages.delete(key);
       return;
@@ -42,11 +42,11 @@ export async function updateVoiceModEmbed(client, channelId, guildId) {
       return;
     }
 
-    const moderator = await client.guilds.cache.get(guildId)?.members.fetch(ref.moderatorId).catch(() => null) || members[0];
+    const moderator = await guild.members.fetch(ref.moderatorId).catch(() => null) || members[0];
     
     let targetMember = null;
     if (ref.targetMemberId) {
-      targetMember = await client.guilds.cache.get(guildId)?.members.fetch(ref.targetMemberId).catch(() => null);
+      targetMember = await guild.members.fetch(ref.targetMemberId).catch(() => null);
     }
     
     const embed = voiceModEmbed(channel, members, moderator, client);

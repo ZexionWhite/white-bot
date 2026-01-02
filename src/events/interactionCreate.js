@@ -26,7 +26,7 @@ export default async function interactionCreate(client, itx) {
         const actionId = parseInt(customId.replace("pending:", ""));
         if (!isNaN(actionId)) {
           const { getPendingAction } = await import("../modules/moderation/modals/helpers.js");
-          const pendingAction = getPendingAction(actionId);
+          const pendingAction = await getPendingAction(actionId);
           
           if (pendingAction) {
             if (pendingAction.command.startsWith("blacklist.")) {

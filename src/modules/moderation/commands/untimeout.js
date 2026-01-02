@@ -24,7 +24,7 @@ export async function handle(itx) {
 
   // Create pending action
   const payload = { targetId: target.id };
-  const actionId = createPendingAction(itx.guild.id, itx.user.id, "untimeout", payload);
+  const actionId = await createPendingAction(itx.guild.id, itx.user.id, "untimeout", payload);
 
   // Create and show modal
   const modal = createReasonModal("untimeout", "Untimeout: Reason", `pending:${actionId}`, "Explain briefly why you're removing the timeout...");

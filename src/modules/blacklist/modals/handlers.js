@@ -26,7 +26,7 @@ export async function handleBlacklistModal(itx) {
     });
   }
 
-  const pendingAction = getPendingAction(actionId);
+  const pendingAction = await getPendingAction(actionId);
   if (!pendingAction) {
     return itx.reply({ 
       embeds: [createErrorEmbed("This action has expired or doesn't exist")], 
@@ -65,7 +65,7 @@ export async function handleBlacklistModal(itx) {
   const evidence = itx.fields.getTextInputValue("evidence")?.trim() || null;
 
   // Delete pending action
-  deletePendingAction(actionId);
+  await deletePendingAction(actionId);
 
   // Route to appropriate handler
   try {

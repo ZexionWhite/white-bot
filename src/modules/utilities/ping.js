@@ -1,5 +1,5 @@
 import { EmbedBuilder } from "discord.js";
-import db from "../../db.js";
+import { prepare } from "../../core/db/index.js";
 
 export default async function handlePing(itx) {
   const publico = itx.options.getBoolean("publico") ?? false;
@@ -11,7 +11,7 @@ export default async function handlePing(itx) {
   const api = Math.round(itx.client.ws.ping);
 
   let dbMs = null;
-  try { const s = Date.now(); db.prepare("SELECT 1").get(); dbMs = Date.now() - s; } catch { }
+  try { const s = Date.now(); await prepare("SELECT 1").get(); dbMs = Date.now() - s; } catch { }
 
   const up = process.uptime();
   const h = Math.floor(up / 3600), m = Math.floor((up % 3600) / 60), s = Math.floor(up % 60);

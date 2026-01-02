@@ -30,7 +30,7 @@ export async function handle(itx) {
 
   // Create pending action
   const payload = { targetId: target.id };
-  const actionId = createPendingAction(itx.guild.id, itx.user.id, "unmute", payload);
+  const actionId = await createPendingAction(itx.guild.id, itx.user.id, "unmute", payload);
 
   // Create and show modal
   const modal = createReasonModal("unmute", "Unmute: Reason", `pending:${actionId}`, "Explain briefly why you're unmuting this user...");

@@ -1,31 +1,31 @@
 import { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } from "discord.js";
-import db from "../../../db.js";
+import { prepare } from "../../../core/db/index.js";
 
 /**
  * Creates a pending action in the database and returns its ID
  */
-export function createPendingAction(guildId, authorId, command, payload) {
+export async function createPendingAction(guildId, authorId, command, payload) {
   const now = Date.now();
   const payloadJson = JSON.stringify(payload);
   
-  const stmt = db.prepare(`
+  const stmt = prepare(`
     INSERT INTO pending_actions (guild_id, author_id, command, payload_json, created_at)
     VALUES (?, ?, ?, ?, ?)
   `);
   
-  const result = stmt.run(guildId, authorId, command, payloadJson, now);
+  const result = await stmt.run(guildId, authorId, command, payloadJson, now);
   return result.lastInsertRowid;
 }
 
 /**
  * Gets a pending action by ID
  */
-export function getPendingAction(actionId) {
-  const stmt = db.prepare(`
+export async function getPendingAction(actionId) {
+  const stmt = prepare(`
     SELECT * FROM pending_actions WHERE id = ?
   `);
   
-  const row = stmt.get(actionId);
+  const row = await stmt.get(actionId);
   if (!row) return null;
   
   return {
@@ -37,24 +37,24 @@ export function getPendingAction(actionId) {
 /**
  * Deletes a pending action
  */
-export function deletePendingAction(actionId) {
-  const stmt = db.prepare(`
+export async function deletePendingAction(actionId) {
+  const stmt = prepare(`
     DELETE FROM pending_actions WHERE id = ?
   `);
   
-  stmt.run(actionId);
+  await stmt.run(actionId);
 }
 
 /**
  * Cleans up old pending actions (older than 1 hour)
  */
-export function cleanupOldPendingActions() {
+export async function cleanupOldPendingActions() {
   const oneHourAgo = Date.now() - (60 * 60 * 1000);
-  const stmt = db.prepare(`
+  const stmt = prepare(`
     DELETE FROM pending_actions WHERE created_at < ?
   `);
   
-  const result = stmt.run(oneHourAgo);
+  const result = await stmt.run(oneHourAgo);
   return result.changes;
 }
 

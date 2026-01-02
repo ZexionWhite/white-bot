@@ -6,6 +6,7 @@ import { createModlogEmbed, createSuccessEmbed, createErrorEmbed, createCaseEmbe
 import { createSanctionMessage } from "../ui/messages.js";
 import { getPendingAction, deletePendingAction, validateReason } from "./helpers.js";
 import { parseDuration } from "../../../utils/duration.js";
+import { log } from "../../../core/logger/index.js";
 
 /**
  * Handles modal submission for moderation commands
@@ -102,6 +103,20 @@ export async function handleModerationModal(itx) {
     }
   } catch (error) {
     console.error(`[modal:${command}] Error:`, error);
+    log.error("handleModerationModal", `Error en modal ${command}:`, error);
+    
+    // Si la interacción no ha sido respondida, responder con error
+    if (itx.isRepliable() && !itx.replied && !itx.deferred) {
+      try {
+        return await itx.reply({ 
+          embeds: [createErrorEmbed(`Ocurrió un error al procesar la acción. Por favor, intenta de nuevo.`)], 
+          ephemeral: true 
+        });
+      } catch (replyError) {
+        // Si falla, puede ser porque la interacción expiró (Unknown interaction)
+        log.error("handleModerationModal", `Error al responder con mensaje de error (posible interacción expirada):`, replyError);
+      }
+    }
     return itx.reply({ 
       embeds: [createErrorEmbed(error.message || "An error occurred")], 
       ephemeral: true 
@@ -153,7 +168,7 @@ async function handleMuteModal(itx, payload, reason) {
     return itx.reply({ embeds: [createErrorEmbed("You cannot moderate this user")], ephemeral: true });
   }
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
+  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
   if (!settings.mute_role_id) {
     return itx.reply({ embeds: [createErrorEmbed("No mute role configured. Use /createmuterole or /setmuterole")], ephemeral: true });
   }

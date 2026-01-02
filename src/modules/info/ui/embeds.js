@@ -87,7 +87,7 @@ export function createUserinfoSanctions(member, guild) {
   };
 
   const fields = sanctions.slice(0, 10).map(s => {
-    const actionName = TYPE_NAMES[s.type] || s.type.toLowerCase();
+    const actionName = s.type ? (TYPE_NAMES[s.type] || s.type.toLowerCase()) : "unknown";
     const actionCapitalized = actionName.charAt(0).toUpperCase() + actionName.slice(1);
     
     return {

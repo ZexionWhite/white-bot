@@ -28,7 +28,7 @@ export const TYPE_NAMES = {
 };
 
 export function createModlogEmbed(case_, target, moderator, dmSent = null) {
-  const actionName = TYPE_NAMES[case_.type] || case_.type.toLowerCase();
+  const actionName = case_.type ? (TYPE_NAMES[case_.type] || case_.type.toLowerCase()) : "unknown";
   const actionCapitalized = actionName.charAt(0).toUpperCase() + actionName.slice(1);
   
   const targetName = target.tag || target.username || "Unknown";
@@ -103,7 +103,7 @@ export function createErrorEmbed(message) {
 }
 
 export function createCaseEmbed(case_, target, moderator) {
-  const actionName = TYPE_NAMES[case_.type] || case_.type.toLowerCase();
+  const actionName = case_.type ? (TYPE_NAMES[case_.type] || case_.type.toLowerCase()) : "unknown";
   const actionCapitalized = actionName.charAt(0).toUpperCase() + actionName.slice(1);
   
   const targetName = target.tag || target.username || "Unknown";
@@ -162,7 +162,7 @@ export function createHistoryEmbed(cases, target, page, totalPages, type = null)
   }
 
   const fields = cases.slice(0, 10).map(c => {
-    const actionName = TYPE_NAMES[c.type] || c.type.toLowerCase();
+    const actionName = c.type ? (TYPE_NAMES[c.type] || c.type.toLowerCase()) : "unknown";
     const actionCapitalized = actionName.charAt(0).toUpperCase() + actionName.slice(1);
     
     return {

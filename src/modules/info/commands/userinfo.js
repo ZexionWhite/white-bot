@@ -20,7 +20,7 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed("User not found in server")], ephemeral: true });
   }
 
-  const embed = createUserinfoOverview(targetMember, itx.guild);
+  const embed = await createUserinfoOverview(targetMember, itx.guild);
   const components = [createUserinfoSelectMenu(`user:${target.id}`, "overview")];
 
   return itx.reply({ embeds: [embed], components, ephemeral: false });
@@ -35,26 +35,26 @@ export async function handleSelectMenu(itx, targetId, view) {
   let embed;
   switch (view) {
     case "overview":
-      embed = createUserinfoOverview(targetMember, itx.guild);
+      embed = await createUserinfoOverview(targetMember, itx.guild);
       break;
     case "sanctions":
-      embed = createUserinfoSanctions(targetMember, itx.guild);
+      embed = await createUserinfoSanctions(targetMember, itx.guild);
       break;
     case "voice":
-      embed = createUserinfoVoice(targetMember, itx.guild);
+      embed = await createUserinfoVoice(targetMember, itx.guild);
       break;
     case "messages":
-      embed = createUserinfoMessages(targetMember, itx.guild);
+      embed = await createUserinfoMessages(targetMember, itx.guild);
       break;
     case "permissions":
-      embed = createUserinfoPermissions(targetMember, itx.guild);
+      embed = await createUserinfoPermissions(targetMember, itx.guild);
       break;
     case "statistics":
       const stats = (await getUserStats.get(itx.guild.id, targetMember.id)) ?? null;
       embed = createUserinfoStatistics(targetMember, stats);
       break;
     default:
-      embed = createUserinfoOverview(targetMember, itx.guild);
+      embed = await createUserinfoOverview(targetMember, itx.guild);
   }
 
   const components = [createUserinfoSelectMenu(`user:${targetId}`, view)];

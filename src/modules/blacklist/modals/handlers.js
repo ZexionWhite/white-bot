@@ -100,7 +100,8 @@ export async function handleBlacklistModal(itx) {
   }
 }
 
-async function handleBlacklistAddModal(itx, payload, reason, evidence) {
+async function handleBlacklistAddModal(itx, payload, reason) {
+  // Validaciones de seguridad
   const target = await itx.client.users.fetch(payload.targetId).catch(() => null);
   if (!target) {
     return itx.reply({ embeds: [createErrorEmbed("User not found")], ephemeral: true });
@@ -118,12 +119,13 @@ async function handleBlacklistAddModal(itx, payload, reason, evidence) {
 
   const severity = payload.severity || "MEDIUM";
 
+  // Crear entrada sin evidence (ya no se guarda en DB)
   const entry = await BlacklistService.createEntry(
     itx.guild.id,
     payload.targetId,
     itx.user.id,
     reason,
-    evidence,
+    null, // evidence ya no se guarda en DB
     severity
   );
 
@@ -131,9 +133,28 @@ async function handleBlacklistAddModal(itx, payload, reason, evidence) {
   
   if (settings.blacklist_channel_id) {
     const blacklistChannel = await itx.guild.channels.fetch(settings.blacklist_channel_id).catch(() => null);
-    if (blacklistChannel) {
+    if (blacklistChannel && blacklistChannel.isTextBased()) {
+      // Enviar embed principal
       const embed = createBlacklistEmbed(entry, target, itx.user);
       await blacklistChannel.send({ embeds: [embed] });
+
+      // Si hay archivo adjunto, reenviarlo por separado (sin guardar en DB)
+      if (payload.evidenceAttachmentUrl) {
+        try {
+          const response = await fetch(payload.evidenceAttachmentUrl);
+          if (response.ok) {
+            const buffer = Buffer.from(await response.arrayBuffer());
+            const attachment = new AttachmentBuilder(buffer, { name: payload.evidenceAttachmentName || "evidence" });
+            await blacklistChannel.send({ 
+              content: `**Evidence for Entry #${entry.id}**`,
+              files: [attachment] 
+            });
+          }
+        } catch (error) {
+          // Si falla la descarga/reenvío, solo loguear el error pero no fallar la operación
+          log.warn("blacklist", `Error al reenviar archivo de evidencia:`, error.message);
+        }
+      }
     }
   }
 

@@ -1,6 +1,7 @@
 import { getSettings, startVoiceSession, endVoiceSession, getVoiceSession, incrementVoiceTime } from "../db.js";
 import { voiceStateEmbed } from "../modules/settings/ui/voice.js";
 import * as VoiceRepo from "../modules/moderation/db/voice.repo.js";
+import { log } from "../core/logger/index.js";
 
 export default async function voiceStateUpdate(client, oldState, newState) {
   try {

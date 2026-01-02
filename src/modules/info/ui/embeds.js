@@ -3,8 +3,8 @@ import { formatDuration } from "../../../utils/time.js";
 import * as UserinfoService from "../services/userinfo.service.js";
 import { MODULES, MODULE_NAMES, getAllModules, getCommandModule } from "../../moderation/services/modules.service.js";
 
-export function createUserinfoOverview(member, guild) {
-  const trustScore = UserinfoService.getUserTrustScore(guild.id, member.id);
+export async function createUserinfoOverview(member, guild) {
+  const trustScore = await UserinfoService.getUserTrustScore(guild.id, member.id);
   const highestRole = member.roles.highest;
   const highestRoleDisplay = highestRole && highestRole.id !== guild.id 
     ? `<@&${highestRole.id}>` 
@@ -102,8 +102,8 @@ export function createUserinfoSanctions(member, guild) {
   return embed;
 }
 
-export function createUserinfoVoice(member, guild) {
-  const activities = UserinfoService.getUserVoiceActivity(guild.id, member.id);
+export async function createUserinfoVoice(member, guild) {
+  const activities = await UserinfoService.getUserVoiceActivity(guild.id, member.id);
 
   const embed = new EmbedBuilder()
     .setColor(0x00ff88)
@@ -157,8 +157,8 @@ export function createUserinfoMessages(member, guild) {
   return embed;
 }
 
-export function createUserinfoPermissions(member, guild) {
-  const { userPolicies, rolePolicies } = UserinfoService.getUserPermissions(guild.id, member.id, member);
+export async function createUserinfoPermissions(member, guild) {
+  const { userPolicies, rolePolicies } = await UserinfoService.getUserPermissions(guild.id, member.id, member);
 
   const embed = new EmbedBuilder()
     .setColor(0xaa00ff)

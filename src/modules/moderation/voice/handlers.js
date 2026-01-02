@@ -3,16 +3,9 @@ import { updateVoiceModEmbed } from "./utils.js";
 import { log } from "../../../core/logger/index.js";
 
 export async function handleVoiceModComponent(client, itx, customId) {
-  if (!itx.inGuild()) {
-    return itx.reply({ 
-      content: "❌ Este comando solo funciona en servidores.", 
-      flags: MessageFlags.Ephemeral
-    });
-  }
-
   if (!itx.guild) {
     return itx.reply({ 
-      content: "❌ No se pudo obtener información del servidor.", 
+      content: "❌ Este comando solo funciona en servidores.", 
       flags: MessageFlags.Ephemeral
     });
   }

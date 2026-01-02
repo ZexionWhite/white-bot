@@ -2,19 +2,11 @@
  * Error base y helpers para el bot
  */
 
-/**
- * Error base para errores del bot
- */
-export class BotError extends Error {
-  constructor(message, code = "BOT_ERROR") {
-    super(message);
-    this.name = "BotError";
-    this.code = code;
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, this.constructor);
-    }
-  }
-}
+// Importar BotError desde archivo base para evitar dependencias circulares
+import { BotError } from "./base.error.js";
+
+// Re-exportar BotError
+export { BotError };
 
 /**
  * Error de configuración

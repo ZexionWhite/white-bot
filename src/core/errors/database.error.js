@@ -2,7 +2,7 @@
  * Errores relacionados con la base de datos
  */
 
-import { BotError } from "./index.js";
+import { BotError } from "./base.error.js";
 
 /**
  * Error de conexión a la base de datos

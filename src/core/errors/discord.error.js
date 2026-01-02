@@ -2,7 +2,7 @@
  * Errores relacionados con Discord API
  */
 
-import { BotError } from "./index.js";
+import { BotError } from "./base.error.js";
 
 /**
  * Error de permisos de Discord

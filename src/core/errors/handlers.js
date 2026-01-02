@@ -3,7 +3,7 @@
  */
 
 import { log } from "../logger/index.js";
-import { BotError } from "./index.js";
+import { BotError } from "./base.error.js";
 
 /**
  * Wrapper para manejar errores de forma consistente en funciones async

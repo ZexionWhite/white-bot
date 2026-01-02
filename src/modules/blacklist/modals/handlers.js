@@ -1,8 +1,10 @@
+import { AttachmentBuilder } from "discord.js";
 import * as BlacklistService from "../services/blacklist.service.js";
 import * as PermService from "../../moderation/services/permissions.service.js";
 import * as SettingsRepo from "../../moderation/db/settings.repo.js";
 import { createBlacklistEmbed, createSuccessEmbed, createErrorEmbed } from "../ui/embeds.js";
 import { getPendingAction, deletePendingAction, validateReason } from "../../moderation/modals/helpers.js";
+import { log } from "../../../core/logger/index.js";
 
 /**
  * Handles modal submission for blacklist commands
@@ -62,7 +64,6 @@ export async function handleBlacklistModal(itx) {
 
   const { command, payload } = pendingAction;
   const validatedReason = validation.reason;
-  const evidence = itx.fields.getTextInputValue("evidence")?.trim() || null;
 
   // Delete pending action
   await deletePendingAction(actionId);
@@ -71,9 +72,9 @@ export async function handleBlacklistModal(itx) {
   try {
     switch (command) {
       case "blacklist.add":
-        return await handleBlacklistAddModal(itx, payload, validatedReason, evidence);
+        return await handleBlacklistAddModal(itx, payload, validatedReason);
       case "blacklist.edit":
-        return await handleBlacklistEditModal(itx, payload, validatedReason, evidence);
+        return await handleBlacklistEditModal(itx, payload, validatedReason);
       default:
         return itx.reply({ 
           embeds: [createErrorEmbed(`Unknown command: ${command}`)], 
@@ -81,11 +82,21 @@ export async function handleBlacklistModal(itx) {
         });
     }
   } catch (error) {
+    log.error("handleBlacklistModal", `Error en modal ${command}:`, error);
     console.error(`[modal:${command}] Error:`, error);
-    return itx.reply({ 
-      embeds: [createErrorEmbed(error.message || "An error occurred")], 
-      ephemeral: true 
-    });
+    
+    // Si la interacción no ha sido respondida, responder con error
+    if (itx.isRepliable() && !itx.replied && !itx.deferred) {
+      try {
+        return await itx.reply({ 
+          embeds: [createErrorEmbed(`Ocurrió un error al procesar la acción. Por favor, intenta de nuevo.`)], 
+          ephemeral: true 
+        });
+      } catch (replyError) {
+        // Si falla, puede ser porque la interacción expiró (Unknown interaction)
+        log.error("handleBlacklistModal", `Error al responder con mensaje de error (posible interacción expirada):`, replyError);
+      }
+    }
   }
 }
 
@@ -126,10 +137,11 @@ async function handleBlacklistAddModal(itx, payload, reason, evidence) {
     }
   }
 
-  return itx.reply({ embeds: [createSuccessEmbed(`User added to blacklist (Entry #${entry.id})`)] });
+  return itx.reply({ embeds: [createSuccessEmbed("User added to blacklist", target, entry.id)] });
 }
 
-async function handleBlacklistEditModal(itx, payload, reason, evidence) {
+async function handleBlacklistEditModal(itx, payload, reason) {
+  // Validaciones de seguridad
   const moderator = await itx.guild.members.fetch(itx.user.id);
   if (!await PermService.canExecuteCommand(moderator, "blacklist.edit")) {
     return itx.reply({ embeds: [createErrorEmbed("You don't have permission to use this command")], ephemeral: true });
@@ -140,12 +152,13 @@ async function handleBlacklistEditModal(itx, payload, reason, evidence) {
     return itx.reply({ embeds: [createErrorEmbed(`Entry #${payload.caseId} not found`)], ephemeral: true });
   }
 
+  // Actualizar entrada sin evidence (ya no se guarda en DB)
   const updated = await BlacklistService.updateEntry(
     itx.guild.id,
     payload.caseId,
     itx.user.id,
     reason,
-    evidence,
+    null, // evidence ya no se guarda en DB
     payload.severity ? payload.severity.toUpperCase() : null
   );
 
@@ -157,7 +170,7 @@ async function handleBlacklistEditModal(itx, payload, reason, evidence) {
   const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
   if (settings.blacklist_channel_id) {
     const blacklistChannel = await itx.guild.channels.fetch(settings.blacklist_channel_id).catch(() => null);
-    if (blacklistChannel) {
+    if (blacklistChannel && blacklistChannel.isTextBased()) {
       await blacklistChannel.send({ embeds: [embed] });
     }
   }

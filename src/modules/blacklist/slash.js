@@ -20,6 +20,7 @@ export const blacklistSlashCommands = [
          { name: "High", value: "HIGH" },
          { name: "Critical", value: "CRITICAL" }
        ))
+       .addAttachmentOption(o => o.setName("evidence").setDescription("Evidence file (optional)").setRequired(false))
     )
     .addSubcommand(sc =>
       sc.setName("history")

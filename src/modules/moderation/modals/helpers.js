@@ -83,7 +83,7 @@ export function createReasonModal(command, title, customId, placeholder = "Expla
 }
 
 /**
- * Creates a blacklist modal with reason and evidence
+ * Creates a blacklist modal with reason only (evidence is handled as attachment in command)
  */
 export function createBlacklistModal(customId, isEdit = false) {
   const modal = new ModalBuilder()
@@ -99,18 +99,9 @@ export function createBlacklistModal(customId, isEdit = false) {
     .setMinLength(3)
     .setMaxLength(1000);
 
-  const evidenceInput = new TextInputBuilder()
-    .setCustomId("evidence")
-    .setLabel("Evidence (Optional)")
-    .setStyle(TextInputStyle.Paragraph)
-    .setRequired(false)
-    .setPlaceholder("Links, message IDs, or other evidence...")
-    .setMaxLength(1000);
-
   const reasonRow = new ActionRowBuilder().addComponents(reasonInput);
-  const evidenceRow = new ActionRowBuilder().addComponents(evidenceInput);
   
-  modal.addComponents(reasonRow, evidenceRow);
+  modal.addComponents(reasonRow);
 
   return modal;
 }

@@ -11,7 +11,7 @@ export default async function handleConfig(itx) {
     });
   }
 
-  const settings = getSettings.get(itx.guild.id) ?? {};
+  const settings = (await getSettings.get(itx.guild.id)) ?? {};
   const embed = configEmbed(itx.guild, settings);
   return itx.reply({ embeds: [embed], ephemeral: true });
 }

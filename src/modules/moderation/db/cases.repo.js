@@ -3,6 +3,7 @@ import { prepare } from "../../../core/db/index.js";
 export const createCase = prepare(`
   INSERT INTO mod_cases (guild_id, type, target_id, moderator_id, reason, created_at, expires_at, active, metadata)
   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  RETURNING id
 `);
 
 export const getCaseById = prepare(`

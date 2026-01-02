@@ -12,11 +12,11 @@ const DEFAULT_PREFIX = "capy!";
 /**
  * Obtiene el prefix del servidor
  * @param {string} guildId - ID del servidor
- * @returns {string} - Prefix configurado o default
+ * @returns {Promise<string>} - Prefix configurado o default
  */
-function getGuildPrefix(guildId) {
+async function getGuildPrefix(guildId) {
   if (!guildId) return DEFAULT_PREFIX;
-  const settings = getSettings.get(guildId);
+  const settings = await getSettings.get(guildId);
   return settings?.command_prefix || DEFAULT_PREFIX;
 }
 
@@ -29,7 +29,7 @@ export async function handlePrefixCommand(message) {
   if (!message.guild) return false;
   
   const content = message.content.trim();
-  const prefix = getGuildPrefix(message.guild.id);
+  const prefix = await getGuildPrefix(message.guild.id);
   
   // Verificar prefijo (case-insensitive)
   if (!content.toLowerCase().startsWith(prefix.toLowerCase())) {

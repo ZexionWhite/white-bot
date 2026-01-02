@@ -1,12 +1,12 @@
 import { getSettings, upsertSettings } from "../../../db.js";
 
-export function getGuildSettings(guildId) {
-  return getSettings.get(guildId) || {};
+export async function getGuildSettings(guildId) {
+  return (await getSettings.get(guildId)) || {};
 }
 
-export function updateGuildSettings(guildId, updates) {
-  const current = getGuildSettings(guildId);
-  upsertSettings.run({
+export async function updateGuildSettings(guildId, updates) {
+  const current = await getGuildSettings(guildId);
+  await upsertSettings.run({
     guild_id: guildId,
     welcome_channel_id: updates.welcome_channel_id ?? current.welcome_channel_id ?? null,
     log_channel_id: updates.log_channel_id ?? current.log_channel_id ?? null,

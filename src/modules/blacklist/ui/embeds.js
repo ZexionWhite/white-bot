@@ -8,19 +8,28 @@ const SEVERITY_COLORS = {
 };
 
 export function createBlacklistEmbed(entry, target, moderator) {
+  const targetName = target.tag || target.username || "Unknown";
+  const targetDisplay = `${targetName} (${entry.user_id})`;
+  
+  const severityName = entry.severity || "MEDIUM";
+  const actionCapitalized = `Blacklist - ${severityName}`;
+  
+  // Build description similar to createModlogEmbed
+  let description = `**Member:** ${targetDisplay}\n**Action:** ${actionCapitalized}`;
+  description += `\n**Reason:** ${entry.reason || "No reason"}`;
+
   const embed = new EmbedBuilder()
     .setColor(SEVERITY_COLORS[entry.severity] || 0x808080)
-    .setTitle(`Blacklist Entry #${entry.id}`)
-    .addFields(
-      { name: "Usuario", value: `<@${entry.user_id}>`, inline: true },
-      { name: "Moderador", value: `<@${entry.moderator_id}>`, inline: true },
-      { name: "Severidad", value: entry.severity || "MEDIUM", inline: true },
-      { name: "Razón", value: entry.reason || "Sin razón especificada", inline: false }
-    )
-    .setTimestamp(entry.created_at);
-
-  if (entry.evidence) {
-    embed.addFields({ name: "Evidencia", value: entry.evidence, inline: false });
+    .setAuthor({ 
+      name: moderator.tag || moderator.username || "Unknown", 
+      iconURL: moderator.displayAvatarURL?.() || moderator.avatarURL?.() || null 
+    })
+    .setDescription(description)
+    .setFooter({ text: `Entry #${entry.id}` });
+  
+  // Solo setear timestamp si created_at es válido
+  if (entry.created_at && typeof entry.created_at === 'number' && entry.created_at > 0) {
+    embed.setTimestamp(entry.created_at);
   }
 
   if (entry.updated_at) {
@@ -42,30 +51,66 @@ export function createBlacklistEmbed(entry, target, moderator) {
   return embed;
 }
 
-export function createBlacklistHistoryEmbed(entries, target) {
+export function createBlacklistHistoryEmbed(entries, target, page, totalPages, counts = null) {
+  const targetName = target.tag || target.username || "Unknown";
+  const targetDisplay = `${targetName} (${target.id})`;
+  
   const embed = new EmbedBuilder()
     .setColor(0x0099ff)
-    .setTitle("Historial de Blacklist")
-    .setDescription(`Usuario: <@${target.id}>`)
-    .setTimestamp();
+    .setAuthor({ 
+      name: targetDisplay,
+      iconURL: target.displayAvatarURL?.() || target.avatarURL?.() || null 
+    });
 
   if (entries.length === 0) {
-    embed.setDescription(`No hay entradas de blacklist para <@${target.id}>`);
+    embed.setDescription("No blacklist entries recorded");
+    if (counts) {
+      const footerText = `Low: ${counts.low} | Medium: ${counts.medium} | High: ${counts.high} | Critical: ${counts.critical}`;
+      embed.setFooter({ text: footerText });
+    } else {
+      embed.setFooter({ text: `Page ${page}/${totalPages}` });
+    }
     return embed;
   }
 
-  const fields = entries.slice(0, 10).map(e => ({
-    name: `Entry #${e.id} - ${e.severity || "MEDIUM"}`,
-    value: `**Razón:** ${e.reason || "Sin razón"}\n**Fecha:** <t:${Math.floor(e.created_at / 1000)}:R>`,
-    inline: false
-  }));
+  // Limitar a 10 entradas por página
+  const fields = entries.slice(0, 10).map(e => {
+    const severityName = (e.severity || "MEDIUM").toLowerCase();
+    
+    return {
+      name: `Entry #${e.id} - ${severityName}`,
+      value: e.reason || "No reason",
+      inline: false
+    };
+  });
 
   embed.addFields(fields);
+
+  // Footer con conteos si están disponibles, sino solo página
+  if (counts) {
+    const footerText = `Low: ${counts.low} | Medium: ${counts.medium} | High: ${counts.high} | Critical: ${counts.critical}`;
+    embed.setFooter({ text: footerText });
+  } else {
+    embed.setFooter({ text: `Page ${page}/${totalPages}` });
+  }
 
   return embed;
 }
 
-export function createSuccessEmbed(message) {
+export function createSuccessEmbed(message, target = null, entryId = null) {
+  // Si es una entrada de blacklist exitosa, usar formato similar a createSanctionMessage
+  if (target?.id && entryId) {
+    const targetName = target.tag || target.username || "Unknown";
+    const targetDisplay = `${targetName} (${target.id})`;
+    const description = `**Member:** ${targetDisplay}\n**Action:** Blacklist entry created`;
+    
+    return new EmbedBuilder()
+      .setColor(0x00ff00)
+      .setDescription(description)
+      .setFooter({ text: `Entry #${entryId}` });
+  }
+  
+  // Formato simple para otros mensajes
   return new EmbedBuilder()
     .setColor(0x00ff00)
     .setDescription(`✅ ${message}`);

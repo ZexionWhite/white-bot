@@ -1,6 +1,7 @@
 import { getSettings, startVoiceSession, endVoiceSession, getVoiceSession, incrementVoiceTime } from "../db.js";
 import { voiceStateEmbed } from "../modules/settings/ui/voice.js";
 import * as VoiceRepo from "../modules/moderation/db/voice.repo.js";
+import { log } from "../core/logger/index.js";
 
 export default async function voiceStateUpdate(client, oldState, newState) {
   try {
@@ -22,7 +23,7 @@ export default async function voiceStateUpdate(client, oldState, newState) {
     let sessionForEmbed = null;
     
     if (oldChannelId) {
-      const session = getVoiceSession.get(guildId, userId);
+      const session = await getVoiceSession.get(guildId, userId);
       if (session) {
         sessionForEmbed = session;
         const joinTime = session.join_timestamp;
@@ -30,14 +31,14 @@ export default async function voiceStateUpdate(client, oldState, newState) {
         
         if (durationSeconds > 0) {
           try {
-            incrementVoiceTime.run(guildId, userId, durationSeconds);
+            await incrementVoiceTime.run(guildId, userId, durationSeconds);
           } catch (err) {
             log.error("voiceStateUpdate", `Error al incrementar tiempo de voz para ${member.user.tag} en ${guild.name}:`, err.message);
           }
         }
         
         try {
-          endVoiceSession.run(guildId, userId);
+          await endVoiceSession.run(guildId, userId);
         } catch (err) {
           log.error("voiceStateUpdate", `Error al finalizar sesión de voz para ${member.user.tag} en ${guild.name}:`, err.message);
         }
@@ -46,9 +47,9 @@ export default async function voiceStateUpdate(client, oldState, newState) {
 
     if (newChannelId) {
       try {
-        startVoiceSession.run(guildId, userId, newChannelId, now);
-        VoiceRepo.insertVoiceActivity.run(guildId, userId, "JOIN", newChannelId, now);
-        VoiceRepo.cleanupOldVoiceActivity.run(guildId, userId, guildId, userId);
+        await startVoiceSession.run(guildId, userId, newChannelId, now);
+        await VoiceRepo.insertVoiceActivity.run(guildId, userId, "JOIN", newChannelId, now);
+        await VoiceRepo.cleanupOldVoiceActivity.run(guildId, userId, guildId, userId);
       } catch (err) {
         log.error("voiceStateUpdate", `Error al iniciar sesión de voz para ${member.user.tag} en ${guild.name}:`, err.message);
       }
@@ -56,8 +57,8 @@ export default async function voiceStateUpdate(client, oldState, newState) {
 
     if (oldChannelId && newChannelId && oldChannelId !== newChannelId) {
       try {
-        VoiceRepo.insertVoiceActivity.run(guildId, userId, "MOVE", newChannelId, now);
-        VoiceRepo.cleanupOldVoiceActivity.run(guildId, userId, guildId, userId);
+        await VoiceRepo.insertVoiceActivity.run(guildId, userId, "MOVE", newChannelId, now);
+        await VoiceRepo.cleanupOldVoiceActivity.run(guildId, userId, guildId, userId);
       } catch (err) {
         log.error("voiceStateUpdate", `Error al registrar movimiento de voz:`, err.message);
       }
@@ -65,8 +66,8 @@ export default async function voiceStateUpdate(client, oldState, newState) {
 
     if (oldChannelId && !newChannelId) {
       try {
-        VoiceRepo.insertVoiceActivity.run(guildId, userId, "LEAVE", oldChannelId, now);
-        VoiceRepo.cleanupOldVoiceActivity.run(guildId, userId, guildId, userId);
+        await VoiceRepo.insertVoiceActivity.run(guildId, userId, "LEAVE", oldChannelId, now);
+        await VoiceRepo.cleanupOldVoiceActivity.run(guildId, userId, guildId, userId);
       } catch (err) {
         log.error("voiceStateUpdate", `Error al registrar salida de voz:`, err.message);
       }
@@ -82,7 +83,7 @@ export default async function voiceStateUpdate(client, oldState, newState) {
         const key = `${guildId}_${oldChannelId}`;
         if (client.voiceModMessages.has(key) && updateVoiceModEmbed) {
           await updateVoiceModEmbed(client, oldChannelId, guildId).catch((err) => {
-            console.error(`[voiceStateUpdate] Error al actualizar embed de moderación (canal anterior) en ${guild.name}:`, err.message);
+            log.error("voiceStateUpdate", `Error al actualizar embed de moderación (canal anterior ${oldChannelId}) en ${guild.name}:`, err.message);
           });
         }
       }
@@ -91,7 +92,7 @@ export default async function voiceStateUpdate(client, oldState, newState) {
         const key = `${guildId}_${newChannelId}`;
         if (client.voiceModMessages.has(key) && updateVoiceModEmbed) {
           await updateVoiceModEmbed(client, newChannelId, guildId).catch((err) => {
-            console.error(`[voiceStateUpdate] Error al actualizar embed de moderación (canal nuevo) en ${guild.name}:`, err.message);
+            log.error("voiceStateUpdate", `Error al actualizar embed de moderación (canal nuevo ${newChannelId}) en ${guild.name}:`, err.message);
           });
         }
       }
@@ -102,7 +103,7 @@ export default async function voiceStateUpdate(client, oldState, newState) {
         const deafChanged = oldState.serverDeaf !== newState.serverDeaf || oldState.selfDeaf !== newState.selfDeaf;
         if (muteChanged || deafChanged) {
           await updateVoiceModEmbed(client, oldChannelId, guildId).catch((err) => {
-            console.error(`[voiceStateUpdate] Error al actualizar embed de moderación (mute/deafen) en ${guild.name}:`, err.message);
+            log.error("voiceStateUpdate", `Error al actualizar embed de moderación (mute/deafen) en canal ${oldChannelId} de ${guild.name}:`, err.message);
           });
         }
       }
@@ -110,7 +111,7 @@ export default async function voiceStateUpdate(client, oldState, newState) {
 
     if (oldChannelId === newChannelId) return;
 
-    const cfg = getSettings.get(guild.id);
+    const cfg = await getSettings.get(guild.id);
     const logId = cfg?.voice_log_channel_id;
     if (!logId) return;
 

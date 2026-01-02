@@ -48,7 +48,7 @@ export async function handle(itx) {
       }
     }
 
-    SettingsRepo.updateGuildSettings(itx.guild.id, { mute_role_id: muteRole.id });
+    await SettingsRepo.updateGuildSettings(itx.guild.id, { mute_role_id: muteRole.id });
 
     return itx.reply({ embeds: [createSuccessEmbed(`Rol de mute creado y configurado: ${muteRole}`, { id: muteRole.id })] });
   } catch (error) {

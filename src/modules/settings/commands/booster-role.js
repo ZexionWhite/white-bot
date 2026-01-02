@@ -8,10 +8,10 @@ export async function handle(itx) {
   }
 
   const role = itx.options.getRole("rol", true);
-  const row = getSettings.get(itx.guild.id) ?? {};
+  const row = (await getSettings.get(itx.guild.id)) ?? {};
   
   try {
-    upsertSettings.run({
+    await upsertSettings.run({
       guild_id: itx.guild.id,
       welcome_channel_id: row.welcome_channel_id ?? null,
       log_channel_id: row.log_channel_id ?? null,

@@ -4,14 +4,14 @@ import { log } from "../core/logger/index.js";
 
 export default async function guildMemberAdd(client, member) {
   try {
-    const cfg = getSettings.get(member.guild.id);
+    const cfg = await getSettings.get(member.guild.id);
     if (!cfg) {
       log.debug("guildMemberAdd", `Servidor ${member.guild.name} (${member.guild.id}) no tiene configuración`);
       return;
     }
 
     const cdMin = Number.isFinite(cfg.welcome_cd_minutes) ? cfg.welcome_cd_minutes : 60;
-    const last = (getCooldown.get(member.guild.id, member.id, "welcome") || {}).last_ts ?? 0;
+    const last = ((await getCooldown.get(member.guild.id, member.id, "welcome")) || {}).last_ts ?? 0;
     const now = Date.now();
     const canSendWelcome = now - last >= cdMin * 60_000;
 
@@ -26,7 +26,7 @@ export default async function guildMemberAdd(client, member) {
           log.error("guildMemberAdd", `Error al enviar mensaje de bienvenida en ${member.guild.name}:`, err.message);
         });
         try { 
-          setCooldown.run(member.guild.id, member.id, "welcome", now); 
+          await setCooldown.run(member.guild.id, member.id, "welcome", now); 
           log.info("guildMemberAdd", `Welcome enviado a ${member.user.tag} en ${member.guild.name}`);
         } catch (err) {
           log.error("guildMemberAdd", `Error al guardar cooldown:`, err.message);

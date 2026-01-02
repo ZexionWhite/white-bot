@@ -9,6 +9,7 @@ import { PermissionFlagsBits } from "discord.js";
 import * as PermService from "../services/permissions.service.js";
 import * as ModService from "../services/moderation.service.js";
 import * as SettingsRepo from "../db/settings.repo.js";
+import * as ModlogService from "../services/modlog.service.js";
 import { createSanctionMessage } from "../ui/messages.js";
 import { parseDuration } from "../../../utils/duration.js";
 
@@ -107,7 +108,7 @@ async function executeModerationCommand(ctx, commandName, requireDuration = fals
         break;
       case "mute": {
         // Verificar mute role
-        const settings = SettingsRepo.getGuildSettings(ctx.guild.id);
+        const settings = await SettingsRepo.getGuildSettings(ctx.guild.id);
         if (!settings.mute_role_id) {
           return ctx.reply({ content: "❌ No hay rol de mute configurado. Usa /createmuterole o /setmuterole" });
         }
@@ -141,16 +142,10 @@ async function executeModerationCommand(ctx, commandName, requireDuration = fals
   }
   
   // Enviar a modlog
-  const settings = SettingsRepo.getGuildSettings(ctx.guild.id);
-  if (settings.modlog_channel_id && result.case) {
-    const modlogChannel = await ctx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
-    if (modlogChannel?.isTextBased()) {
-      const { createModlogEmbed } = await import("../ui/embeds.js");
-      const embed = createModlogEmbed(result.case, targetMember.user, ctx.member.user, result.dmSent);
-      await modlogChannel.send({ embeds: [embed] });
-    }
+  if (result.case) {
+    await ModlogService.sendToModlog(ctx.guild, result.case, targetMember.user, ctx.member.user, result.dmSent || null);
   }
-  
+
   const message = createSanctionMessage(commandName, targetMember.user, result.case?.id);
   return ctx.reply({ content: message });
 }

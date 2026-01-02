@@ -28,7 +28,7 @@ export const TYPE_NAMES = {
 };
 
 export function createModlogEmbed(case_, target, moderator, dmSent = null) {
-  const actionName = TYPE_NAMES[case_.type] || case_.type.toLowerCase();
+  const actionName = case_.type ? (TYPE_NAMES[case_.type] || case_.type.toLowerCase()) : "unknown";
   const actionCapitalized = actionName.charAt(0).toUpperCase() + actionName.slice(1);
   
   const targetName = target.tag || target.username || "Unknown";
@@ -52,8 +52,12 @@ export function createModlogEmbed(case_, target, moderator, dmSent = null) {
       iconURL: moderator.displayAvatarURL?.() || moderator.avatarURL?.() || null 
     })
     .setDescription(description)
-    .setFooter({ text: `Case #${case_.id}` })
-    .setTimestamp(case_.created_at);
+    .setFooter({ text: `Case #${case_.id}` });
+  
+  // Solo setear timestamp si created_at es válido
+  if (case_.created_at && typeof case_.created_at === 'number' && case_.created_at > 0) {
+    embed.setTimestamp(case_.created_at);
+  }
 
   return embed;
 }
@@ -99,7 +103,7 @@ export function createErrorEmbed(message) {
 }
 
 export function createCaseEmbed(case_, target, moderator) {
-  const actionName = TYPE_NAMES[case_.type] || case_.type.toLowerCase();
+  const actionName = case_.type ? (TYPE_NAMES[case_.type] || case_.type.toLowerCase()) : "unknown";
   const actionCapitalized = actionName.charAt(0).toUpperCase() + actionName.slice(1);
   
   const targetName = target.tag || target.username || "Unknown";
@@ -119,7 +123,8 @@ export function createCaseEmbed(case_, target, moderator) {
   description += `\n**Reason:** ${case_.reason || "No reason"}`;
   
   if (case_.deleted_at) {
-    description += `\n**Deleted:** <t:${Math.floor(case_.deleted_at / 1000)}:R>\n**Deleted by:** <@${case_.deleted_by}>\n**Deletion reason:** ${case_.deleted_reason || "No reason"}`;
+    const deletedByMention = case_.deleted_by ? `<@${case_.deleted_by}>` : "Usuario desconocido";
+    description += `\n**Deleted:** <t:${Math.floor(case_.deleted_at / 1000)}:R>\n**Deleted by:** ${deletedByMention}\n**Deletion reason:** ${case_.deleted_reason || "No reason"}`;
   }
   
   const embed = new EmbedBuilder()
@@ -129,13 +134,17 @@ export function createCaseEmbed(case_, target, moderator) {
       iconURL: moderator.displayAvatarURL?.() || moderator.avatarURL?.() || null 
     })
     .setDescription(description)
-    .setFooter({ text: `Case #${case_.id}` })
-    .setTimestamp(case_.created_at);
+    .setFooter({ text: `Case #${case_.id}` });
+  
+  // Solo setear timestamp si created_at es válido
+  if (case_.created_at && typeof case_.created_at === 'number' && case_.created_at > 0) {
+    embed.setTimestamp(case_.created_at);
+  }
 
   return embed;
 }
 
-export function createHistoryEmbed(cases, target, page, totalPages, type = null) {
+export function createHistoryEmbed(cases, target, page, totalPages, type = null, counts = null) {
   const targetName = target.tag || target.username || "Unknown";
   const targetDisplay = `${targetName} (${target.id})`;
   
@@ -144,26 +153,39 @@ export function createHistoryEmbed(cases, target, page, totalPages, type = null)
     .setAuthor({ 
       name: targetDisplay,
       iconURL: target.displayAvatarURL?.() || target.avatarURL?.() || null 
-    })
-    .setFooter({ text: `Page ${page}/${totalPages}` });
+    });
 
   if (cases.length === 0) {
     embed.setDescription("No sanctions recorded");
+    if (counts) {
+      const footerText = `Warned: ${counts.warned} | Muted: ${counts.muted} | Timeouted: ${counts.timeouted} | Kicked: ${counts.kicked} | Banned: ${counts.banned}`;
+      embed.setFooter({ text: footerText });
+    } else {
+      embed.setFooter({ text: `Page ${page}/${totalPages}` });
+    }
     return embed;
   }
 
+  // Limitar a 10 casos por página
   const fields = cases.slice(0, 10).map(c => {
-    const actionName = TYPE_NAMES[c.type] || c.type.toLowerCase();
-    const actionCapitalized = actionName.charAt(0).toUpperCase() + actionName.slice(1);
+    const actionName = c.type ? (TYPE_NAMES[c.type] || c.type.toLowerCase()) : "unknown";
     
     return {
-      name: `${actionCapitalized} • Case #${c.id}`,
-      value: `${c.reason || "No reason"}\n<t:${Math.floor(c.created_at / 1000)}:R>`,
+      name: `Case #${c.id} - ${actionName}`,
+      value: c.reason || "No reason",
       inline: false
     };
   });
 
   embed.addFields(fields);
+
+  // Footer con conteos si están disponibles, sino solo página
+  if (counts) {
+    const footerText = `Warned: ${counts.warned} | Muted: ${counts.muted} | Timeouted: ${counts.timeouted} | Kicked: ${counts.kicked} | Banned: ${counts.banned}`;
+    embed.setFooter({ text: footerText });
+  } else {
+    embed.setFooter({ text: `Page ${page}/${totalPages}` });
+  }
 
   return embed;
 }

@@ -1,10 +1,10 @@
 import * as CasesRepo from "../db/cases.repo.js";
 
-export function createCase(guildId, type, targetId, moderatorId, reason, expiresAt = null, metadata = null) {
+export async function createCase(guildId, type, targetId, moderatorId, reason, expiresAt = null, metadata = null) {
   const now = Date.now();
   const metadataStr = metadata ? JSON.stringify(metadata) : null;
 
-  const result = CasesRepo.createCase.run(
+  const result = await CasesRepo.createCase.run(
     guildId,
     type,
     targetId,
@@ -30,44 +30,44 @@ export function createCase(guildId, type, targetId, moderatorId, reason, expires
   };
 }
 
-export function getCase(guildId, caseId) {
-  return CasesRepo.getCaseById.get(caseId, guildId);
+export async function getCase(guildId, caseId) {
+  return await CasesRepo.getCaseById.get(caseId, guildId);
 }
 
-export function getUserCases(guildId, userId, type = null, limit = 10, offset = 0) {
+export async function getUserCases(guildId, userId, type = null, limit = 10, offset = 0) {
   if (type) {
-    return CasesRepo.getCasesByType.all(guildId, userId, type, limit, offset);
+    return await CasesRepo.getCasesByType.all(guildId, userId, type, limit, offset);
   }
-  return CasesRepo.getCasesByUser.all(guildId, userId, limit, offset);
+  return await CasesRepo.getCasesByUser.all(guildId, userId, limit, offset);
 }
 
-export function getActiveCases(guildId, userId) {
-  return CasesRepo.getActiveCases.all(guildId, userId);
+export async function getActiveCases(guildId, userId) {
+  return await CasesRepo.getActiveCases.all(guildId, userId);
 }
 
-export function updateCase(guildId, caseId, newReason, metadata = null) {
+export async function updateCase(guildId, caseId, newReason, metadata = null) {
   const metadataStr = metadata ? JSON.stringify(metadata) : null;
-  CasesRepo.updateCase.run(newReason, metadataStr, caseId, guildId);
-  return getCase(guildId, caseId);
+  await CasesRepo.updateCase.run(newReason, metadataStr, caseId, guildId);
+  return await getCase(guildId, caseId);
 }
 
-export function deleteCase(guildId, caseId, deletedBy, reason) {
-  CasesRepo.deleteCase.run(Date.now(), deletedBy, reason, caseId, guildId);
+export async function deleteCase(guildId, caseId, deletedBy, reason) {
+  await CasesRepo.deleteCase.run(Date.now(), deletedBy, reason, caseId, guildId);
 }
 
-export function deactivateCase(guildId, caseId) {
-  CasesRepo.deactivateCase.run(caseId, guildId);
+export async function deactivateCase(guildId, caseId) {
+  await CasesRepo.deactivateCase.run(caseId, guildId);
 }
 
-export function countUserCases(guildId, userId) {
-  const result = CasesRepo.countCasesByUser.get(guildId, userId);
+export async function countUserCases(guildId, userId) {
+  const result = await CasesRepo.countCasesByUser.get(guildId, userId);
   return result?.count || 0;
 }
 
-export function getActiveTempbans(guildId) {
+export async function getActiveTempbans(guildId) {
   // Returns tempbans that haven't expired yet (expires_at > now)
   const now = Date.now();
-  const allTempbans = CasesRepo.getActiveTempbans.all(guildId, now + 1); // Add 1ms to get non-expired ones
+  const allTempbans = await CasesRepo.getActiveTempbans.all(guildId, now + 1); // Add 1ms to get non-expired ones
   return allTempbans.filter(c => c.expires_at && c.expires_at > now);
 }
 

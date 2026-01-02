@@ -1,14 +1,15 @@
 import * as BlacklistRepo from "../db/blacklist.repo.js";
 import * as CasesService from "../../moderation/services/cases.service.js";
 
-export function createEntry(guildId, userId, moderatorId, reason, evidence = null, severity = "MEDIUM") {
+export async function createEntry(guildId, userId, moderatorId, reason, evidence = null, severity = "MEDIUM") {
   const now = Date.now();
-  const result = BlacklistRepo.createBlacklistEntry.run(
+  // Evidence ya no se guarda en DB (se maneja como archivo adjunto en Discord CDN)
+  const result = await BlacklistRepo.createBlacklistEntry.run(
     guildId,
     userId,
     moderatorId,
     reason || "Sin razón especificada",
-    evidence,
+    null, // evidence ya no se guarda en DB
     severity,
     now
   );
@@ -19,27 +20,29 @@ export function createEntry(guildId, userId, moderatorId, reason, evidence = nul
     user_id: userId,
     moderator_id: moderatorId,
     reason: reason || "Sin razón especificada",
-    evidence,
+    evidence: null, // Ya no se guarda en DB
     severity,
     created_at: now
   };
 }
 
-export function getEntry(guildId, entryId) {
-  return BlacklistRepo.getBlacklistEntry.get(entryId, guildId);
+export async function getEntry(guildId, entryId) {
+  return await BlacklistRepo.getBlacklistEntry.get(entryId, guildId);
 }
 
-export function getUserEntries(guildId, userId) {
-  return BlacklistRepo.getBlacklistByUser.all(guildId, userId);
+export async function getUserEntries(guildId, userId) {
+  return await BlacklistRepo.getBlacklistByUser.all(guildId, userId);
 }
 
-export function updateEntry(guildId, entryId, updatedBy, newReason, newEvidence = null, newSeverity = null) {
-  const current = getEntry(guildId, entryId);
+export async function updateEntry(guildId, entryId, updatedBy, newReason, newEvidence = null, newSeverity = null) {
+  // Validaciones de seguridad
+  const current = await getEntry(guildId, entryId);
   if (!current) return null;
 
-  BlacklistRepo.updateBlacklistEntry.run(
+  // Evidence ya no se guarda en DB (se maneja como archivo adjunto en Discord CDN)
+  await BlacklistRepo.updateBlacklistEntry.run(
     newReason || current.reason,
-    newEvidence !== null ? newEvidence : current.evidence,
+    null, // evidence ya no se guarda en DB
     newSeverity || current.severity,
     Date.now(),
     updatedBy,
@@ -47,11 +50,11 @@ export function updateEntry(guildId, entryId, updatedBy, newReason, newEvidence 
     guildId
   );
 
-  return getEntry(guildId, entryId);
+  return await getEntry(guildId, entryId);
 }
 
-export function deleteEntry(guildId, entryId, deletedBy, reason) {
-  BlacklistRepo.deleteBlacklistEntry.run(
+export async function deleteEntry(guildId, entryId, deletedBy, reason) {
+  await BlacklistRepo.deleteBlacklistEntry.run(
     Date.now(),
     deletedBy,
     reason || "Sin razón especificada",

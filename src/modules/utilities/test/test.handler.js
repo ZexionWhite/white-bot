@@ -339,7 +339,8 @@ export async function handleTestSelect(itx, client) {
           generateMockBlacklistEntry(member),
           generateMockBlacklistEntry(member)
         ];
-        embed = createBlacklistHistoryEmbed(entries, member.user);
+        const mockCounts = { low: 0, medium: 1, high: 1, critical: 0 };
+        embed = createBlacklistHistoryEmbed(entries, member.user, 1, 1, mockCounts);
         break;
 
       case "help_intro":

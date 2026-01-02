@@ -17,7 +17,7 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed("El canal debe ser de texto")], ephemeral: true });
   }
 
-  SettingsRepo.updateGuildSettings(itx.guild.id, { modlog_channel_id: channel.id });
+  await SettingsRepo.updateGuildSettings(itx.guild.id, { modlog_channel_id: channel.id });
 
   return itx.reply({ embeds: [createSuccessEmbed(`Canal de modlog configurado: ${channel}`, { id: channel.id })] });
 }

@@ -15,12 +15,12 @@ export async function handle(itx) {
   if (!itx.memberPermissions.has(PermissionFlagsBits.ManageRoles))
     return itx.reply({ content: "Sin permisos.", ephemeral: true });
 
-  const cfg = getSettings.get(itx.guild.id);
+  const cfg = await getSettings.get(itx.guild.id);
   if (!cfg?.welcome_channel_id) {
     return itx.reply({ content: "Primero configurá canales con /set welcome y /set join-log.", ephemeral: true });
   }
 
-  const colors = getColorRoles.all(itx.guild.id);
+  const colors = await getColorRoles.all(itx.guild.id);
   if (!colors.length) {
     return itx.reply({ content: "No hay roles de color. Utiliza /setupcolors.", ephemeral: true });
   }
@@ -80,7 +80,7 @@ export async function handle(itx) {
         nickname_log_channel_id: cfg.nickname_log_channel_id ?? null,
         voice_log_channel_id: cfg.voice_log_channel_id ?? null
       };
-      upsertSettings.run(updated);
+      await upsertSettings.run(updated);
     }
   } catch {
     return itx.reply({ content: "No pude postear/editar el menú. Verificá permisos y canal.", ephemeral: true });

@@ -44,9 +44,9 @@ async function handleView(itx) {
   let policies = [];
 
   if (type === "user" && user) {
-    policies = PolicyRepo.getAllPoliciesBySubject.all(itx.guild.id, "USER", user.id);
+    policies = await PolicyRepo.getAllPoliciesBySubject.all(itx.guild.id, "USER", user.id);
   } else if (type === "role" && role) {
-    policies = PolicyRepo.getAllPoliciesBySubject.all(itx.guild.id, "ROLE", role.id);
+    policies = await PolicyRepo.getAllPoliciesBySubject.all(itx.guild.id, "ROLE", role.id);
   } else {
     // Get all policies for the guild (simplified - would need a new query for all)
     // For now, show a message explaining how to view specific policies
@@ -127,13 +127,13 @@ async function handleModule(itx) {
   const subjectName = user ? user.tag : role.name;
 
   if (effect === "RESET") {
-    PolicyRepo.deletePolicy.run(itx.guild.id, module, subjectType, subjectId);
+    await PolicyRepo.deletePolicy.run(itx.guild.id, module, subjectType, subjectId);
     return itx.reply({
       embeds: [createSuccessEmbed(`Module policy reset for ${MODULE_NAMES[module]} → ${subjectName}`)]
     });
   }
 
-  PolicyRepo.createPolicy.run(
+  await PolicyRepo.createPolicy.run(
     itx.guild.id,
     module,
     subjectType,
@@ -173,13 +173,13 @@ async function handleCommand(itx) {
   const subjectName = user ? user.tag : role.name;
 
   if (effect === "RESET") {
-    PolicyRepo.deletePolicy.run(itx.guild.id, commandKey, subjectType, subjectId);
+    await PolicyRepo.deletePolicy.run(itx.guild.id, commandKey, subjectType, subjectId);
     return itx.reply({
       embeds: [createSuccessEmbed(`Command policy reset for \`${commandKey}\` → ${subjectName}`)]
     });
   }
 
-  PolicyRepo.createPolicy.run(
+  await PolicyRepo.createPolicy.run(
     itx.guild.id,
     commandKey,
     subjectType,
@@ -205,7 +205,7 @@ async function handleReset(itx) {
   }
 
   // Delete all policies for this guild
-  PolicyRepo.deleteAllPolicies.run(itx.guild.id);
+  await PolicyRepo.deleteAllPolicies.run(itx.guild.id);
 
   return itx.reply({
     embeds: [createSuccessEmbed("All permission policies have been reset for this server")]

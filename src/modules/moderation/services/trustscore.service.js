@@ -12,8 +12,8 @@ const WEIGHTS = {
 
 const DECAY_DAYS = 30;
 
-export function calculateTrustScore(guildId, userId) {
-  const cases = CasesRepo.getCasesByUser.all(guildId, userId, 100, 0);
+export async function calculateTrustScore(guildId, userId) {
+  const cases = await CasesRepo.getCasesByUser.all(guildId, userId, 100, 0);
   const now = Date.now();
   const decayMs = DECAY_DAYS * 24 * 60 * 60 * 1000;
 

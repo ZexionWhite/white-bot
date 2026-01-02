@@ -3,6 +3,7 @@ import { createUserinfoOverview, createUserinfoSanctions, createUserinfoVoice, c
 import { createUserinfoSelectMenu } from "../../moderation/ui/components.js";
 import { createErrorEmbed } from "../../moderation/ui/embeds.js";
 import { getUserStats } from "../../../db.js";
+import { log } from "../../../core/logger/index.js";
 
 export async function handle(itx) {
   if (!itx.inGuild()) {
@@ -20,45 +21,53 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed("User not found in server")], ephemeral: true });
   }
 
-  const embed = createUserinfoOverview(targetMember, itx.guild);
+  const embed = await createUserinfoOverview(targetMember, itx.guild);
   const components = [createUserinfoSelectMenu(`user:${target.id}`, "overview")];
 
   return itx.reply({ embeds: [embed], components, ephemeral: false });
 }
 
 export async function handleSelectMenu(itx, targetId, view) {
-  const targetMember = await itx.guild.members.fetch(targetId).catch(() => null);
-  if (!targetMember) {
-    return itx.update({ embeds: [createErrorEmbed("User not found")], components: [] });
+  try {
+    const targetMember = await itx.guild.members.fetch(targetId).catch(() => null);
+    if (!targetMember) {
+      return itx.update({ embeds: [createErrorEmbed("User not found")], components: [] });
+    }
+
+    let embed;
+    switch (view) {
+      case "overview":
+        embed = await createUserinfoOverview(targetMember, itx.guild);
+        break;
+      case "sanctions":
+        embed = await createUserinfoSanctions(targetMember, itx.guild);
+        break;
+      case "voice":
+        embed = await createUserinfoVoice(targetMember, itx.guild);
+        break;
+      case "messages":
+        embed = await createUserinfoMessages(targetMember, itx.guild);
+        break;
+      case "permissions":
+        embed = await createUserinfoPermissions(targetMember, itx.guild);
+        break;
+      case "statistics":
+        const stats = (await getUserStats.get(itx.guild.id, targetMember.id)) ?? null;
+        embed = createUserinfoStatistics(targetMember, stats);
+        break;
+      default:
+        embed = await createUserinfoOverview(targetMember, itx.guild);
+    }
+
+    const components = [createUserinfoSelectMenu(`user:${targetId}`, view)];
+
+    return itx.update({ embeds: [embed], components });
+  } catch (error) {
+    log.error("userinfo", `Error en handleSelectMenu para view "${view}":`, error);
+    return itx.update({ 
+      embeds: [createErrorEmbed(`Error al cargar la vista ${view}. Por favor, intenta de nuevo.`)], 
+      components: [] 
+    }).catch(() => {});
   }
-
-  let embed;
-  switch (view) {
-    case "overview":
-      embed = createUserinfoOverview(targetMember, itx.guild);
-      break;
-    case "sanctions":
-      embed = createUserinfoSanctions(targetMember, itx.guild);
-      break;
-    case "voice":
-      embed = createUserinfoVoice(targetMember, itx.guild);
-      break;
-    case "messages":
-      embed = createUserinfoMessages(targetMember, itx.guild);
-      break;
-    case "permissions":
-      embed = createUserinfoPermissions(targetMember, itx.guild);
-      break;
-    case "statistics":
-      const stats = getUserStats.get(itx.guild.id, targetMember.id) ?? null;
-      embed = createUserinfoStatistics(targetMember, stats);
-      break;
-    default:
-      embed = createUserinfoOverview(targetMember, itx.guild);
-  }
-
-  const components = [createUserinfoSelectMenu(`user:${targetId}`, view)];
-
-  return itx.update({ embeds: [embed], components });
 }
 

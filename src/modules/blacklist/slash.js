@@ -20,6 +20,7 @@ export const blacklistSlashCommands = [
          { name: "High", value: "HIGH" },
          { name: "Critical", value: "CRITICAL" }
        ))
+       .addAttachmentOption(o => o.setName("evidence").setDescription("Evidence file (optional)").setRequired(false))
     )
     .addSubcommand(sc =>
       sc.setName("history")
@@ -42,6 +43,11 @@ export const blacklistSlashCommands = [
        .setDescription("Eliminar una entrada de blacklist")
        .addIntegerOption(o => o.setName("caseid").setDescription("ID de la entrada").setRequired(true))
        .addStringOption(o => o.setName("reason").setDescription("Razón de eliminación"))
+    )
+    .addSubcommand(sc =>
+      sc.setName("case")
+       .setDescription("Ver una entrada específica de blacklist")
+       .addIntegerOption(o => o.setName("id").setDescription("ID de la entrada").setRequired(true))
     )
 ];
 

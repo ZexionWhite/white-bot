@@ -1,5 +1,6 @@
 import { PermissionFlagsBits } from "discord.js";
 import { getSettings, upsertSettings } from "../../../db.js";
+import { getAllSettingsFields } from "./_updateAllSettings.js";
 
 export async function handle(itx) {
   if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild)) {
@@ -17,10 +18,10 @@ export async function handle(itx) {
   }
 
   try {
-    const allFields = getAllSettingsFields(itx.guild.id, {
+    const allFields = await getAllSettingsFields(itx.guild.id, {
       command_prefix: prefix
     });
-    upsertSettings.run(allFields);
+    await upsertSettings.run(allFields);
     console.log(`[settings/prefix] Prefijo configurado a '${prefix}' en ${itx.guild.name}`);
   } catch (err) {
     console.error(`[settings/prefix] Error al guardar configuración:`, err.message);

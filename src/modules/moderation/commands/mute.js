@@ -30,7 +30,7 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed("You cannot moderate this user")], ephemeral: true });
   }
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
+  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
   if (!settings.mute_role_id) {
     return itx.reply({ embeds: [createErrorEmbed("No mute role configured. Use /createmuterole or /setmuterole")], ephemeral: true });
   }

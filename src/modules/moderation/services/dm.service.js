@@ -18,7 +18,7 @@ const ACTION_TITLES = {
 export async function sendPunishmentDM(user, action, reason, caseId, guildName, duration = null, created_at = null) {
   if (!user) return false;
 
-  const actionName = TYPE_NAMES[action] || action.toLowerCase();
+  const actionName = action ? (TYPE_NAMES[action] || action.toLowerCase()) : "unknown";
   const actionCapitalized = actionName.charAt(0).toUpperCase() + actionName.slice(1);
   const title = ACTION_TITLES[action] || `You have been ${actionName}`;
   

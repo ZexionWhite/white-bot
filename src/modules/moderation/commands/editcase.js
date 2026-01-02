@@ -14,7 +14,7 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed("You don't have permission to use this command")], ephemeral: true });
   }
 
-  const case_ = CasesService.getCase(itx.guild.id, caseId);
+  const case_ = await CasesService.getCase(itx.guild.id, caseId);
   if (!case_) {
     return itx.reply({ embeds: [createErrorEmbed(`Case #${caseId} not found`)], ephemeral: true });
   }

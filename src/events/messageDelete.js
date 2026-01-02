@@ -13,7 +13,7 @@ function truncate(str, n = 1000) {
 export default async function messageDelete(client, message) {
   if (!message?.guild) return;
 
-  const cfg = getSettings.get(message.guild.id);
+  const cfg = await getSettings.get(message.guild.id);
   const logId = cfg?.message_log_channel_id;
   if (!logId) return;
 

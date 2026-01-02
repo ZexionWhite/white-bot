@@ -45,6 +45,7 @@ export const COMMAND_TO_MODULE = {
   // Blacklist commands
   "blacklist.add": MODULES.BLACKLIST,
   "blacklist.history": MODULES.BLACKLIST,
+  "blacklist.case": MODULES.BLACKLIST,
   "blacklist.edit": MODULES.BLACKLIST,
   "blacklist.remove": MODULES.BLACKLIST,
   

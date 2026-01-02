@@ -2,10 +2,12 @@ import * as ModService from "../services/moderation.service.js";
 import * as PermService from "../services/permissions.service.js";
 import * as CasesService from "../services/cases.service.js";
 import * as SettingsRepo from "../db/settings.repo.js";
+import * as ModlogService from "../services/modlog.service.js";
 import { createModlogEmbed, createSuccessEmbed, createErrorEmbed, createCaseEmbed } from "../ui/embeds.js";
 import { createSanctionMessage } from "../ui/messages.js";
 import { getPendingAction, deletePendingAction, validateReason } from "./helpers.js";
 import { parseDuration } from "../../../utils/duration.js";
+import { log } from "../../../core/logger/index.js";
 
 /**
  * Handles modal submission for moderation commands
@@ -92,6 +94,8 @@ export async function handleModerationModal(itx) {
         return await handleSoftbanModal(itx, payload, validatedReason);
       case "unban":
         return await handleUnbanModal(itx, payload, validatedReason);
+      case "editcase":
+        return await handleEditCaseModal(itx, payload, validatedReason);
       default:
         return itx.reply({ 
           embeds: [createErrorEmbed(`Unknown command: ${command}`)], 
@@ -100,6 +104,20 @@ export async function handleModerationModal(itx) {
     }
   } catch (error) {
     console.error(`[modal:${command}] Error:`, error);
+    log.error("handleModerationModal", `Error en modal ${command}:`, error);
+    
+    // Si la interacción no ha sido respondida, responder con error
+    if (itx.isRepliable() && !itx.replied && !itx.deferred) {
+      try {
+        return await itx.reply({ 
+          embeds: [createErrorEmbed(`Ocurrió un error al procesar la acción. Por favor, intenta de nuevo.`)], 
+          ephemeral: true 
+        });
+      } catch (replyError) {
+        // Si falla, puede ser porque la interacción expiró (Unknown interaction)
+        log.error("handleModerationModal", `Error al responder con mensaje de error (posible interacción expirada):`, replyError);
+      }
+    }
     return itx.reply({ 
       embeds: [createErrorEmbed(error.message || "An error occurred")], 
       ephemeral: true 
@@ -124,14 +142,7 @@ async function handleWarnModal(itx, payload, reason) {
 
   const { case: case_, dmSent } = await ModService.warn(itx.guild, target, moderator, reason);
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
-  if (settings.modlog_channel_id) {
-    const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
-    if (modlogChannel) {
-      const embed = createModlogEmbed(case_, target.user, itx.user, dmSent);
-      await modlogChannel.send({ embeds: [embed] });
-    }
-  }
+  await ModlogService.sendToModlog(itx.guild, case_, target.user, itx.user, dmSent);
 
   return itx.reply({ content: createSanctionMessage("warn", target.user, case_.id) });
 }
@@ -151,7 +162,7 @@ async function handleMuteModal(itx, payload, reason) {
     return itx.reply({ embeds: [createErrorEmbed("You cannot moderate this user")], ephemeral: true });
   }
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
+  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
   if (!settings.mute_role_id) {
     return itx.reply({ embeds: [createErrorEmbed("No mute role configured. Use /createmuterole or /setmuterole")], ephemeral: true });
   }
@@ -170,13 +181,7 @@ async function handleMuteModal(itx, payload, reason) {
 
   const { case: case_, dmSent } = await ModService.mute(itx.guild, target, moderator, reason, duration);
 
-  if (settings.modlog_channel_id) {
-    const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
-    if (modlogChannel) {
-      const embed = createModlogEmbed(case_, target.user, itx.user, dmSent);
-      await modlogChannel.send({ embeds: [embed] });
-    }
-  }
+  await ModlogService.sendToModlog(itx.guild, case_, target.user, itx.user, dmSent);
 
   return itx.reply({ content: createSanctionMessage("mute", target.user, case_.id) });
 }
@@ -196,7 +201,7 @@ async function handleUnmuteModal(itx, payload, reason) {
     return itx.reply({ embeds: [createErrorEmbed("You cannot moderate this user")], ephemeral: true });
   }
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
+  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
   if (!settings.mute_role_id) {
     return itx.reply({ embeds: [createErrorEmbed("No mute role configured")], ephemeral: true });
   }
@@ -236,14 +241,7 @@ async function handleTimeoutModal(itx, payload, reason) {
 
   const { case: case_, dmSent } = await ModService.timeout(itx.guild, target, moderator, reason, duration);
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
-  if (settings.modlog_channel_id) {
-    const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
-    if (modlogChannel) {
-      const embed = createModlogEmbed(case_, target.user, itx.user, dmSent);
-      await modlogChannel.send({ embeds: [embed] });
-    }
-  }
+  await ModlogService.sendToModlog(itx.guild, case_, target.user, itx.user, dmSent);
 
   return itx.reply({ content: createSanctionMessage("timeout", target.user, case_.id) });
 }
@@ -265,7 +263,7 @@ async function handleUntimeoutModal(itx, payload, reason) {
 
   const { case: case_, dmSent } = await ModService.untimeout(itx.guild, target, moderator, reason);
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
+  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
   if (settings.modlog_channel_id) {
     const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
     if (modlogChannel) {
@@ -294,14 +292,7 @@ async function handleKickModal(itx, payload, reason) {
 
   const { case: case_, dmSent } = await ModService.kick(itx.guild, target, moderator, reason);
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
-  if (settings.modlog_channel_id) {
-    const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
-    if (modlogChannel) {
-      const embed = createModlogEmbed(case_, target.user, itx.user, dmSent);
-      await modlogChannel.send({ embeds: [embed] });
-    }
-  }
+  await ModlogService.sendToModlog(itx.guild, case_, target.user, itx.user, dmSent);
 
   return itx.reply({ content: createSanctionMessage("kick", target.user, case_.id) });
 }
@@ -323,16 +314,9 @@ async function handleBanModal(itx, payload, reason) {
 
   const deleteDays = payload.deleteDays || 0;
 
-  const { case: case_, dmSent } = await ModService.ban(itx.guild, target, moderator, reason, deleteDays);
+  const { case: case_, dmSent } = await ModService.ban(itx.guild, target.id, moderator, reason, deleteDays);
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
-  if (settings.modlog_channel_id) {
-    const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
-    if (modlogChannel) {
-      const embed = createModlogEmbed(case_, target.user, itx.user, dmSent);
-      await modlogChannel.send({ embeds: [embed] });
-    }
-  }
+  await ModlogService.sendToModlog(itx.guild, case_, target.user, itx.user, dmSent);
 
   return itx.reply({ content: createSanctionMessage("ban", target.user, case_.id) });
 }
@@ -357,16 +341,9 @@ async function handleTempbanModal(itx, payload, reason) {
     return itx.reply({ embeds: [createErrorEmbed("Duration is required")], ephemeral: true });
   }
 
-  const { case: case_ } = await ModService.tempban(itx.guild, payload.targetId, moderator, reason, duration);
+  const { case: case_, dmSent } = await ModService.tempban(itx.guild, payload.targetId, moderator, reason, duration);
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
-  if (settings.modlog_channel_id) {
-    const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
-    if (modlogChannel) {
-      const embed = createModlogEmbed(case_, target.user, itx.user, null);
-      await modlogChannel.send({ embeds: [embed] });
-    }
-  }
+  await ModlogService.sendToModlog(itx.guild, case_, target.user, itx.user, dmSent);
 
   return itx.reply({ content: createSanctionMessage("tempban", target.user, case_.id) });
 }
@@ -390,7 +367,7 @@ async function handleSoftbanModal(itx, payload, reason) {
 
   const { case: case_ } = await ModService.softban(itx.guild, payload.targetId, moderator, reason, deleteDays);
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
+  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
   if (settings.modlog_channel_id) {
     const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
     if (modlogChannel) {
@@ -417,14 +394,7 @@ async function handleUnbanModal(itx, payload, reason) {
 
   const { case: case_, dmSent } = await ModService.unban(itx.guild, targetId, moderator, reason);
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
-  if (settings.modlog_channel_id) {
-    const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
-    if (modlogChannel) {
-      const embed = createModlogEmbed(case_, { id: targetId, tag: ban.user.tag }, itx.user, dmSent);
-      await modlogChannel.send({ embeds: [embed] });
-    }
-  }
+  await ModlogService.sendToModlog(itx.guild, case_, ban.user, itx.user, dmSent);
 
   return itx.reply({ content: createSanctionMessage("unban", { id: targetId }, case_.id) });
 }
@@ -435,12 +405,12 @@ async function handleEditCaseModal(itx, payload, reason) {
     return itx.reply({ embeds: [createErrorEmbed("You don't have permission to use this command")], ephemeral: true });
   }
 
-  const case_ = CasesService.getCase(itx.guild.id, payload.caseId);
+  const case_ = await CasesService.getCase(itx.guild.id, payload.caseId);
   if (!case_) {
     return itx.reply({ embeds: [createErrorEmbed(`Case #${payload.caseId} not found`)], ephemeral: true });
   }
 
-  const updated = CasesService.updateCase(itx.guild.id, payload.caseId, reason);
+  const updated = await CasesService.updateCase(itx.guild.id, payload.caseId, reason);
 
   const target = await itx.client.users.fetch(updated.target_id).catch(() => ({ id: updated.target_id }));
   const originalModerator = await itx.client.users.fetch(updated.moderator_id).catch(() => ({ id: updated.moderator_id }));

@@ -67,14 +67,37 @@ export async function registerModerationExtraPrefixCommands() {
           return ctx.reply({ content: "❌ Usuario no encontrado." });
         }
         
-        const totalCases = CasesService.countUserCases(ctx.guild.id, userId);
+        const totalCases = await CasesService.countUserCases(ctx.guild.id, userId);
         const totalPages = Math.max(1, Math.ceil(totalCases / CASES_PER_PAGE));
         const page = 1;
-        const cases = CasesService.getUserCases(ctx.guild.id, userId, null, CASES_PER_PAGE, 0);
         
-        const embed = createHistoryEmbed(cases, target, page, totalPages, null);
+        // Obtener casos paginados (10 por página)
+        const cases = await CasesService.getUserCases(ctx.guild.id, userId, null, CASES_PER_PAGE, 0);
+
+        // Obtener todos los casos para contar por tipo (sin paginación, solo para contar)
+        const allCases = await CasesService.getUserCases(ctx.guild.id, userId, null, 10000, 0);
+        
+        // Contar por tipo
+        const counts = {
+          warned: 0,
+          muted: 0,
+          timeouted: 0,
+          kicked: 0,
+          banned: 0
+        };
+
+        allCases.forEach(c => {
+          const caseType = c.type?.toUpperCase();
+          if (caseType === "WARN") counts.warned++;
+          else if (caseType === "MUTE") counts.muted++;
+          else if (caseType === "TIMEOUT") counts.timeouted++;
+          else if (caseType === "KICK") counts.kicked++;
+          else if (caseType === "BAN" || caseType === "TEMPBAN" || caseType === "SOFTBAN") counts.banned++;
+        });
+
+        const embed = createHistoryEmbed(cases, target, page, totalPages, null, counts);
         const components = totalPages > 1 ? createPaginationComponents(page, totalPages, `history:${userId}:all`) : [];
-        
+
         return ctx.reply({ embeds: [embed], components });
       }
     },
@@ -91,7 +114,7 @@ export async function registerModerationExtraPrefixCommands() {
           return ctx.reply({ content: "❌ No tienes permisos para usar este comando." });
         }
         
-        const case_ = CasesService.getCase(ctx.guild.id, caseId);
+        const case_ = await CasesService.getCase(ctx.guild.id, caseId);
         if (!case_) {
           return ctx.reply({ embeds: [createErrorEmbed(`Case #${caseId} no encontrado`)] });
         }
@@ -128,14 +151,14 @@ export async function registerModerationExtraPrefixCommands() {
           return ctx.reply({ content: `❌ Error al desbanear: ${error.message}` });
         }
         
-        const activeCases = CasesService.getActiveCases(ctx.guild.id, userId);
+        const activeCases = await CasesService.getActiveCases(ctx.guild.id, userId);
         for (const case_ of activeCases) {
           if (case_.type === "BAN" || case_.type === "TEMPBAN") {
-            CasesService.deactivateCase(ctx.guild.id, case_.id);
+            await CasesService.deactivateCase(ctx.guild.id, case_.id);
           }
         }
         
-        const case_ = CasesService.createCase(
+        const case_ = await CasesService.createCase(
           ctx.guild.id,
           "UNBAN",
           userId,
@@ -143,17 +166,9 @@ export async function registerModerationExtraPrefixCommands() {
           "Unban aplicado"
         );
         
-        const SettingsRepo = await import("../db/settings.repo.js");
-        const settings = SettingsRepo.getGuildSettings(ctx.guild.id);
-        if (settings.modlog_channel_id) {
-          const modlogChannel = await ctx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
-          if (modlogChannel?.isTextBased()) {
-            const target = await ctx.raw.client.users.fetch(userId).catch(() => ({ id: userId }));
-            const { createModlogEmbed } = await import("../ui/embeds.js");
-            const embed = createModlogEmbed(case_, target, ctx.member.user);
-            await modlogChannel.send({ embeds: [embed] });
-          }
-        }
+        const ModlogService = await import("../services/modlog.service.js");
+        const target = await ctx.raw.client.users.fetch(userId).catch(() => ({ id: userId }));
+        await ModlogService.sendToModlog(ctx.guild, case_, target, ctx.member.user, null);
         
         return ctx.reply({ content: `✅ Usuario desbaneado. Case #${case_.id}` });
       }
@@ -214,7 +229,7 @@ export async function registerModerationExtraPrefixCommands() {
           
           // Crear caso para clear
           const CasesService = await import("../services/cases.service.js");
-          const case_ = CasesService.createCase(
+          const case_ = await CasesService.createCase(
             ctx.guild.id,
             "CLEAR",
             userId || "ALL",

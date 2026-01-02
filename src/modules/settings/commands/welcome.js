@@ -9,10 +9,10 @@ export async function handle(itx) {
 
   const channel = itx.options.getChannel("canal", true);
   const cooldown = itx.options.getInteger("cooldown");
-  const row = getSettings.get(itx.guild.id) ?? {};
+  const row = (await getSettings.get(itx.guild.id)) ?? {};
   
   try {
-    upsertSettings.run({
+    await upsertSettings.run({
       guild_id: itx.guild.id,
       welcome_channel_id: channel.id,
       log_channel_id: row.log_channel_id ?? null,

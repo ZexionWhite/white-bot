@@ -14,12 +14,12 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed("No tienes permisos para usar este comando")], ephemeral: true });
   }
 
-  const case_ = CasesService.getCase(itx.guild.id, caseId);
+  const case_ = await CasesService.getCase(itx.guild.id, caseId);
   if (!case_) {
     return itx.reply({ embeds: [createErrorEmbed(`Case #${caseId} no encontrado`)], ephemeral: true });
   }
 
-  CasesService.deleteCase(itx.guild.id, caseId, itx.user.id, reason);
+  await CasesService.deleteCase(itx.guild.id, caseId, itx.user.id, reason);
 
   return itx.reply({ embeds: [createSuccessEmbed("Case eliminado", { id: case_.target_id }, caseId)] });
 }

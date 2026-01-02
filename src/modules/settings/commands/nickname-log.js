@@ -1,9 +1,9 @@
 import { PermissionFlagsBits } from "discord.js";
-import { getSettings, upsertSettings } from "../../db.js";
+import { getSettings, upsertSettings } from "../../../db.js";
 
-export default async function handleSetAvatarLog(itx) {
+export async function handle(itx) {
   if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild)) {
-    console.warn(`[config/avatarLog] Sin permisos - ${itx.user.tag} en ${itx.guild.name}`);
+    console.warn(`[settings/nickname-log] Sin permisos - ${itx.user.tag} en ${itx.guild.name}`);
     return itx.reply({ content: "Sin permisos.", ephemeral: true });
   }
 
@@ -22,15 +22,14 @@ export default async function handleSetAvatarLog(itx) {
       welcome_cd_minutes: row.welcome_cd_minutes ?? 60,
       info_channel_id: row.info_channel_id ?? null,
       message_log_channel_id: row.message_log_channel_id ?? null,
-      avatar_log_channel_id: channel.id,
-      nickname_log_channel_id: row.nickname_log_channel_id ?? null,
+      avatar_log_channel_id: row.avatar_log_channel_id ?? null,
+      nickname_log_channel_id: channel.id,
       voice_log_channel_id: row.voice_log_channel_id ?? null
     });
-    console.log(`[config/avatarLog] Canal configurado a ${channel.name} (${channel.id}) en ${itx.guild.name}`);
+    console.log(`[settings/nickname-log] Canal configurado a ${channel.name} (${channel.id}) en ${itx.guild.name}`);
   } catch (err) {
-    console.error(`[config/avatarLog] Error al guardar configuración:`, err.message);
+    console.error(`[settings/nickname-log] Error al guardar configuración:`, err.message);
   }
   
-  return itx.reply({ content: `Canal de logs de avatares seteado a <#${channel.id}>`, ephemeral: true });
+  return itx.reply({ content: `Canal de logs de apodos seteado a <#${channel.id}>`, ephemeral: true });
 }
-

@@ -1,9 +1,9 @@
 import { ActionRowBuilder, StringSelectMenuBuilder, PermissionFlagsBits, EmbedBuilder } from "discord.js";
-import { getColorRoles, getSettings, upsertSettings } from "../db.js";
-import { EMOJIS } from "../config/emojis.js";
+import { getColorRoles, getSettings, upsertSettings } from "../../../db.js";
+import { EMOJIS } from "../../../config/emojis.js";
 
 function parseEmojiMarkdown(markdown) {
-  if (!markdown || typeof markdown !== 'string') return null;
+  if (!markdown || typeof markdown !== "string") return null;
   const match = markdown.match(/^<a?:(\w+):(\d+)>$/);
   if (match) {
     return { id: match[2], name: match[1] };
@@ -11,7 +11,7 @@ function parseEmojiMarkdown(markdown) {
   return null;
 }
 
-export default async function colorMenu(itx) {
+export async function handle(itx) {
   if (!itx.memberPermissions.has(PermissionFlagsBits.ManageRoles))
     return itx.reply({ content: "Sin permisos.", ephemeral: true });
 
@@ -88,4 +88,3 @@ export default async function colorMenu(itx) {
 
   return itx.reply({ content: "Menú de autoroles publicado/actualizado.", ephemeral: true });
 }
-

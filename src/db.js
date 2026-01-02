@@ -281,14 +281,14 @@ export const incrementVoiceTime = prepare(`
   INSERT INTO user_stats (guild_id, user_id, total_voice_seconds, message_count)
   VALUES (?, ?, ?, 0)
   ON CONFLICT(guild_id, user_id) DO UPDATE SET
-    total_voice_seconds = total_voice_seconds + excluded.total_voice_seconds;
+    total_voice_seconds = user_stats.total_voice_seconds + EXCLUDED.total_voice_seconds;
 `);
 
 export const incrementMessageCount = prepare(`
   INSERT INTO user_stats (guild_id, user_id, total_voice_seconds, message_count)
   VALUES (?, ?, 0, 1)
   ON CONFLICT(guild_id, user_id) DO UPDATE SET
-    message_count = message_count + 1;
+    message_count = user_stats.message_count + 1;
 `);
 
 export default db;

@@ -23,6 +23,7 @@ const COMMAND_PERMISSIONS = {
   clear: PermissionFlagsBits.ManageMessages,
   "blacklist.add": PermissionFlagsBits.ModerateMembers,
   "blacklist.history": PermissionFlagsBits.ModerateMembers,
+  "blacklist.case": PermissionFlagsBits.ModerateMembers,
   "blacklist.edit": PermissionFlagsBits.ModerateMembers,
   "blacklist.remove": PermissionFlagsBits.ModerateMembers,
   user: PermissionFlagsBits.ModerateMembers

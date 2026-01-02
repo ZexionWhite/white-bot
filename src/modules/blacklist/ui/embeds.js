@@ -51,25 +51,48 @@ export function createBlacklistEmbed(entry, target, moderator) {
   return embed;
 }
 
-export function createBlacklistHistoryEmbed(entries, target) {
+export function createBlacklistHistoryEmbed(entries, target, page, totalPages, counts = null) {
+  const targetName = target.tag || target.username || "Unknown";
+  const targetDisplay = `${targetName} (${target.id})`;
+  
   const embed = new EmbedBuilder()
     .setColor(0x0099ff)
-    .setTitle("Historial de Blacklist")
-    .setDescription(`Usuario: <@${target.id}>`)
-    .setTimestamp();
+    .setAuthor({ 
+      name: targetDisplay,
+      iconURL: target.displayAvatarURL?.() || target.avatarURL?.() || null 
+    });
 
   if (entries.length === 0) {
-    embed.setDescription(`No hay entradas de blacklist para <@${target.id}>`);
+    embed.setDescription("No blacklist entries recorded");
+    if (counts) {
+      const footerText = `Low: ${counts.low} | Medium: ${counts.medium} | High: ${counts.high} | Critical: ${counts.critical}`;
+      embed.setFooter({ text: footerText });
+    } else {
+      embed.setFooter({ text: `Page ${page}/${totalPages}` });
+    }
     return embed;
   }
 
-  const fields = entries.slice(0, 10).map(e => ({
-    name: `Entry #${e.id} - ${e.severity || "MEDIUM"}`,
-    value: `**Razón:** ${e.reason || "Sin razón"}\n**Fecha:** <t:${Math.floor(e.created_at / 1000)}:R>`,
-    inline: false
-  }));
+  // Limitar a 10 entradas por página
+  const fields = entries.slice(0, 10).map(e => {
+    const severityName = (e.severity || "MEDIUM").toLowerCase();
+    
+    return {
+      name: `Entry #${e.id} - ${severityName}`,
+      value: e.reason || "No reason",
+      inline: false
+    };
+  });
 
   embed.addFields(fields);
+
+  // Footer con conteos si están disponibles, sino solo página
+  if (counts) {
+    const footerText = `Low: ${counts.low} | Medium: ${counts.medium} | High: ${counts.high} | Critical: ${counts.critical}`;
+    embed.setFooter({ text: footerText });
+  } else {
+    embed.setFooter({ text: `Page ${page}/${totalPages}` });
+  }
 
   return embed;
 }

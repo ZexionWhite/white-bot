@@ -80,6 +80,43 @@ export const componentHandlers = {
     const components = createPaginationComponents(newPage, totalPages, `history:${userId}:${type}`);
     return itx.update({ embeds: [embed], components });
   },
+  blacklisthistory: async (itx, customId) => {
+    const [_, userId, type, action, page] = customId.split(":");
+    const newPage = action === "next" ? parseInt(page) + 1 : parseInt(page) - 1;
+    const BlacklistService = await import("./blacklist/services/blacklist.service.js");
+    
+    // Obtener todas las entradas para contar y paginar
+    const allEntries = await BlacklistService.getUserEntries(itx.guild.id, userId);
+    const totalEntries = allEntries.length;
+    const totalPages = Math.max(1, Math.ceil(totalEntries / 10));
+    
+    // Obtener entradas paginadas (10 por página)
+    const startIndex = (newPage - 1) * 10;
+    const entries = allEntries.slice(startIndex, startIndex + 10);
+    
+    // Contar por severidad
+    const counts = {
+      low: 0,
+      medium: 0,
+      high: 0,
+      critical: 0
+    };
+
+    allEntries.forEach(e => {
+      const severity = (e.severity || "MEDIUM").toUpperCase();
+      if (severity === "LOW") counts.low++;
+      else if (severity === "MEDIUM") counts.medium++;
+      else if (severity === "HIGH") counts.high++;
+      else if (severity === "CRITICAL") counts.critical++;
+    });
+    
+    const target = await itx.client.users.fetch(userId).catch(() => ({ id: userId }));
+    const { createBlacklistHistoryEmbed } = await import("./blacklist/ui/embeds.js");
+    const embed = createBlacklistHistoryEmbed(entries, target, newPage, totalPages, counts);
+    const { createPaginationComponents } = await import("./moderation/ui/components.js");
+    const components = createPaginationComponents(newPage, totalPages, `blacklisthistory:${userId}:all`);
+    return itx.update({ embeds: [embed], components });
+  },
   user: async (itx, customId) => {
     const [_, userId] = customId.split(":");
     const view = itx.values[0];

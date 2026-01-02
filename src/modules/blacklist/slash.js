@@ -44,5 +44,10 @@ export const blacklistSlashCommands = [
        .addIntegerOption(o => o.setName("caseid").setDescription("ID de la entrada").setRequired(true))
        .addStringOption(o => o.setName("reason").setDescription("Razón de eliminación"))
     )
+    .addSubcommand(sc =>
+      sc.setName("case")
+       .setDescription("Ver una entrada específica de blacklist")
+       .addIntegerOption(o => o.setName("id").setDescription("ID de la entrada").setRequired(true))
+    )
 ];
 

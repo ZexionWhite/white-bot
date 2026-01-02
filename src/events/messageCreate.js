@@ -1,6 +1,7 @@
 import { incrementMessageCount } from "../db.js";
 import * as MessagesRepo from "../modules/moderation/db/messages.repo.js";
 import { handlePrefixCommand } from "../core/commands/adapters/prefixAdapter.js";
+import { log } from "../core/logger/index.js";
 
 export default async function messageCreate(client, message) {
   if (!message.guild) return;
@@ -27,7 +28,7 @@ export default async function messageCreate(client, message) {
     );
     MessagesRepo.cleanupOldMessages.run(message.guild.id, message.author.id, message.guild.id, message.author.id);
   } catch (error) {
-    console.error(`[messageCreate] Error al procesar mensaje para ${message.author?.tag || message.author?.id} en ${message.guild.name}:`, error.message);
+    log.error("messageCreate", `Error al procesar mensaje para ${message.author?.tag || message.author?.id} en ${message.guild.name}:`, error.message);
   }
 }
 

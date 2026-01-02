@@ -1,8 +1,12 @@
 import db from "../../../db.js";
 
 export const createPolicy = db.prepare(`
-  INSERT OR REPLACE INTO mod_policy (guild_id, command_key, subject_type, subject_id, effect, created_at, created_by)
+  INSERT INTO mod_policy (guild_id, command_key, subject_type, subject_id, effect, created_at, created_by)
   VALUES (?, ?, ?, ?, ?, ?, ?)
+  ON CONFLICT(guild_id, command_key, subject_type, subject_id) DO UPDATE SET
+    effect = EXCLUDED.effect,
+    created_at = EXCLUDED.created_at,
+    created_by = EXCLUDED.created_by
 `);
 
 export const getPolicy = db.prepare(`

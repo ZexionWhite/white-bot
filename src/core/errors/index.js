@@ -10,7 +10,9 @@ export class BotError extends Error {
     super(message);
     this.name = "BotError";
     this.code = code;
-    Error.captureStackTrace(this, this.constructor);
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
   }
 }
 
@@ -43,3 +45,7 @@ export function createError(message, code, context = {}) {
   Object.assign(error, context);
   return error;
 }
+
+// Re-exportar errores específicos
+export * from "./database.error.js";
+export * from "./discord.error.js";

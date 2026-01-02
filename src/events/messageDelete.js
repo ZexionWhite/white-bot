@@ -2,6 +2,7 @@ import { AuditLogEvent, EmbedBuilder } from "discord.js";
 import { getSettings } from "../db.js";
 import { TZ } from "../config.js";
 import { EMOJIS } from "../config/emojis.js";
+import { log } from "../core/logger/index.js";
 
 function truncate(str, n = 1000) {
   if (!str) return "(no content)";
@@ -43,7 +44,7 @@ export default async function messageDelete(client, message) {
       }
     }
   } catch (err) {
-    console.warn(`[messageDelete] Error al obtener audit log en ${message.guild.name}:`, err.message);
+    log.warn("messageDelete", `Error al obtener audit log en ${message.guild.name}:`, err.message);
   }
 
   const content = message.content ?? (message.partial ? "(uncached)" : "(no content)");
@@ -90,6 +91,6 @@ export default async function messageDelete(client, message) {
     });
 
   await logCh.send({ embeds: [embed] }).catch((err) => {
-    console.error(`[messageDelete] Error al enviar log de eliminación en ${message.guild.name}:`, err.message);
+    log.error("messageDelete", `Error al enviar log de eliminación en ${message.guild.name}:`, err.message);
   });
 }

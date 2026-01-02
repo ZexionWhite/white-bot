@@ -13,7 +13,10 @@ const envSchema = z.object({
   CLIENT_ID: z.string().min(1, "CLIENT_ID es requerido"),
   GUILD_ID_PRUEBA: z.string().optional(),
   AVATARS_DIR: z.string().optional(),
-  NODE_ENV: z.enum(["development", "production", "test"]).default("development")
+  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  // Base de datos: DATABASE_URL para PostgreSQL, o DB_PROVIDER=sqlite para SQLite
+  DATABASE_URL: z.string().url().optional(),
+  DB_PROVIDER: z.enum(["sqlite", "postgres"]).default("sqlite")
 });
 
 /**

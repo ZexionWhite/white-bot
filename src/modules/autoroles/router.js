@@ -12,8 +12,8 @@ export async function handleColorSelect(itx, customId) {
 
   const { getSettings, getColorRoles } = await import("../../db.js");
 
-  const cfg = getSettings.get(itx.guild.id);
-  const all = getColorRoles.all(itx.guild.id);
+  const cfg = await getSettings.get(itx.guild.id);
+  const all = await getColorRoles.all(itx.guild.id);
 
   const selectedId = itx.values[0];
   const chosen = all.find(r => r.role_id === selectedId);

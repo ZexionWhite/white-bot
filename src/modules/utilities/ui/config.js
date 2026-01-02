@@ -7,119 +7,97 @@ export function configEmbed(guild, settings) {
     .setThumbnail(guild.iconURL({ size: 128, extension: "png" }))
     .setTimestamp();
 
-  const fields = [];
+  const formatChannel = (channelId) => channelId ? `<#${channelId}>` : "*No configurado*";
+  const formatRole = (roleId) => {
+    if (!roleId) return "*No configurado*";
+    const role = guild.roles.cache.get(roleId);
+    return role ? `<@&${roleId}>` : `\`${roleId}\` *(rol no encontrado)*`;
+  };
 
-  if (settings.welcome_channel_id) {
-    fields.push({ 
+  const fields = [
+    { 
       name: "📥 Canal de Bienvenida", 
-      value: `<#${settings.welcome_channel_id}>`, 
+      value: formatChannel(settings.welcome_channel_id), 
       inline: true 
-    });
-  }
-
-  if (settings.log_channel_id) {
-    fields.push({ 
+    },
+    { 
       name: "📋 Canal de Logs (Admin)", 
-      value: `<#${settings.log_channel_id}>`, 
+      value: formatChannel(settings.log_channel_id), 
       inline: true 
-    });
-  }
-
-  if (settings.message_log_channel_id) {
-    fields.push({ 
+    },
+    { 
       name: "💬 Logs de Mensajes", 
-      value: `<#${settings.message_log_channel_id}>`, 
+      value: formatChannel(settings.message_log_channel_id), 
       inline: true 
-    });
-  }
-
-  if (settings.avatar_log_channel_id) {
-    fields.push({ 
+    },
+    { 
       name: "🖼️ Logs de Avatares", 
-      value: `<#${settings.avatar_log_channel_id}>`, 
+      value: formatChannel(settings.avatar_log_channel_id), 
       inline: true 
-    });
-  }
-
-  if (settings.nickname_log_channel_id) {
-    fields.push({ 
+    },
+    { 
       name: "👤 Logs de Apodos", 
-      value: `<#${settings.nickname_log_channel_id}>`, 
+      value: formatChannel(settings.nickname_log_channel_id), 
       inline: true 
-    });
-  }
-
-  if (settings.voice_log_channel_id) {
-    fields.push({ 
+    },
+    { 
       name: "🎤 Logs de Voz", 
-      value: `<#${settings.voice_log_channel_id}>`, 
+      value: formatChannel(settings.voice_log_channel_id), 
       inline: true 
-    });
-  }
-
-  if (settings.modlog_channel_id) {
-    fields.push({ 
+    },
+    { 
       name: "🛡️ Modlog", 
-      value: `<#${settings.modlog_channel_id}>`, 
+      value: formatChannel(settings.modlog_channel_id), 
       inline: true 
-    });
-  }
-
-  if (settings.booster_announce_channel_id) {
-    fields.push({ 
+    },
+    { 
+      name: "📋 Canal de Blacklist", 
+      value: formatChannel(settings.blacklist_channel_id), 
+      inline: true 
+    },
+    { 
       name: "💎 Canal de Boosts", 
-      value: `<#${settings.booster_announce_channel_id}>`, 
+      value: formatChannel(settings.booster_announce_channel_id), 
       inline: true 
-    });
-  }
-
-  if (settings.info_channel_id) {
-    fields.push({ 
+    },
+    { 
       name: "ℹ️ Canal de Info", 
-      value: `<#${settings.info_channel_id}>`, 
+      value: formatChannel(settings.info_channel_id), 
       inline: true 
-    });
-  }
-
-  if (settings.mute_role_id) {
-    const role = guild.roles.cache.get(settings.mute_role_id);
-    fields.push({ 
+    },
+    { 
       name: "🔇 Rol de Mute", 
-      value: role ? `<@&${settings.mute_role_id}>` : `\`${settings.mute_role_id}\` (rol no encontrado)`, 
+      value: formatRole(settings.mute_role_id), 
       inline: true 
-    });
-  }
-
-  if (settings.booster_role_id) {
-    const role = guild.roles.cache.get(settings.booster_role_id);
-    fields.push({ 
+    },
+    { 
       name: "💎 Rol de Boosters", 
-      value: role ? `<@&${settings.booster_role_id}>` : `\`${settings.booster_role_id}\` (rol no encontrado)`, 
+      value: formatRole(settings.booster_role_id), 
       inline: true 
-    });
-  }
-
-  if (settings.welcome_cd_minutes) {
-    fields.push({ 
+    },
+    { 
       name: "⏱️ Cooldown de Bienvenida", 
-      value: `${settings.welcome_cd_minutes} minutos`, 
+      value: settings.welcome_cd_minutes ? `${settings.welcome_cd_minutes} minutos` : "*No configurado*", 
       inline: true 
-    });
-  }
-
-  if (settings.command_prefix) {
-    fields.push({ 
+    },
+    { 
       name: "🔧 Prefijo de Comandos", 
-      value: `\`${settings.command_prefix}\``, 
+      value: settings.command_prefix ? `\`${settings.command_prefix}\`` : "*No configurado*", 
       inline: true 
-    });
-  }
+    },
+    { 
+      name: "📨 DM al Sancionar", 
+      value: settings.dm_on_punish ? "Habilitado" : "Deshabilitado", 
+      inline: true 
+    },
+    { 
+      name: "🎨 Canal de Autoroles", 
+      value: formatChannel(settings.autorole_channel_id), 
+      inline: true 
+    }
+  ];
 
-  if (fields.length === 0) {
-    embed.setDescription("No hay configuración establecida.");
-  } else {
-    embed.setFields(fields);
-  }
+  embed.setFields(fields);
 
   return embed;
 }

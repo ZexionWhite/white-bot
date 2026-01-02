@@ -69,7 +69,7 @@ export async function registerUtilitiesPrefixCommands() {
           return ctx.reply({ content: "❌ No tienes permisos para ver la configuración." });
         }
         
-        const settings = getSettings.get(ctx.guild.id) ?? {};
+        const settings = (await getSettings.get(ctx.guild.id)) ?? {};
         const embed = configEmbed(ctx.guild, settings);
         return ctx.reply({ embeds: [embed] });
       }

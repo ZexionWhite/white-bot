@@ -1,7 +1,7 @@
 {
-  "name": "white",
+  "name": "capybot",
   "type": "module",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
@@ -9,12 +9,21 @@
     "register": "node src/commands/registerCommands.js",
     "clean:guild": "node src/commands/cleanupCommands.js guild",
     "clean:global": "node src/commands/cleanupCommands.js global",
-    "clean:both": "node src/commands/cleanupCommands.js"
+    "clean:both": "node src/commands/cleanupCommands.js",
+    "lint": "eslint src/**/*.js",
+    "format": "prettier --write \"src/**/*.js\""
   },
   "dependencies": {
     "better-sqlite3": "^9.4.0",
     "discord.js": "^14.15.3",
     "dotenv": "^16.4.5",
-    "sharp": "^0.34.3"
+    "sharp": "^0.34.3",
+    "zod": "^4.3.4"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-node": "^11.1.0",
+    "prettier": "^3.7.4"
   }
 }

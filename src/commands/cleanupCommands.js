@@ -1,9 +1,10 @@
-import "dotenv/config";
 import { REST, Routes } from "discord.js";
+import { getConfig } from "../core/config/index.js";
 
-const rest = new REST({ version: "10" }).setToken(process.env.BOT_TOKEN);
-const appId = process.env.CLIENT_ID;
-const guildId = process.env.GUILD_ID_PRUEBA;
+const config = getConfig();
+const rest = new REST({ version: "10" }).setToken(config.BOT_TOKEN);
+const appId = config.CLIENT_ID;
+const guildId = config.GUILD_ID_PRUEBA;
 
 async function wipeGuild() {
   if (!guildId) {

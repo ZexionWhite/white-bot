@@ -1,12 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { getEnv } from "../core/config/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const AVATARS_DIR = process.env.AVATARS_DIR 
-  ? path.resolve(process.env.AVATARS_DIR)
+const AVATARS_DIR = getEnv("AVATARS_DIR")
+  ? path.resolve(getEnv("AVATARS_DIR"))
   : path.join(__dirname, "../assets/avatars");
 const STATE_FILE = path.join(process.cwd(), "data", "avatar-state.json");
 const COOLDOWN_MS = 60 * 60 * 1000;
@@ -62,7 +63,7 @@ function loadAvatarFiles() {
       console.error(`[AvatarManager] ❌ CRÍTICO: Directorio de avatares NO EXISTE`);
       console.error(`[AvatarManager] Ruta buscada: ${AVATARS_DIR}`);
       console.error(`[AvatarManager] process.cwd(): ${process.cwd()}`);
-      console.error(`[AvatarManager] AVATARS_DIR env: ${process.env.AVATARS_DIR || "(no definida)"}`);
+      console.error(`[AvatarManager] AVATARS_DIR env: ${getEnv("AVATARS_DIR") || "(no definida)"}`);
       return [];
     }
 
@@ -191,7 +192,7 @@ export async function setRandomAvatar(client) {
 export function startAvatarScheduler(client) {
   console.log(`[AvatarManager] ===== INICIALIZACIÓN =====`);
   console.log(`[AvatarManager] process.cwd(): ${process.cwd()}`);
-  console.log(`[AvatarManager] AVATARS_DIR (env): ${process.env.AVATARS_DIR || "(no definida, usando default)"}`);
+  console.log(`[AvatarManager] AVATARS_DIR (env): ${getEnv("AVATARS_DIR") || "(no definida, usando default)"}`);
   console.log(`[AvatarManager] AVATARS_DIR (resuelto): ${AVATARS_DIR}`);
   console.log(`[AvatarManager] fs.existsSync(AVATARS_DIR): ${fs.existsSync(AVATARS_DIR)}`);
 

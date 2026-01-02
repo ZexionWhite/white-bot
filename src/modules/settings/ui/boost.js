@@ -1,9 +1,10 @@
 import { EmbedBuilder } from "discord.js";
 import { BOOST_GIF_URL } from "../../../config.js";
+import { EMOJIS } from "../../../config/emojis.js";
 
 export function boosterEmbed(member, { boosterRoleId = null, infoChannelId = null } = {}) {
   const embed = new EmbedBuilder()
-    .setTitle("💎 ¡Nuevo Booster!")
+    .setTitle(`${EMOJIS.BOOST.BOOSTER} ¡Nuevo Booster!`)
     .setDescription(`**${member.user.tag}** acaba de boostear el servidor`)
     .setThumbnail(member.user.displayAvatarURL({ size: 128, extension: "png" }))
     .setImage(BOOST_GIF_URL)
@@ -17,7 +18,7 @@ export function boosterEmbed(member, { boosterRoleId = null, infoChannelId = nul
   });
 
   if (infoChannelId) {
-    embed.addFields({ name: "💎 Perks", value: `Mira <#${infoChannelId}> para ver los beneficios` });
+    embed.addFields({ name: `${EMOJIS.BOOST.BOOSTER} Perks`, value: `Mira <#${infoChannelId}> para ver los beneficios` });
   }
 
   return embed;

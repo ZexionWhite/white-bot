@@ -37,7 +37,7 @@ export async function handle(itx) {
         updated++;
       }
 
-      // Guardar en BD (booster_only se puede configurar después, por ahora todos son false)
+      // Guardar en BD (todos son free por defecto, se pueden configurar después con /config-colors)
       await insertColorRole.run(guild.id, role.id, color.name, color.hex, 0);
     } catch (error) {
       errors.push(`${color.name}: ${error.message}`);

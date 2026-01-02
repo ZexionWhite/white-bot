@@ -1,8 +1,9 @@
 import { EmbedBuilder } from "discord.js";
+import { EMOJIS } from "../../../config/emojis.js";
 
 export function configEmbed(guild, settings) {
   const embed = new EmbedBuilder()
-    .setTitle(`⚙️ Configuración de ${guild.name}`)
+    .setTitle(`${EMOJIS.UTILS.CONFIG} Configuración de ${guild.name}`)
     .setColor(0x5865f2)
     .setThumbnail(guild.iconURL({ size: 128, extension: "png" }))
     .setTimestamp();
@@ -56,7 +57,7 @@ export function configEmbed(guild, settings) {
       inline: true 
     },
     { 
-      name: "💎 Canal de Boosts", 
+      name: `${EMOJIS.BOOST.BOOSTER} Canal de Boosts`, 
       value: formatChannel(settings.booster_announce_channel_id), 
       inline: true 
     },
@@ -71,7 +72,7 @@ export function configEmbed(guild, settings) {
       inline: true 
     },
     { 
-      name: "💎 Rol de Boosters", 
+      name: `${EMOJIS.BOOST.BOOSTER} Rol de Boosters`, 
       value: formatRole(settings.booster_role_id), 
       inline: true 
     },

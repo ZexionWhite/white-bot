@@ -1,9 +1,11 @@
 import * as setupColors from "./commands/setup-colors.js";
 import * as colorMenu from "./commands/color-menu.js";
+import * as configColors from "./commands/config-colors.js";
 
 export const autorolesHandlers = {
   setupcolors: setupColors.handle,
-  "color-menu": colorMenu.handle
+  "color-menu": colorMenu.handle,
+  "config-colors": configColors.handle
 };
 
 // Handler para el componente color-select
@@ -48,6 +50,13 @@ export async function handleColorSelect(itx, customId) {
   }
 }
 
+export async function handleConfigColorSelect(itx) {
+  const selectedRoleId = itx.values[0];
+  const { handleColorSelect } = await import("./commands/config-colors.js");
+  return handleColorSelect(itx, selectedRoleId);
+}
+
 export const autorolesComponentHandlers = {
-  "color-select": handleColorSelect
+  "color-select": handleColorSelect,
+  "config-color-select": handleConfigColorSelect
 };

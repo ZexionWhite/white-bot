@@ -9,5 +9,10 @@ export const autorolesSlashCommands = [
   new SlashCommandBuilder()
     .setName("color-menu")
     .setDescription("Publica/actualiza el mensaje con el menú de selección de color")
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
+
+  new SlashCommandBuilder()
+    .setName("config-colors")
+    .setDescription("Configura qué colores son premium (solo para boosters)")
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
 ];

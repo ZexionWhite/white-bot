@@ -1,12 +1,13 @@
 import { ActivityType } from "discord.js";
 
-/**
- * Configuración de actividades para rotar
- * Cada actividad debe tener: name, type, y opcionalmente interval (en ms)
- */
 const ACTIVITIES = [
   {
     name: "/help",
+    type: ActivityType.Custom,
+    interval: 60000 // 60 segundos
+  },
+  {
+    name: "capy!",
     type: ActivityType.Custom,
     interval: 60000 // 60 segundos
   },

@@ -59,15 +59,7 @@ export const moderationSlashCommands = [
   new SlashCommandBuilder()
     .setName("history")
     .setDescription("Ver historial de sanciones de un usuario")
-    .addUserOption(o => o.setName("user").setDescription("Usuario").setRequired(true))
-    .addStringOption(o => o.setName("type").setDescription("Tipo de sanción").addChoices(
-      { name: "Warn", value: "WARN" },
-      { name: "Mute", value: "MUTE" },
-      { name: "Timeout", value: "TIMEOUT" },
-      { name: "Kick", value: "KICK" },
-      { name: "Ban", value: "BAN" }
-    ))
-    .addIntegerOption(o => o.setName("limit").setDescription("Límite de resultados (1-50)").setMinValue(1).setMaxValue(50)),
+    .addUserOption(o => o.setName("user").setDescription("Usuario").setRequired(true)),
   
   new SlashCommandBuilder()
     .setName("case")

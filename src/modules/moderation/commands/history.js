@@ -11,7 +11,6 @@ export async function handle(itx) {
   }
 
   const target = itx.options.getUser("user", true);
-  const type = itx.options.getString("type");
 
   if (!await PermService.canExecuteCommand(itx.member, "history")) {
     return itx.reply({ embeds: [createErrorEmbed("No tienes permisos para usar este comando")], ephemeral: true });
@@ -22,7 +21,7 @@ export async function handle(itx) {
   const page = 1;
 
   // Obtener casos paginados (10 por página)
-  const cases = await CasesService.getUserCases(itx.guild.id, target.id, type, CASES_PER_PAGE, 0);
+  const cases = await CasesService.getUserCases(itx.guild.id, target.id, null, CASES_PER_PAGE, 0);
 
   // Obtener todos los casos para contar por tipo (sin paginación, solo para contar)
   const allCases = await CasesService.getUserCases(itx.guild.id, target.id, null, 10000, 0);
@@ -45,8 +44,8 @@ export async function handle(itx) {
     else if (caseType === "BAN" || caseType === "TEMPBAN" || caseType === "SOFTBAN") counts.banned++;
   });
 
-  const embed = createHistoryEmbed(cases, target, page, totalPages, type, counts);
-  const components = totalPages > 1 ? createPaginationComponents(page, totalPages, `history:${target.id}:${type || "all"}`) : [];
+  const embed = createHistoryEmbed(cases, target, page, totalPages, null, counts);
+  const components = totalPages > 1 ? createPaginationComponents(page, totalPages, `history:${target.id}:all`) : [];
 
   return itx.reply({ embeds: [embed], components });
 }

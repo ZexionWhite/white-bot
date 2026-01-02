@@ -11,6 +11,7 @@ export async function createPendingAction(guildId, authorId, command, payload) {
   const stmt = prepare(`
     INSERT INTO pending_actions (guild_id, author_id, command, payload_json, created_at)
     VALUES (?, ?, ?, ?, ?)
+    RETURNING id
   `);
   
   const result = await stmt.run(guildId, authorId, command, payloadJson, now);

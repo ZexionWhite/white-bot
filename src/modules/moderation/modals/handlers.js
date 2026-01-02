@@ -92,6 +92,8 @@ export async function handleModerationModal(itx) {
         return await handleSoftbanModal(itx, payload, validatedReason);
       case "unban":
         return await handleUnbanModal(itx, payload, validatedReason);
+      case "editcase":
+        return await handleEditCaseModal(itx, payload, validatedReason);
       default:
         return itx.reply({ 
           embeds: [createErrorEmbed(`Unknown command: ${command}`)], 
@@ -196,7 +198,7 @@ async function handleUnmuteModal(itx, payload, reason) {
     return itx.reply({ embeds: [createErrorEmbed("You cannot moderate this user")], ephemeral: true });
   }
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
+  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
   if (!settings.mute_role_id) {
     return itx.reply({ embeds: [createErrorEmbed("No mute role configured")], ephemeral: true });
   }

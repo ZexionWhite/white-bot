@@ -81,8 +81,18 @@ class PostgresPreparedStatement extends PreparedStatement {
       
       // Simular el formato de SQLite: { lastInsertRowid, changes }
       // PostgreSQL retorna rows, rowCount
+      // Si la query tiene RETURNING, el ID estará en result.rows[0]
+      // Si es INSERT sin RETURNING, intentamos obtener el ID de la última fila insertada (no siempre funciona)
+      let lastInsertRowid = null;
+      if (sql.trim().toUpperCase().includes('RETURNING')) {
+        lastInsertRowid = result.rows[0]?.id || result.rows[0]?.ID || null;
+      } else if (result.rows && result.rows.length > 0) {
+        // Si hay filas retornadas (aunque no sea RETURNING explícito)
+        lastInsertRowid = result.rows[0]?.id || result.rows[0]?.ID || null;
+      }
+      
       return {
-        lastInsertRowid: result.rows[0]?.id || null, // Asume que hay un campo 'id' si es INSERT
+        lastInsertRowid,
         changes: result.rowCount || 0
       };
     } catch (error) {

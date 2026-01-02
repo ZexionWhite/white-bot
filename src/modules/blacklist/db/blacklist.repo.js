@@ -3,6 +3,7 @@ import { prepare } from "../../../core/db/index.js";
 export const createBlacklistEntry = prepare(`
   INSERT INTO blacklist (guild_id, user_id, moderator_id, reason, evidence, severity, created_at)
   VALUES (?, ?, ?, ?, ?, ?, ?)
+  RETURNING id
 `);
 
 export const getBlacklistEntry = prepare(`

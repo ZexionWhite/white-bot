@@ -12,7 +12,7 @@ export function startTempbanScheduler(client) {
     for (const guild of client.guilds.cache.values()) {
       try {
         // Check tempbans
-        const expiredTempbans = CasesRepo.getActiveTempbans.all(guild.id, now);
+        const expiredTempbans = await CasesRepo.getActiveTempbans.all(guild.id, now);
         for (const case_ of expiredTempbans) {
           try {
             await guild.bans.remove(case_.target_id, "Tempban expired automatically");
@@ -85,7 +85,7 @@ export function startTempbanScheduler(client) {
         }
 
         // Check expired timeouts
-        const expiredTimeouts = CasesRepo.getActiveTimeouts.all(guild.id, now);
+        const expiredTimeouts = await CasesRepo.getActiveTimeouts.all(guild.id, now);
         for (const case_ of expiredTimeouts) {
           try {
             const targetMember = await guild.members.fetch(case_.target_id).catch(() => null);

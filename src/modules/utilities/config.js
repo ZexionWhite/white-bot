@@ -1,6 +1,6 @@
 import { PermissionFlagsBits } from "discord.js";
 import { getSettings } from "../../db.js";
-import { configEmbed } from "../../utils/embeds.js";
+import { configEmbed } from "./ui/config.js";
 
 export default async function handleConfig(itx) {
   if (!itx.memberPermissions.has(PermissionFlagsBits.ManageGuild) && 

@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, PermissionFlagsBits } from "discord.js";
+import { SlashCommandBuilder, PermissionFlagsBits, ChannelType } from "discord.js";
 
 export const moderationSlashCommands = [
   new SlashCommandBuilder()
@@ -124,6 +124,29 @@ export const moderationSlashCommands = [
     .setName("setmodlog")
     .setDescription("Configura el canal de modlog")
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-    .addChannelOption(o => o.setName("channel").setDescription("Canal de modlog").setRequired(true))
+    .addChannelOption(o => o.setName("channel").setDescription("Canal de modlog").setRequired(true)),
+  
+  new SlashCommandBuilder()
+    .setName("voice-mod")
+    .setDescription("Herramientas de moderación de canales de voz")
+    .addSubcommand(sc =>
+      sc.setName("channel")
+       .setDescription("Modera usuarios en un canal de voz")
+       .addChannelOption(o =>
+         o.setName("canal")
+          .setDescription("Canal de voz a moderar (opcional, usa el canal actual si no se especifica)")
+          .addChannelTypes(ChannelType.GuildVoice, ChannelType.GuildStageVoice)
+       )
+    )
+    .addSubcommand(sc =>
+      sc.setName("user")
+       .setDescription("Modera un usuario específico en voz")
+       .addUserOption(o =>
+         o.setName("usuario")
+          .setDescription("Usuario a moderar")
+          .setRequired(true)
+       )
+    )
+    .setDefaultMemberPermissions(PermissionFlagsBits.MuteMembers | PermissionFlagsBits.MoveMembers)
 ];
 

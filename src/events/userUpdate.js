@@ -3,6 +3,7 @@ import { getSettings } from "../db.js";
 import { TZ } from "../config.js";
 import { composeBeforeAfter } from "../utils/beforeAfter.js";
 import { EMOJIS } from "../config/emojis.js";
+import { log } from "../core/logger/index.js";
 
 function fmtNow() {
   return new Intl.DateTimeFormat("es-AR", {
@@ -24,19 +25,19 @@ export default async function userUpdate(client, oldUser, newUser) {
     if (!logId) continue;
 
     const member = await guild.members.fetch(newUser.id).catch((err) => {
-      console.warn(`[userUpdate] Usuario ${newUser.tag} no encontrado en ${guild.name}:`, err.message);
+      log.warn("userUpdate", `Usuario ${newUser.tag} no encontrado en ${guild.name}:`, err.message);
       return null;
     });
     if (!member) continue;
 
     const logCh = await guild.channels.fetch(logId).catch((err) => {
-      console.error(`[userUpdate] Error al obtener canal de logs ${logId} en ${guild.name}:`, err.message);
+      log.error("userUpdate", `Error al obtener canal de logs ${logId} en ${guild.name}:`, err.message);
       return null;
     });
     if (!logCh?.isTextBased()) continue;
 
     const composed = await composeBeforeAfter(oldUrl, newUrl).catch((err) => {
-      console.warn(`[userUpdate] Error al componer imagen before/after para ${newUser.tag}:`, err.message);
+      log.warn("userUpdate", `Error al componer imagen before/after para ${newUser.tag}:`, err.message);
       return null;
     });
     const when = fmtNow();
@@ -60,13 +61,13 @@ export default async function userUpdate(client, oldUser, newUser) {
       const file = new AttachmentBuilder(composed, { name: "avatar-before-after.png" });
       embed.setImage("attachment://avatar-before-after.png");
       await logCh.send({ embeds: [embed], files: [file] }).catch((err) => {
-        console.error(`[userUpdate] Error al enviar log de avatar con imagen compuesta en ${guild.name}:`, err.message);
+        log.error("userUpdate", `Error al enviar log de avatar con imagen compuesta en ${guild.name}:`, err.message);
       });
     } else {
       const fallback = newUrl ?? oldUrl ?? null;
       if (fallback) embed.setImage(fallback);
       await logCh.send({ embeds: [embed] }).catch((err) => {
-        console.error(`[userUpdate] Error al enviar log de avatar en ${guild.name}:`, err.message);
+        log.error("userUpdate", `Error al enviar log de avatar en ${guild.name}:`, err.message);
       });
     }
   }

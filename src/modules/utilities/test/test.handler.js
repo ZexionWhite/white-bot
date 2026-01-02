@@ -1,8 +1,8 @@
 import { ActionRowBuilder, StringSelectMenuBuilder, EmbedBuilder, MessageFlags } from "discord.js";
-import { welcomeEmbed, logJoinEmbed } from "../../../embeds/welcome.js";
-import { boosterEmbed } from "../../../embeds/boost.js";
-import { configEmbed } from "../../../embeds/config.js";
-import { voiceStateEmbed } from "../../../embeds/voice.js";
+import { welcomeEmbed, logJoinEmbed } from "../../settings/ui/welcome.js";
+import { boosterEmbed } from "../../settings/ui/boost.js";
+import { configEmbed } from "../ui/config.js";
+import { voiceStateEmbed } from "../../settings/ui/voice.js";
 import { createModlogEmbed, createCaseEmbed, createHistoryEmbed, createSuccessEmbed, createErrorEmbed } from "../../moderation/ui/embeds.js";
 import { createUserinfoOverview, createUserinfoSanctions, createUserinfoVoice, createUserinfoMessages, createUserinfoPermissions, createUserinfoStatistics } from "../../info/ui/embeds.js";
 import { createBlacklistEmbed, createBlacklistHistoryEmbed } from "../../blacklist/ui/embeds.js";

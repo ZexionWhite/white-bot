@@ -1,5 +1,5 @@
 import { PermissionFlagsBits } from "discord.js";
-import { voiceModEmbed, createVoiceModComponents } from "../../utils/embeds.js";
+import { voiceModEmbed, createVoiceModComponents } from "./voice/embeds.js";
 
 export default async function handleVoiceMod(client, itx) {
   if (!itx.memberPermissions.has(PermissionFlagsBits.MuteMembers) && 

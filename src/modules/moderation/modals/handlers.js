@@ -29,7 +29,7 @@ export async function handleModerationModal(itx) {
     });
   }
 
-  const pendingAction = getPendingAction(actionId);
+  const pendingAction = await getPendingAction(actionId);
   if (!pendingAction) {
     return itx.reply({ 
       embeds: [createErrorEmbed("This action has expired or doesn't exist")], 
@@ -67,7 +67,7 @@ export async function handleModerationModal(itx) {
   const validatedReason = validation.reason;
 
   // Delete pending action
-  deletePendingAction(actionId);
+  await deletePendingAction(actionId);
 
   // Route to appropriate handler
   try {

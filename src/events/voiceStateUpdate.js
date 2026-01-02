@@ -1,5 +1,5 @@
 import { getSettings, startVoiceSession, endVoiceSession, getVoiceSession, incrementVoiceTime } from "../db.js";
-import { voiceStateEmbed } from "../utils/embeds.js";
+import { voiceStateEmbed } from "../modules/settings/ui/voice.js";
 import * as VoiceRepo from "../modules/moderation/db/voice.repo.js";
 
 export default async function voiceStateUpdate(client, oldState, newState) {
@@ -32,14 +32,14 @@ export default async function voiceStateUpdate(client, oldState, newState) {
           try {
             incrementVoiceTime.run(guildId, userId, durationSeconds);
           } catch (err) {
-            console.error(`[voiceStateUpdate] Error al incrementar tiempo de voz para ${member.user.tag} en ${guild.name}:`, err.message);
+            log.error("voiceStateUpdate", `Error al incrementar tiempo de voz para ${member.user.tag} en ${guild.name}:`, err.message);
           }
         }
         
         try {
           endVoiceSession.run(guildId, userId);
         } catch (err) {
-          console.error(`[voiceStateUpdate] Error al finalizar sesión de voz para ${member.user.tag} en ${guild.name}:`, err.message);
+          log.error("voiceStateUpdate", `Error al finalizar sesión de voz para ${member.user.tag} en ${guild.name}:`, err.message);
         }
       }
     }
@@ -50,7 +50,7 @@ export default async function voiceStateUpdate(client, oldState, newState) {
         VoiceRepo.insertVoiceActivity.run(guildId, userId, "JOIN", newChannelId, now);
         VoiceRepo.cleanupOldVoiceActivity.run(guildId, userId, guildId, userId);
       } catch (err) {
-        console.error(`[voiceStateUpdate] Error al iniciar sesión de voz para ${member.user.tag} en ${guild.name}:`, err.message);
+        log.error("voiceStateUpdate", `Error al iniciar sesión de voz para ${member.user.tag} en ${guild.name}:`, err.message);
       }
     }
 
@@ -59,7 +59,7 @@ export default async function voiceStateUpdate(client, oldState, newState) {
         VoiceRepo.insertVoiceActivity.run(guildId, userId, "MOVE", newChannelId, now);
         VoiceRepo.cleanupOldVoiceActivity.run(guildId, userId, guildId, userId);
       } catch (err) {
-        console.error(`[voiceStateUpdate] Error al registrar movimiento de voz:`, err.message);
+        log.error("voiceStateUpdate", `Error al registrar movimiento de voz:`, err.message);
       }
     }
 
@@ -68,12 +68,12 @@ export default async function voiceStateUpdate(client, oldState, newState) {
         VoiceRepo.insertVoiceActivity.run(guildId, userId, "LEAVE", oldChannelId, now);
         VoiceRepo.cleanupOldVoiceActivity.run(guildId, userId, guildId, userId);
       } catch (err) {
-        console.error(`[voiceStateUpdate] Error al registrar salida de voz:`, err.message);
+        log.error("voiceStateUpdate", `Error al registrar salida de voz:`, err.message);
       }
     }
 
-    const { updateVoiceModEmbed } = await import("../utils/voiceMod.js").catch((err) => {
-      console.error(`[voiceStateUpdate] Error al importar updateVoiceModEmbed:`, err.message);
+    const { updateVoiceModEmbed } = await import("../modules/moderation/voice/utils.js").catch((err) => {
+      log.error("voiceStateUpdate", `Error al importar updateVoiceModEmbed:`, err.message);
       return {};
     });
     
@@ -115,7 +115,7 @@ export default async function voiceStateUpdate(client, oldState, newState) {
     if (!logId) return;
 
     const logCh = await guild.channels.fetch(logId).catch((err) => {
-      console.error(`[voiceStateUpdate] Error al obtener canal de logs de voz ${logId} en ${guild.name}:`, err.message);
+      log.error("voiceStateUpdate", `Error al obtener canal de logs de voz ${logId} en ${guild.name}:`, err.message);
       return null;
     });
     if (!logCh?.isTextBased()) return;
@@ -124,10 +124,10 @@ export default async function voiceStateUpdate(client, oldState, newState) {
     if (!embed) return;
 
     await logCh.send({ embeds: [embed] }).catch((err) => {
-      console.error(`[voiceStateUpdate] Error al enviar log de voz en ${guild.name}:`, err.message);
+      log.error("voiceStateUpdate", `Error al enviar log de voz en ${guild.name}:`, err.message);
     });
   } catch (error) {
-    console.error(`[voiceStateUpdate] Error inesperado:`, error.message);
+    log.error("voiceStateUpdate", "Error inesperado:", error.message);
   }
 }
 

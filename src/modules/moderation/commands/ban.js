@@ -22,7 +22,7 @@ export async function handle(itx) {
 
   // Create pending action
   const payload = { targetId: target.id, deleteDays };
-  const actionId = createPendingAction(itx.guild.id, itx.user.id, "ban", payload);
+  const actionId = await createPendingAction(itx.guild.id, itx.user.id, "ban", payload);
 
   // Create and show modal
   const modal = createReasonModal("ban", "Ban: Reason", `pending:${actionId}`, "Explain briefly what happened...");

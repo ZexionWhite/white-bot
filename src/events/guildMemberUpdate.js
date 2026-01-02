@@ -1,9 +1,10 @@
 import { EmbedBuilder, AttachmentBuilder, AuditLogEvent } from "discord.js";
-import { boosterEmbed } from "../utils/embeds.js";
+import { boosterEmbed } from "../modules/settings/ui/boost.js";
 import { getSettings } from "../db.js";
 import { TZ } from "../config.js";
 import { composeBeforeAfter } from "../utils/beforeAfter.js";
 import { EMOJIS } from "../config/emojis.js";
+import { log } from "../core/logger/index.js";
 
 export default async function guildMemberUpdate(client, oldM, newM) {
   const cfg = getSettings.get(newM.guild.id) ?? {};
@@ -13,11 +14,11 @@ export default async function guildMemberUpdate(client, oldM, newM) {
   const started = !had && has;
 
   if (started) {
-    console.log(`[guildMemberUpdate] Boost detectado: ${newM.user.tag} en ${newM.guild.name}`);
+    log.info("guildMemberUpdate", `Boost detectado: ${newM.user.tag} en ${newM.guild.name}`);
     const channelId = cfg?.booster_announce_channel_id;
     if (channelId) {
       const ch = await newM.guild.channels.fetch(channelId).catch((err) => {
-        console.error(`[guildMemberUpdate] Error al obtener canal de boost ${channelId} en ${newM.guild.name}:`, err.message);
+        log.error("guildMemberUpdate", `Error al obtener canal de boost ${channelId} en ${newM.guild.name}:`, err.message);
         return null;
       });
       if (ch?.isTextBased()) {
@@ -28,11 +29,11 @@ export default async function guildMemberUpdate(client, oldM, newM) {
 
         const embed = boosterEmbed(newM, { boosterRoleId, infoChannelId });
         await ch.send({ embeds: [embed] }).catch((err) => {
-          console.error(`[guildMemberUpdate] Error al enviar anuncio de boost en ${newM.guild.name}:`, err.message);
+          log.error("guildMemberUpdate", `Error al enviar anuncio de boost en ${newM.guild.name}:`, err.message);
         });
       }
     } else {
-      console.log(`[guildMemberUpdate] Boost detectado pero no hay canal configurado en ${newM.guild.name}`);
+      log.debug("guildMemberUpdate", `Boost detectado pero no hay canal configurado en ${newM.guild.name}`);
     }
   }
 
@@ -80,13 +81,13 @@ export default async function guildMemberUpdate(client, oldM, newM) {
             const file = new AttachmentBuilder(composed, { name: "server-avatar-before-after.png" });
             embed.setImage("attachment://server-avatar-before-after.png");
             await logCh.send({ embeds: [embed], files: [file] }).catch((err) => {
-              console.error(`[guildMemberUpdate] Error al enviar log de avatar de servidor con imagen compuesta en ${newM.guild.name}:`, err.message);
+              log.error("guildMemberUpdate", `Error al enviar log de avatar de servidor con imagen compuesta en ${newM.guild.name}:`, err.message);
             });
           } else {
             const fallback = newServerUrl ?? oldServerUrl ?? null;
             if (fallback) embed.setImage(fallback);
             await logCh.send({ embeds: [embed] }).catch((err) => {
-              console.error(`[guildMemberUpdate] Error al enviar log de avatar de servidor en ${newM.guild.name}:`, err.message);
+              log.error("guildMemberUpdate", `Error al enviar log de avatar de servidor en ${newM.guild.name}:`, err.message);
             });
           }
         }
@@ -102,11 +103,11 @@ export default async function guildMemberUpdate(client, oldM, newM) {
       const nickLogId = cfg?.nickname_log_channel_id;
       if (nickLogId) {
         const ch = await newM.guild.channels.fetch(nickLogId).catch((err) => {
-          console.error(`[guildMemberUpdate] Error al obtener canal de logs de nickname ${nickLogId} en ${newM.guild.name}:`, err.message);
+          log.error("guildMemberUpdate", `Error al obtener canal de logs de nickname ${nickLogId} en ${newM.guild.name}:`, err.message);
           return null;
         });
         if (ch?.isTextBased()) {
-          console.log(`[guildMemberUpdate] Nickname cambiado: ${newM.user.tag} en ${newM.guild.name} (${oldM?.displayName} → ${newM.displayName})`);
+          log.info("guildMemberUpdate", `Nickname cambiado: ${newM.user.tag} en ${newM.guild.name} (${oldM?.displayName} → ${newM.displayName})`);
           let executorText = "(unknown)";
           try {
             const logs = await newM.guild.fetchAuditLogs({ type: AuditLogEvent.MemberUpdate, limit: 5 });
@@ -123,7 +124,7 @@ export default async function guildMemberUpdate(client, oldM, newM) {
               }
             }
           } catch (err) {
-            console.warn(`[guildMemberUpdate] Error al obtener audit log para nickname:`, err.message);
+            log.warn("guildMemberUpdate", `Error al obtener audit log para nickname:`, err.message);
           }
 
           const when = new Intl.DateTimeFormat("es-AR", {
@@ -152,7 +153,7 @@ export default async function guildMemberUpdate(client, oldM, newM) {
             });
 
           await ch.send({ embeds: [embed] }).catch((err) => {
-            console.error(`[guildMemberUpdate] Error al enviar log de nickname en ${newM.guild.name}:`, err.message);
+            log.error("guildMemberUpdate", `Error al enviar log de nickname en ${newM.guild.name}:`, err.message);
           });
         }
       }

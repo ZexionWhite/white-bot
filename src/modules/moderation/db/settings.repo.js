@@ -23,7 +23,8 @@ export function updateGuildSettings(guildId, updates) {
     modlog_channel_id: updates.modlog_channel_id ?? current.modlog_channel_id ?? null,
     blacklist_channel_id: updates.blacklist_channel_id ?? current.blacklist_channel_id ?? null,
     mute_role_id: updates.mute_role_id ?? current.mute_role_id ?? null,
-    dm_on_punish: updates.dm_on_punish ?? current.dm_on_punish ?? 1
+    dm_on_punish: updates.dm_on_punish ?? current.dm_on_punish ?? 1,
+    command_prefix: updates.command_prefix ?? current.command_prefix ?? "capy!"
   });
 }
 

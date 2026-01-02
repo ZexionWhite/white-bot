@@ -2,6 +2,7 @@ import { EmbedBuilder } from "discord.js";
 import { getSettings } from "../db.js";
 import { TZ } from "../config.js";
 import { EMOJIS } from "../config/emojis.js";
+import { log } from "../core/logger/index.js";
 
 function truncate(str, n = 1000) {
   if (!str) return "(no content)";
@@ -18,16 +19,16 @@ export default async function messageUpdate(client, oldMessage, newMessage) {
   if (!logId) return;
 
   const logCh = await newMessage.guild.channels.fetch(logId).catch((err) => {
-    console.error(`[messageUpdate] Error al obtener canal de logs ${logId} en ${newMessage.guild.name}:`, err.message);
+    log.error("messageUpdate", `Error al obtener canal de logs ${logId} en ${newMessage.guild.name}:`, err.message);
     return null;
   });
   if (!logCh?.isTextBased()) return;
 
   try { if (oldMessage?.partial) oldMessage = await oldMessage.fetch(); } catch (err) {
-    console.warn(`[messageUpdate] Error al fetch oldMessage parcial:`, err.message);
+    log.warn("messageUpdate", `Error al fetch oldMessage parcial:`, err.message);
   }
   try { if (newMessage?.partial) newMessage = await newMessage.fetch(); } catch (err) {
-    console.warn(`[messageUpdate] Error al fetch newMessage parcial:`, err.message);
+    log.warn("messageUpdate", `Error al fetch newMessage parcial:`, err.message);
   }
 
   const before = oldMessage?.content ?? "(uncached)";
@@ -73,6 +74,6 @@ export default async function messageUpdate(client, oldMessage, newMessage) {
     });
 
   await logCh.send({ embeds: [embed] }).catch((err) => {
-    console.error(`[messageUpdate] Error al enviar log de edición en ${newMessage.guild.name}:`, err.message);
+    log.error("messageUpdate", `Error al enviar log de edición en ${newMessage.guild.name}:`, err.message);
   });
 }

@@ -27,7 +27,7 @@ export async function handle(itx) {
 
   // Create pending action
   const payload = { caseId, severity: newSeverity ? newSeverity.toUpperCase() : null };
-  const actionId = createPendingAction(itx.guild.id, itx.user.id, "blacklist.edit", payload);
+  const actionId = await createPendingAction(itx.guild.id, itx.user.id, "blacklist.edit", payload);
 
   // Create and show modal
   const modal = createBlacklistModal(`pending:${actionId}`, true);

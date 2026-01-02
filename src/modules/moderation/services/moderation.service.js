@@ -208,7 +208,24 @@ export async function ban(guild, targetId, moderator, reason, deleteDays = 0) {
     reason
   );
 
-  return { case: case_ };
+  // Try to send DM (user might not be in server, so might fail)
+  let dmSent = false;
+  try {
+    const target = await guild.client.users.fetch(targetId);
+    dmSent = await DmService.sendPunishmentDM(
+      target,
+      "BAN",
+      reason,
+      case_.id,
+      guild.name,
+      null,
+      case_.created_at
+    );
+  } catch (error) {
+    // User not found or DMs disabled, ignore
+  }
+
+  return { case: case_, dmSent };
 }
 
 export async function tempban(guild, targetId, moderator, reason, duration) {
@@ -229,9 +246,10 @@ export async function tempban(guild, targetId, moderator, reason, duration) {
   );
 
   // Try to send DM (user might not be in server, so might fail)
+  let dmSent = false;
   try {
     const target = await guild.client.users.fetch(targetId);
-    await DmService.sendPunishmentDM(
+    dmSent = await DmService.sendPunishmentDM(
       target,
       "TEMPBAN",
       reason,
@@ -244,7 +262,7 @@ export async function tempban(guild, targetId, moderator, reason, duration) {
     // User not found or DMs disabled, ignore
   }
 
-  return { case: case_ };
+  return { case: case_, dmSent };
 }
 
 export async function softban(guild, targetId, moderator, reason, deleteDays = 1) {
@@ -284,6 +302,23 @@ export async function unban(guild, targetId, moderator, reason) {
     reason
   );
 
-  return { case: case_ };
+  // Try to send DM (user might not be in server, so might fail)
+  let dmSent = false;
+  try {
+    const target = await guild.client.users.fetch(targetId);
+    dmSent = await DmService.sendPunishmentDM(
+      target,
+      "UNBAN",
+      reason,
+      case_.id,
+      guild.name,
+      null,
+      case_.created_at
+    );
+  } catch (error) {
+    // User not found or DMs disabled, ignore
+  }
+
+  return { case: case_, dmSent };
 }
 

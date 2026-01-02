@@ -143,17 +143,9 @@ export async function registerModerationExtraPrefixCommands() {
           "Unban aplicado"
         );
         
-        const SettingsRepo = await import("../db/settings.repo.js");
-        const settings = await SettingsRepo.getGuildSettings(ctx.guild.id);
-        if (settings.modlog_channel_id) {
-          const modlogChannel = await ctx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
-          if (modlogChannel?.isTextBased()) {
-            const target = await ctx.raw.client.users.fetch(userId).catch(() => ({ id: userId }));
-            const { createModlogEmbed } = await import("../ui/embeds.js");
-            const embed = createModlogEmbed(case_, target, ctx.member.user);
-            await modlogChannel.send({ embeds: [embed] });
-          }
-        }
+        const ModlogService = await import("../services/modlog.service.js");
+        const target = await ctx.raw.client.users.fetch(userId).catch(() => ({ id: userId }));
+        await ModlogService.sendToModlog(ctx.guild, case_, target, ctx.member.user, null);
         
         return ctx.reply({ content: `✅ Usuario desbaneado. Case #${case_.id}` });
       }

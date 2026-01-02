@@ -2,6 +2,7 @@ import * as ModService from "../services/moderation.service.js";
 import * as PermService from "../services/permissions.service.js";
 import * as CasesService from "../services/cases.service.js";
 import * as SettingsRepo from "../db/settings.repo.js";
+import * as ModlogService from "../services/modlog.service.js";
 import { createModlogEmbed, createSuccessEmbed, createErrorEmbed, createCaseEmbed } from "../ui/embeds.js";
 import { createSanctionMessage } from "../ui/messages.js";
 import { getPendingAction, deletePendingAction, validateReason } from "./helpers.js";
@@ -141,14 +142,7 @@ async function handleWarnModal(itx, payload, reason) {
 
   const { case: case_, dmSent } = await ModService.warn(itx.guild, target, moderator, reason);
 
-  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
-  if (settings.modlog_channel_id) {
-    const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
-    if (modlogChannel) {
-      const embed = createModlogEmbed(case_, target.user, itx.user, dmSent);
-      await modlogChannel.send({ embeds: [embed] });
-    }
-  }
+  await ModlogService.sendToModlog(itx.guild, case_, target.user, itx.user, dmSent);
 
   return itx.reply({ content: createSanctionMessage("warn", target.user, case_.id) });
 }
@@ -187,13 +181,7 @@ async function handleMuteModal(itx, payload, reason) {
 
   const { case: case_, dmSent } = await ModService.mute(itx.guild, target, moderator, reason, duration);
 
-  if (settings.modlog_channel_id) {
-    const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
-    if (modlogChannel) {
-      const embed = createModlogEmbed(case_, target.user, itx.user, dmSent);
-      await modlogChannel.send({ embeds: [embed] });
-    }
-  }
+  await ModlogService.sendToModlog(itx.guild, case_, target.user, itx.user, dmSent);
 
   return itx.reply({ content: createSanctionMessage("mute", target.user, case_.id) });
 }
@@ -253,14 +241,7 @@ async function handleTimeoutModal(itx, payload, reason) {
 
   const { case: case_, dmSent } = await ModService.timeout(itx.guild, target, moderator, reason, duration);
 
-  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
-  if (settings.modlog_channel_id) {
-    const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
-    if (modlogChannel) {
-      const embed = createModlogEmbed(case_, target.user, itx.user, dmSent);
-      await modlogChannel.send({ embeds: [embed] });
-    }
-  }
+  await ModlogService.sendToModlog(itx.guild, case_, target.user, itx.user, dmSent);
 
   return itx.reply({ content: createSanctionMessage("timeout", target.user, case_.id) });
 }
@@ -311,14 +292,7 @@ async function handleKickModal(itx, payload, reason) {
 
   const { case: case_, dmSent } = await ModService.kick(itx.guild, target, moderator, reason);
 
-  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
-  if (settings.modlog_channel_id) {
-    const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
-    if (modlogChannel) {
-      const embed = createModlogEmbed(case_, target.user, itx.user, dmSent);
-      await modlogChannel.send({ embeds: [embed] });
-    }
-  }
+  await ModlogService.sendToModlog(itx.guild, case_, target.user, itx.user, dmSent);
 
   return itx.reply({ content: createSanctionMessage("kick", target.user, case_.id) });
 }
@@ -340,16 +314,9 @@ async function handleBanModal(itx, payload, reason) {
 
   const deleteDays = payload.deleteDays || 0;
 
-  const { case: case_, dmSent } = await ModService.ban(itx.guild, target, moderator, reason, deleteDays);
+  const { case: case_, dmSent } = await ModService.ban(itx.guild, target.id, moderator, reason, deleteDays);
 
-  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
-  if (settings.modlog_channel_id) {
-    const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
-    if (modlogChannel) {
-      const embed = createModlogEmbed(case_, target.user, itx.user, dmSent);
-      await modlogChannel.send({ embeds: [embed] });
-    }
-  }
+  await ModlogService.sendToModlog(itx.guild, case_, target.user, itx.user, dmSent);
 
   return itx.reply({ content: createSanctionMessage("ban", target.user, case_.id) });
 }
@@ -374,16 +341,9 @@ async function handleTempbanModal(itx, payload, reason) {
     return itx.reply({ embeds: [createErrorEmbed("Duration is required")], ephemeral: true });
   }
 
-  const { case: case_ } = await ModService.tempban(itx.guild, payload.targetId, moderator, reason, duration);
+  const { case: case_, dmSent } = await ModService.tempban(itx.guild, payload.targetId, moderator, reason, duration);
 
-  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
-  if (settings.modlog_channel_id) {
-    const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
-    if (modlogChannel) {
-      const embed = createModlogEmbed(case_, target.user, itx.user, null);
-      await modlogChannel.send({ embeds: [embed] });
-    }
-  }
+  await ModlogService.sendToModlog(itx.guild, case_, target.user, itx.user, dmSent);
 
   return itx.reply({ content: createSanctionMessage("tempban", target.user, case_.id) });
 }
@@ -434,14 +394,7 @@ async function handleUnbanModal(itx, payload, reason) {
 
   const { case: case_, dmSent } = await ModService.unban(itx.guild, targetId, moderator, reason);
 
-  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
-  if (settings.modlog_channel_id) {
-    const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
-    if (modlogChannel) {
-      const embed = createModlogEmbed(case_, { id: targetId, tag: ban.user.tag }, itx.user, dmSent);
-      await modlogChannel.send({ embeds: [embed] });
-    }
-  }
+  await ModlogService.sendToModlog(itx.guild, case_, ban.user, itx.user, dmSent);
 
   return itx.reply({ content: createSanctionMessage("unban", { id: targetId }, case_.id) });
 }

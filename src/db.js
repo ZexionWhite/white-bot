@@ -139,6 +139,7 @@ ensureColumn("guild_settings", "modlog_channel_id", "modlog_channel_id TEXT");
 ensureColumn("guild_settings", "blacklist_channel_id", "blacklist_channel_id TEXT");
 ensureColumn("guild_settings", "mute_role_id", "mute_role_id TEXT");
 ensureColumn("guild_settings", "dm_on_punish", "dm_on_punish INTEGER DEFAULT 1");
+ensureColumn("guild_settings", "command_prefix", "command_prefix TEXT DEFAULT 'capy!'");
 
 export const getSettings = db.prepare(`
   SELECT *
@@ -164,7 +165,8 @@ export const upsertSettings = db.prepare(`
     modlog_channel_id,
     blacklist_channel_id,
     mute_role_id,
-    dm_on_punish
+    dm_on_punish,
+    command_prefix
   )
   VALUES (
     @guild_id,
@@ -183,7 +185,8 @@ export const upsertSettings = db.prepare(`
     @modlog_channel_id,
     @blacklist_channel_id,
     @mute_role_id,
-    @dm_on_punish
+    @dm_on_punish,
+    @command_prefix
   )
   ON CONFLICT(guild_id) DO UPDATE SET
     welcome_channel_id           = excluded.welcome_channel_id,
@@ -201,7 +204,8 @@ export const upsertSettings = db.prepare(`
     modlog_channel_id            = excluded.modlog_channel_id,
     blacklist_channel_id         = excluded.blacklist_channel_id,
     mute_role_id                 = excluded.mute_role_id,
-    dm_on_punish                 = excluded.dm_on_punish;
+    dm_on_punish                 = excluded.dm_on_punish,
+    command_prefix               = excluded.command_prefix;
 `);
 
 export const insertColorRole = db.prepare(`

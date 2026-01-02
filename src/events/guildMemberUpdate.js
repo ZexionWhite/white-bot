@@ -1,5 +1,5 @@
 import { EmbedBuilder, AttachmentBuilder, AuditLogEvent } from "discord.js";
-import { boosterEmbed } from "../utils/embeds.js";
+import { boosterEmbed } from "../modules/settings/ui/boost.js";
 import { getSettings } from "../db.js";
 import { TZ } from "../config.js";
 import { composeBeforeAfter } from "../utils/beforeAfter.js";

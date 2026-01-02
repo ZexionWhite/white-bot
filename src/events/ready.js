@@ -1,6 +1,6 @@
 import { startAvatarScheduler } from "../utils/avatarManager.js";
 import { showBanner } from "../utils/consoleBanner.js";
-import { startTempbanScheduler } from "../utils/tempbanScheduler.js";
+import { startTempbanScheduler } from "../modules/moderation/schedulers/tempban.js";
 import { startActivityRotator } from "../utils/activityRotator.js";
 
 let avatarInterval = null;

@@ -24,7 +24,12 @@ export async function handle(itx) {
       message_log_channel_id: row.message_log_channel_id ?? null,
       avatar_log_channel_id: row.avatar_log_channel_id ?? null,
       nickname_log_channel_id: channel.id,
-      voice_log_channel_id: row.voice_log_channel_id ?? null
+      voice_log_channel_id: row.voice_log_channel_id ?? null,
+      modlog_channel_id: row.modlog_channel_id ?? null,
+      blacklist_channel_id: row.blacklist_channel_id ?? null,
+      mute_role_id: row.mute_role_id ?? null,
+      dm_on_punish: row.dm_on_punish ?? 1,
+      command_prefix: row.command_prefix ?? "capy!"
     });
     console.log(`[settings/nickname-log] Canal configurado a ${channel.name} (${channel.id}) en ${itx.guild.name}`);
   } catch (err) {

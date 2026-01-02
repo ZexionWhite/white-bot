@@ -1,7 +1,7 @@
-import * as CasesService from "../modules/moderation/services/cases.service.js";
-import * as SettingsRepo from "../modules/moderation/db/settings.repo.js";
-import * as CasesRepo from "../modules/moderation/db/cases.repo.js";
-import { createModlogEmbed } from "../modules/moderation/ui/embeds.js";
+import * as CasesService from "../services/cases.service.js";
+import * as SettingsRepo from "../db/settings.repo.js";
+import * as CasesRepo from "../db/cases.repo.js";
+import { createModlogEmbed } from "../ui/embeds.js";
 
 export function startTempbanScheduler(client) {
   console.log("[SanctionScheduler] Iniciando scheduler de sanciones temporales...");
@@ -133,4 +133,3 @@ export function startTempbanScheduler(client) {
 
   console.log("[SanctionScheduler] Scheduler started (check every 60s)");
 }
-

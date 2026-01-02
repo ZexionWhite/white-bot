@@ -1,112 +1,13 @@
-import { EmbedBuilder, PermissionFlagsBits, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
-import { TZ } from "../config.js";
-import { formatDuration } from "../utils/time.js";
-import { EMOJIS } from "../config/emojis.js";
+import { ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, PermissionFlagsBits } from "discord.js";
+import { EMOJIS } from "../../../config/emojis.js";
 
-export function voiceStateEmbed(oldState, newState, session = null) {
-  const when = new Intl.DateTimeFormat("es-AR", {
-    dateStyle: "short",
-    timeStyle: "short",
-    timeZone: TZ
-  }).format(new Date());
-
-  const member = newState.member ?? oldState.member;
-  if (!member) return null;
-
-  const username = member.user?.tag ?? member.displayName ?? "Desconocido";
-  const userId = member.id ?? "Desconocido";
-
-  const oldChannel = oldState.channel;
-  const newChannel = newState.channel;
-  const oldChannelId = oldChannel?.id ?? null;
-  const newChannelId = newChannel?.id ?? null;
-
-  let eventType, color, title, description, fields = [];
-
-  if (!oldChannel && newChannel) {
-    eventType = "join";
-    color = 0x2ecc71;
-    title = "🔊 Usuario se unió a voz";
-    description = `**${username}** (\`${userId}\`) se unió a un canal de voz.`;
-    fields.push({
-      name: "Canal",
-      value: `<#${newChannelId}>`,
-      inline: true
-    });
+function parseEmojiMarkdown(markdown, fallback) {
+  if (!markdown || typeof markdown !== "string") return fallback;
+  const match = markdown.match(/^<a?:(\w+):(\d+)>$/);
+  if (match) {
+    return { id: match[2], name: match[1] };
   }
-  else if (oldChannel && !newChannel) {
-    eventType = "leave";
-    color = 0xed4245;
-    title = "🔇 Usuario salió de voz";
-    description = `**${username}** (\`${userId}\`) salió del canal de voz.`;
-    fields.push({
-      name: "Canal anterior",
-      value: `<#${oldChannelId}>`,
-      inline: true
-    });
-    
-    if (session) {
-      const now = Date.now();
-      const durationSeconds = Math.floor((now - session.join_timestamp) / 1000);
-      if (durationSeconds > 0) {
-        fields.push({
-          name: "Tiempo en canal",
-          value: formatDuration(durationSeconds),
-          inline: true
-        });
-      }
-    }
-  }
-  else if (oldChannel && newChannel && oldChannelId !== newChannelId) {
-    eventType = "move";
-    color = 0xf1c40f;
-    title = "🔄 Usuario se movió de canal";
-    description = `**${username}** (\`${userId}\`) cambió de canal de voz.`;
-    fields.push(
-      {
-        name: "Desde",
-        value: `<#${oldChannelId}>`,
-        inline: true
-      },
-      {
-        name: "Hacia",
-        value: `<#${newChannelId}>`,
-        inline: true
-      }
-    );
-    
-    if (session) {
-      const now = Date.now();
-      const durationSeconds = Math.floor((now - session.join_timestamp) / 1000);
-      if (durationSeconds > 0) {
-        fields.push({
-          name: "Tiempo en canal anterior",
-          value: formatDuration(durationSeconds),
-          inline: true
-        });
-      }
-    }
-  }
-  else {
-    return null;
-  }
-
-  const embed = new EmbedBuilder()
-    .setTitle(title)
-    .setDescription(description)
-    .setColor(color)
-    .addFields(fields)
-    .setTimestamp()
-    .setFooter({
-      text: `Voice state update • ${when}`,
-      iconURL: member.guild?.iconURL({ size: 64, extension: "png" }) ?? undefined
-    });
-
-  if (member.user) {
-    embed.setThumbnail(member.user.displayAvatarURL({ size: 128 }));
-  }
-
-  return embed;
+  return fallback;
 }
 
 export function voiceModEmbed(channel, members, moderator, client = null) {
@@ -130,29 +31,29 @@ export function voiceModEmbed(channel, members, moderator, client = null) {
   const memberList = members.map((member) => {
     let muteIcon;
     if (member.voice.serverMute) {
-      muteIcon = EMOJIS.VOICE.GUILD_MUTE;
+      muteIcon = EMOJIS.VOICE?.GUILD_MUTE || "🔇";
     }
     else if (member.voice.selfMute) {
-      muteIcon = EMOJIS.VOICE.LOCAL_MUTED;
+      muteIcon = EMOJIS.VOICE?.LOCAL_MUTED || "🔇";
     } else {
-      muteIcon = EMOJIS.VOICE.UNMUTED;
+      muteIcon = EMOJIS.VOICE?.UNMUTED || "🔊";
     }
     
     let deafIcon;
     if (member.voice.serverDeaf) {
-      deafIcon = EMOJIS.VOICE.GUILD_DEAFEN;
+      deafIcon = EMOJIS.VOICE?.GUILD_DEAFEN || "🔇";
     }
     else if (member.voice.selfDeaf) {
-      deafIcon = EMOJIS.VOICE.LOCAL_DEAFEN;
+      deafIcon = EMOJIS.VOICE?.LOCAL_DEAFEN || "🔇";
     } else {
-      deafIcon = EMOJIS.VOICE.UNDEAFEN;
+      deafIcon = EMOJIS.VOICE?.UNDEAFEN || "🔊";
     }
     
     let roleIcons = "";
     if (isOwner(member)) {
-      roleIcons += EMOJIS.ROLES.OWNER;
+      roleIcons += EMOJIS.ROLES?.OWNER || "👑";
     } else if (isModerator(member)) {
-      roleIcons += EMOJIS.ROLES.STAFF;
+      roleIcons += EMOJIS.ROLES?.STAFF || "🛡️";
     }
 
     return `${muteIcon}${deafIcon} <@${member.id}> ${roleIcons}`;
@@ -168,23 +69,12 @@ export function voiceModEmbed(channel, members, moderator, client = null) {
   return embed;
 }
 
-function parseEmojiMarkdown(markdown, fallback) {
-  if (!markdown || typeof markdown !== 'string') return fallback;
-  
-  const match = markdown.match(/^<a?:(\w+):(\d+)>$/);
-  if (match) {
-    return { id: match[2], name: match[1] };
-  }
-  
-  return fallback;
-}
-
 export function createVoiceModComponents(channel, members, moderator, targetMember = null, client = null) {
-  const muteEmoji = parseEmojiMarkdown(EMOJIS.VOICE.GUILD_MUTE, "🔇");
-  const unmutedEmoji = parseEmojiMarkdown(EMOJIS.VOICE.UNMUTED, "🔊");
-  const refreshEmoji = parseEmojiMarkdown(EMOJIS.ACTIONS.REFRESH, "🔄");
-  const moveOutEmoji = parseEmojiMarkdown(EMOJIS.ACTIONS.MOVE_OUT, "👥");
-  const moveInEmoji = parseEmojiMarkdown(EMOJIS.ACTIONS.MOVE_IN, "🔊");
+  const muteEmoji = parseEmojiMarkdown(EMOJIS.VOICE?.GUILD_MUTE, "🔇");
+  const unmutedEmoji = parseEmojiMarkdown(EMOJIS.VOICE?.UNMUTED, "🔊");
+  const refreshEmoji = parseEmojiMarkdown(EMOJIS.ACTIONS?.REFRESH, "🔄");
+  const moveOutEmoji = parseEmojiMarkdown(EMOJIS.ACTIONS?.MOVE_OUT, "👥");
+  const moveInEmoji = parseEmojiMarkdown(EMOJIS.ACTIONS?.MOVE_IN, "🔊");
 
   const menuOptions = [
     {
@@ -274,4 +164,3 @@ export function createVoiceModComponents(channel, members, moderator, targetMemb
 
   return [menuRow, quickButtons];
 }
-

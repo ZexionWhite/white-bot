@@ -1,5 +1,6 @@
 import { PermissionFlagsBits } from "discord.js";
-import { welcomeEmbed, boosterEmbed } from "../../utils/embeds.js";
+import { welcomeEmbed } from "../settings/ui/welcome.js";
+import { boosterEmbed } from "../settings/ui/boost.js";
 import { getSettings } from "../../db.js";
 
 export default async function handlePreview(itx) {

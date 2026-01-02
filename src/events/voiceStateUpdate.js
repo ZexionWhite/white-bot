@@ -1,5 +1,5 @@
 import { getSettings, startVoiceSession, endVoiceSession, getVoiceSession, incrementVoiceTime } from "../db.js";
-import { voiceStateEmbed } from "../utils/embeds.js";
+import { voiceStateEmbed } from "../modules/settings/ui/voice.js";
 import * as VoiceRepo from "../modules/moderation/db/voice.repo.js";
 
 export default async function voiceStateUpdate(client, oldState, newState) {
@@ -72,7 +72,7 @@ export default async function voiceStateUpdate(client, oldState, newState) {
       }
     }
 
-    const { updateVoiceModEmbed } = await import("../utils/voiceMod.js").catch((err) => {
+    const { updateVoiceModEmbed } = await import("../modules/moderation/voice/utils.js").catch((err) => {
       console.error(`[voiceStateUpdate] Error al importar updateVoiceModEmbed:`, err.message);
       return {};
     });

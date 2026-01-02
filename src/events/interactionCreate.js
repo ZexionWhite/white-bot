@@ -1,7 +1,7 @@
 import { PermissionFlagsBits } from "discord.js";
 import * as utilitiesModule from "../modules/utilities/index.js";
 import { commandHandlers, componentHandlers, autocompleteHandlers } from "../modules/registry.js";
-import { handleVoiceModComponent } from "../utils/voiceModHandlers.js";
+import { handleVoiceModComponent } from "../modules/moderation/voice/handlers.js";
 
 export default async function interactionCreate(client, itx) {
   try {

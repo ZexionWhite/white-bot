@@ -1,4 +1,4 @@
-import { welcomeEmbed, logJoinEmbed } from "../utils/embeds.js";
+import { welcomeEmbed, logJoinEmbed } from "../modules/settings/ui/welcome.js";
 import { getSettings, getCooldown, setCooldown } from "../db.js";
 
 export default async function guildMemberAdd(client, member) {

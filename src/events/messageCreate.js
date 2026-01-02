@@ -1,10 +1,17 @@
 import { incrementMessageCount } from "../db.js";
 import * as MessagesRepo from "../modules/moderation/db/messages.repo.js";
+import { handlePrefixCommand } from "../core/commands/adapters/prefixAdapter.js";
 
 export default async function messageCreate(client, message) {
   if (!message.guild) return;
   if (message.author?.bot) return;
   if (message.system) return;
+
+  // Intentar procesar prefix command primero
+  const handled = await handlePrefixCommand(message);
+  if (handled) {
+    return; // Si se procesó un comando, no continuar con el logging
+  }
 
   try {
     incrementMessageCount.run(message.guild.id, message.author.id);

@@ -7,6 +7,7 @@ import * as voiceLog from "./commands/voice-log.js";
 import * as boostChannel from "./commands/boost-channel.js";
 import * as infoChannel from "./commands/info-channel.js";
 import * as boosterRole from "./commands/booster-role.js";
+import * as prefix from "./commands/prefix.js";
 
 export const settingsHandlers = {
   set: async (itx) => {
@@ -21,6 +22,7 @@ export const settingsHandlers = {
     if (subcommand === "boost-channel") return boostChannel.handle(itx);
     if (subcommand === "info-channel") return infoChannel.handle(itx);
     if (subcommand === "booster-role") return boosterRole.handle(itx);
+    if (subcommand === "prefix") return prefix.handle(itx);
     
     return itx.reply({ content: "Subcomando no reconocido.", ephemeral: true });
   }

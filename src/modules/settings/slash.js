@@ -99,4 +99,15 @@ export const settingsSlashCommands = [
           .setRequired(true)
        )
     )
+    .addSubcommand(sc =>
+      sc.setName("prefix")
+       .setDescription("Configura el prefijo de comandos del servidor")
+       .addStringOption(o =>
+         o.setName("prefijo")
+          .setDescription("Nuevo prefijo (ej: '!', 'capy!', 'bot.')")
+          .setRequired(true)
+          .setMinLength(1)
+          .setMaxLength(10)
+       )
+    )
 ];

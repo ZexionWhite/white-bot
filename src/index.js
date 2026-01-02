@@ -6,6 +6,24 @@ import { loadConfig, getEnv } from "./core/config/index.js";
 import { registerEvents, registerProcessHandlers } from "./core/discord/registerEvents.js";
 import { log } from "./core/logger/index.js";
 
+// Registrar prefix commands de todos los módulos
+import { registerModerationPrefixCommands } from "./modules/moderation/commands/prefix.js";
+import { registerUtilitiesPrefixCommands } from "./modules/utilities/commands/prefix.js";
+import { registerInfoPrefixCommands } from "./modules/info/commands/prefix.js";
+
+async function registerAllPrefixCommands() {
+  try {
+    await registerModerationPrefixCommands();
+    await registerUtilitiesPrefixCommands();
+    await registerInfoPrefixCommands();
+    log.info("Prefix commands", "Todos los prefix commands registrados correctamente");
+  } catch (err) {
+    log.error("Prefix commands", "Error registrando prefix commands:", err);
+  }
+}
+
+registerAllPrefixCommands();
+
 // Cargar y validar configuración
 let config;
 try {

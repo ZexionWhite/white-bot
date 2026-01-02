@@ -16,9 +16,10 @@ export default async function handlePreview(itx) {
   const publico = itx.options.getBoolean("publico") ?? false;
 
   if (subcommand === "boost") {
+    const settings = await getSettings.get(itx.guild.id);
     const embed = boosterEmbed(member, {
-      boosterRoleId: getSettings.get(itx.guild.id)?.booster_role_id ?? null,
-      infoChannelId: getSettings.get(itx.guild.id)?.info_channel_id ?? null
+      boosterRoleId: settings?.booster_role_id ?? null,
+      infoChannelId: settings?.info_channel_id ?? null
     });
 
     const forced = itx.options.getInteger("boosts");
@@ -36,7 +37,7 @@ export default async function handlePreview(itx) {
       return itx.reply({ embeds: [embed], ephemeral: true });
     }
 
-    const cfg = getSettings.get(itx.guild.id);
+    const cfg = await getSettings.get(itx.guild.id);
     let ch = null;
     if (cfg?.booster_announce_channel_id) {
       ch = await itx.guild.channels.fetch(cfg.booster_announce_channel_id).catch(() => null);
@@ -48,7 +49,7 @@ export default async function handlePreview(itx) {
   }
 
   if (subcommand === "welcome") {
-    const cfg = getSettings.get(itx.guild.id);
+    const cfg = await getSettings.get(itx.guild.id);
     const embed = welcomeEmbed(member, {
       autorolesChannelId: cfg?.autorole_channel_id ?? null
     });

@@ -20,7 +20,7 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed("You don't have permission to use this command")], ephemeral: true });
   }
 
-  const entry = BlacklistService.getEntry(itx.guild.id, caseId);
+  const entry = await BlacklistService.getEntry(itx.guild.id, caseId);
   if (!entry) {
     return itx.reply({ embeds: [createErrorEmbed(`Entry #${caseId} not found`)], ephemeral: true });
   }

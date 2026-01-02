@@ -18,11 +18,11 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed("No tienes permisos para usar este comando")], ephemeral: true });
   }
 
-  const totalCases = CasesService.countUserCases(itx.guild.id, target.id);
+  const totalCases = await CasesService.countUserCases(itx.guild.id, target.id);
   const totalPages = Math.max(1, Math.ceil(totalCases / CASES_PER_PAGE));
   const page = 1;
 
-  const cases = CasesService.getUserCases(itx.guild.id, target.id, type, CASES_PER_PAGE, 0);
+  const cases = await CasesService.getUserCases(itx.guild.id, target.id, type, CASES_PER_PAGE, 0);
 
   const embed = createHistoryEmbed(cases, target, page, totalPages, type);
   const components = totalPages > 1 ? createPaginationComponents(page, totalPages, `history:${target.id}:${type || "all"}`) : [];

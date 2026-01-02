@@ -107,7 +107,7 @@ async function executeModerationCommand(ctx, commandName, requireDuration = fals
         break;
       case "mute": {
         // Verificar mute role
-        const settings = SettingsRepo.getGuildSettings(ctx.guild.id);
+        const settings = await SettingsRepo.getGuildSettings(ctx.guild.id);
         if (!settings.mute_role_id) {
           return ctx.reply({ content: "❌ No hay rol de mute configurado. Usa /createmuterole o /setmuterole" });
         }
@@ -141,7 +141,7 @@ async function executeModerationCommand(ctx, commandName, requireDuration = fals
   }
   
   // Enviar a modlog
-  const settings = SettingsRepo.getGuildSettings(ctx.guild.id);
+  const settings = await SettingsRepo.getGuildSettings(ctx.guild.id);
   if (settings.modlog_channel_id && result.case) {
     const modlogChannel = await ctx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
     if (modlogChannel?.isTextBased()) {

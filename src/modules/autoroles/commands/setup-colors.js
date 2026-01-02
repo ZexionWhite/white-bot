@@ -38,7 +38,7 @@ export async function handle(itx) {
       }
 
       // Guardar en BD (booster_only se puede configurar después, por ahora todos son false)
-      insertColorRole.run(guild.id, role.id, color.name, color.hex, 0);
+      await insertColorRole.run(guild.id, role.id, color.name, color.hex, 0);
     } catch (error) {
       errors.push(`${color.name}: ${error.message}`);
     }

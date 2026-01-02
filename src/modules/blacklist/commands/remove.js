@@ -14,12 +14,12 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed("No tienes permisos para usar este comando")], ephemeral: true });
   }
 
-  const entry = BlacklistService.getEntry(itx.guild.id, caseId);
+  const entry = await BlacklistService.getEntry(itx.guild.id, caseId);
   if (!entry) {
     return itx.reply({ embeds: [createErrorEmbed(`Entry #${caseId} no encontrado`)], ephemeral: true });
   }
 
-  BlacklistService.deleteEntry(itx.guild.id, caseId, itx.user.id, reason);
+  await BlacklistService.deleteEntry(itx.guild.id, caseId, itx.user.id, reason);
 
   return itx.reply({ embeds: [createSuccessEmbed(`Entry #${caseId} eliminado`)] });
 }

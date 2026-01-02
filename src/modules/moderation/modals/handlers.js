@@ -124,7 +124,7 @@ async function handleWarnModal(itx, payload, reason) {
 
   const { case: case_, dmSent } = await ModService.warn(itx.guild, target, moderator, reason);
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
+  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
   if (settings.modlog_channel_id) {
     const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
     if (modlogChannel) {
@@ -236,7 +236,7 @@ async function handleTimeoutModal(itx, payload, reason) {
 
   const { case: case_, dmSent } = await ModService.timeout(itx.guild, target, moderator, reason, duration);
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
+  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
   if (settings.modlog_channel_id) {
     const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
     if (modlogChannel) {
@@ -265,7 +265,7 @@ async function handleUntimeoutModal(itx, payload, reason) {
 
   const { case: case_, dmSent } = await ModService.untimeout(itx.guild, target, moderator, reason);
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
+  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
   if (settings.modlog_channel_id) {
     const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
     if (modlogChannel) {
@@ -294,7 +294,7 @@ async function handleKickModal(itx, payload, reason) {
 
   const { case: case_, dmSent } = await ModService.kick(itx.guild, target, moderator, reason);
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
+  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
   if (settings.modlog_channel_id) {
     const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
     if (modlogChannel) {
@@ -325,7 +325,7 @@ async function handleBanModal(itx, payload, reason) {
 
   const { case: case_, dmSent } = await ModService.ban(itx.guild, target, moderator, reason, deleteDays);
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
+  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
   if (settings.modlog_channel_id) {
     const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
     if (modlogChannel) {
@@ -359,7 +359,7 @@ async function handleTempbanModal(itx, payload, reason) {
 
   const { case: case_ } = await ModService.tempban(itx.guild, payload.targetId, moderator, reason, duration);
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
+  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
   if (settings.modlog_channel_id) {
     const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
     if (modlogChannel) {
@@ -390,7 +390,7 @@ async function handleSoftbanModal(itx, payload, reason) {
 
   const { case: case_ } = await ModService.softban(itx.guild, payload.targetId, moderator, reason, deleteDays);
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
+  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
   if (settings.modlog_channel_id) {
     const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
     if (modlogChannel) {
@@ -417,7 +417,7 @@ async function handleUnbanModal(itx, payload, reason) {
 
   const { case: case_, dmSent } = await ModService.unban(itx.guild, targetId, moderator, reason);
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
+  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
   if (settings.modlog_channel_id) {
     const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
     if (modlogChannel) {
@@ -435,12 +435,12 @@ async function handleEditCaseModal(itx, payload, reason) {
     return itx.reply({ embeds: [createErrorEmbed("You don't have permission to use this command")], ephemeral: true });
   }
 
-  const case_ = CasesService.getCase(itx.guild.id, payload.caseId);
+  const case_ = await CasesService.getCase(itx.guild.id, payload.caseId);
   if (!case_) {
     return itx.reply({ embeds: [createErrorEmbed(`Case #${payload.caseId} not found`)], ephemeral: true });
   }
 
-  const updated = CasesService.updateCase(itx.guild.id, payload.caseId, reason);
+  const updated = await CasesService.updateCase(itx.guild.id, payload.caseId, reason);
 
   const target = await itx.client.users.fetch(updated.target_id).catch(() => ({ id: updated.target_id }));
   const originalModerator = await itx.client.users.fetch(updated.moderator_id).catch(() => ({ id: updated.moderator_id }));

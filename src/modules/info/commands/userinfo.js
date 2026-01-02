@@ -50,7 +50,7 @@ export async function handleSelectMenu(itx, targetId, view) {
       embed = createUserinfoPermissions(targetMember, itx.guild);
       break;
     case "statistics":
-      const stats = getUserStats.get(itx.guild.id, targetMember.id) ?? null;
+      const stats = (await getUserStats.get(itx.guild.id, targetMember.id)) ?? null;
       embed = createUserinfoStatistics(targetMember, stats);
       break;
     default:

@@ -5,8 +5,8 @@
 
 import { getSettings } from "../../../db.js";
 
-export function getAllSettingsFields(guildId, updates) {
-  const row = getSettings.get(guildId) ?? {};
+export async function getAllSettingsFields(guildId, updates) {
+  const row = (await getSettings.get(guildId)) ?? {};
   return {
     guild_id: guildId,
     welcome_channel_id: updates.welcome_channel_id ?? row.welcome_channel_id ?? null,

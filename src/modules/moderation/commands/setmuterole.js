@@ -19,7 +19,7 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed("El bot no puede gestionar este rol. Verifica la jerarquía de roles")], ephemeral: true });
   }
 
-  SettingsRepo.updateGuildSettings(itx.guild.id, { mute_role_id: role.id });
+  await SettingsRepo.updateGuildSettings(itx.guild.id, { mute_role_id: role.id });
 
   return itx.reply({ embeds: [createSuccessEmbed(`Rol de mute configurado: ${role}`, { id: role.id })] });
 }

@@ -13,7 +13,7 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed("No tienes permisos para usar este comando")], ephemeral: true });
   }
 
-  const case_ = CasesService.getCase(itx.guild.id, caseId);
+  const case_ = await CasesService.getCase(itx.guild.id, caseId);
   if (!case_) {
     return itx.reply({ embeds: [createErrorEmbed(`Case #${caseId} no encontrado`)], ephemeral: true });
   }

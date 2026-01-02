@@ -13,7 +13,7 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed("No tienes permisos para usar este comando")], ephemeral: true });
   }
 
-  const entries = BlacklistService.getUserEntries(itx.guild.id, target.id);
+  const entries = await BlacklistService.getUserEntries(itx.guild.id, target.id);
   const embed = createBlacklistHistoryEmbed(entries, target);
 
   return itx.reply({ embeds: [embed], ephemeral: true });

@@ -67,10 +67,10 @@ export async function registerModerationExtraPrefixCommands() {
           return ctx.reply({ content: "❌ Usuario no encontrado." });
         }
         
-        const totalCases = CasesService.countUserCases(ctx.guild.id, userId);
+        const totalCases = await CasesService.countUserCases(ctx.guild.id, userId);
         const totalPages = Math.max(1, Math.ceil(totalCases / CASES_PER_PAGE));
         const page = 1;
-        const cases = CasesService.getUserCases(ctx.guild.id, userId, null, CASES_PER_PAGE, 0);
+        const cases = await CasesService.getUserCases(ctx.guild.id, userId, null, CASES_PER_PAGE, 0);
         
         const embed = createHistoryEmbed(cases, target, page, totalPages, null);
         const components = totalPages > 1 ? createPaginationComponents(page, totalPages, `history:${userId}:all`) : [];
@@ -128,14 +128,14 @@ export async function registerModerationExtraPrefixCommands() {
           return ctx.reply({ content: `❌ Error al desbanear: ${error.message}` });
         }
         
-        const activeCases = CasesService.getActiveCases(ctx.guild.id, userId);
+        const activeCases = await CasesService.getActiveCases(ctx.guild.id, userId);
         for (const case_ of activeCases) {
           if (case_.type === "BAN" || case_.type === "TEMPBAN") {
-            CasesService.deactivateCase(ctx.guild.id, case_.id);
+            await CasesService.deactivateCase(ctx.guild.id, case_.id);
           }
         }
         
-        const case_ = CasesService.createCase(
+        const case_ = await CasesService.createCase(
           ctx.guild.id,
           "UNBAN",
           userId,
@@ -144,7 +144,7 @@ export async function registerModerationExtraPrefixCommands() {
         );
         
         const SettingsRepo = await import("../db/settings.repo.js");
-        const settings = SettingsRepo.getGuildSettings(ctx.guild.id);
+        const settings = await SettingsRepo.getGuildSettings(ctx.guild.id);
         if (settings.modlog_channel_id) {
           const modlogChannel = await ctx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
           if (modlogChannel?.isTextBased()) {
@@ -214,7 +214,7 @@ export async function registerModerationExtraPrefixCommands() {
           
           // Crear caso para clear
           const CasesService = await import("../services/cases.service.js");
-          const case_ = CasesService.createCase(
+          const case_ = await CasesService.createCase(
             ctx.guild.id,
             "CLEAR",
             userId || "ALL",

@@ -107,7 +107,7 @@ async function handleBlacklistAddModal(itx, payload, reason, evidence) {
 
   const severity = payload.severity || "MEDIUM";
 
-  const entry = BlacklistService.createEntry(
+  const entry = await BlacklistService.createEntry(
     itx.guild.id,
     payload.targetId,
     itx.user.id,
@@ -116,7 +116,7 @@ async function handleBlacklistAddModal(itx, payload, reason, evidence) {
     severity
   );
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
+  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
   
   if (settings.blacklist_channel_id) {
     const blacklistChannel = await itx.guild.channels.fetch(settings.blacklist_channel_id).catch(() => null);
@@ -135,12 +135,12 @@ async function handleBlacklistEditModal(itx, payload, reason, evidence) {
     return itx.reply({ embeds: [createErrorEmbed("You don't have permission to use this command")], ephemeral: true });
   }
 
-  const entry = BlacklistService.getEntry(itx.guild.id, payload.caseId);
+  const entry = await BlacklistService.getEntry(itx.guild.id, payload.caseId);
   if (!entry) {
     return itx.reply({ embeds: [createErrorEmbed(`Entry #${payload.caseId} not found`)], ephemeral: true });
   }
 
-  const updated = BlacklistService.updateEntry(
+  const updated = await BlacklistService.updateEntry(
     itx.guild.id,
     payload.caseId,
     itx.user.id,
@@ -154,7 +154,7 @@ async function handleBlacklistEditModal(itx, payload, reason, evidence) {
 
   const embed = createBlacklistEmbed(updated, target, originalModerator);
 
-  const settings = SettingsRepo.getGuildSettings(itx.guild.id);
+  const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
   if (settings.blacklist_channel_id) {
     const blacklistChannel = await itx.guild.channels.fetch(settings.blacklist_channel_id).catch(() => null);
     if (blacklistChannel) {

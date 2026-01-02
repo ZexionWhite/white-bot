@@ -50,7 +50,7 @@ export async function handle(itx) {
       }
     }
 
-    const case_ = CasesService.createCase(
+    const case_ = await CasesService.createCase(
       itx.guild.id,
       "CLEAR",
       targetUser?.id || "ALL",

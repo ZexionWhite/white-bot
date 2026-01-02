@@ -7,7 +7,7 @@ import { EMOJIS } from "../config/emojis.js";
 import { log } from "../core/logger/index.js";
 
 export default async function guildMemberUpdate(client, oldM, newM) {
-  const cfg = getSettings.get(newM.guild.id) ?? {};
+  const cfg = (await getSettings.get(newM.guild.id)) ?? {};
 
   const had = Boolean(oldM?.premiumSince);
   const has = Boolean(newM?.premiumSince);

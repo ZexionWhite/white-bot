@@ -41,14 +41,14 @@ export async function canExecuteCommand(member, commandKey) {
 
   // Check for explicit command policies first
   for (const role of roles.values()) {
-    const rolePolicy = PolicyRepo.getPolicy.get(guild.id, commandKey, "ROLE", role.id);
+    const rolePolicy = await PolicyRepo.getPolicy.get(guild.id, commandKey, "ROLE", role.id);
     if (rolePolicy) {
       if (rolePolicy.effect === "DENY") return false;
       if (rolePolicy.effect === "ALLOW") return true;
     }
   }
 
-  const userPolicy = PolicyRepo.getPolicy.get(guild.id, commandKey, "USER", userId);
+  const userPolicy = await PolicyRepo.getPolicy.get(guild.id, commandKey, "USER", userId);
   if (userPolicy) {
     if (userPolicy.effect === "DENY") return false;
     if (userPolicy.effect === "ALLOW") return true;
@@ -58,14 +58,14 @@ export async function canExecuteCommand(member, commandKey) {
   const module = getCommandModule(commandKey);
   if (module) {
     for (const role of roles.values()) {
-      const modulePolicy = PolicyRepo.getPolicy.get(guild.id, module, "ROLE", role.id);
+      const modulePolicy = await PolicyRepo.getPolicy.get(guild.id, module, "ROLE", role.id);
       if (modulePolicy) {
         if (modulePolicy.effect === "DENY") return false;
         if (modulePolicy.effect === "ALLOW") return true;
       }
     }
 
-    const moduleUserPolicy = PolicyRepo.getPolicy.get(guild.id, module, "USER", userId);
+    const moduleUserPolicy = await PolicyRepo.getPolicy.get(guild.id, module, "USER", userId);
     if (moduleUserPolicy) {
       if (moduleUserPolicy.effect === "DENY") return false;
       if (moduleUserPolicy.effect === "ALLOW") return true;

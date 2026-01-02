@@ -1,9 +1,9 @@
 import * as BlacklistRepo from "../db/blacklist.repo.js";
 import * as CasesService from "../../moderation/services/cases.service.js";
 
-export function createEntry(guildId, userId, moderatorId, reason, evidence = null, severity = "MEDIUM") {
+export async function createEntry(guildId, userId, moderatorId, reason, evidence = null, severity = "MEDIUM") {
   const now = Date.now();
-  const result = BlacklistRepo.createBlacklistEntry.run(
+  const result = await BlacklistRepo.createBlacklistEntry.run(
     guildId,
     userId,
     moderatorId,
@@ -25,19 +25,19 @@ export function createEntry(guildId, userId, moderatorId, reason, evidence = nul
   };
 }
 
-export function getEntry(guildId, entryId) {
-  return BlacklistRepo.getBlacklistEntry.get(entryId, guildId);
+export async function getEntry(guildId, entryId) {
+  return await BlacklistRepo.getBlacklistEntry.get(entryId, guildId);
 }
 
-export function getUserEntries(guildId, userId) {
-  return BlacklistRepo.getBlacklistByUser.all(guildId, userId);
+export async function getUserEntries(guildId, userId) {
+  return await BlacklistRepo.getBlacklistByUser.all(guildId, userId);
 }
 
-export function updateEntry(guildId, entryId, updatedBy, newReason, newEvidence = null, newSeverity = null) {
-  const current = getEntry(guildId, entryId);
+export async function updateEntry(guildId, entryId, updatedBy, newReason, newEvidence = null, newSeverity = null) {
+  const current = await getEntry(guildId, entryId);
   if (!current) return null;
 
-  BlacklistRepo.updateBlacklistEntry.run(
+  await BlacklistRepo.updateBlacklistEntry.run(
     newReason || current.reason,
     newEvidence !== null ? newEvidence : current.evidence,
     newSeverity || current.severity,
@@ -47,11 +47,11 @@ export function updateEntry(guildId, entryId, updatedBy, newReason, newEvidence 
     guildId
   );
 
-  return getEntry(guildId, entryId);
+  return await getEntry(guildId, entryId);
 }
 
-export function deleteEntry(guildId, entryId, deletedBy, reason) {
-  BlacklistRepo.deleteBlacklistEntry.run(
+export async function deleteEntry(guildId, entryId, deletedBy, reason) {
+  await BlacklistRepo.deleteBlacklistEntry.run(
     Date.now(),
     deletedBy,
     reason || "Sin razón especificada",

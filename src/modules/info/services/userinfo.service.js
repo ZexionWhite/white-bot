@@ -17,36 +17,36 @@ export function getUserOverview(member, guild) {
   };
 }
 
-export function getUserSanctions(guildId, userId) {
-  const allCases = CasesService.getUserCases(guildId, userId, null, 10, 0);
+export async function getUserSanctions(guildId, userId) {
+  const allCases = await CasesService.getUserCases(guildId, userId, null, 10, 0);
   // Filtrar casos de blacklist - la blacklist es un sistema separado
   return allCases.filter(c => c.type !== "BLACKLIST");
 }
 
-export function getUserVoiceActivity(guildId, userId) {
-  return VoiceRepo.getVoiceActivity.all(guildId, userId, 5);
+export async function getUserVoiceActivity(guildId, userId) {
+  return await VoiceRepo.getVoiceActivity.all(guildId, userId, 5);
 }
 
-export function getUserMessages(guildId, userId) {
-  return MessagesRepo.getMessages.all(guildId, userId, 5);
+export async function getUserMessages(guildId, userId) {
+  return await MessagesRepo.getMessages.all(guildId, userId, 5);
 }
 
-export function getUserPermissions(guildId, userId, member) {
+export async function getUserPermissions(guildId, userId, member) {
   const userPolicies = [];
   const rolePolicies = [];
 
   for (const role of member.roles.cache.values()) {
-    const policies = PolicyRepo.getPoliciesBySubject.all(guildId, "ROLE", role.id);
+    const policies = await PolicyRepo.getPoliciesBySubject.all(guildId, "ROLE", role.id);
     rolePolicies.push(...policies);
   }
 
-  const userPoliciesList = PolicyRepo.getPoliciesBySubject.all(guildId, "USER", userId);
+  const userPoliciesList = await PolicyRepo.getPoliciesBySubject.all(guildId, "USER", userId);
   userPolicies.push(...userPoliciesList);
 
   return { userPolicies, rolePolicies };
 }
 
-export function getUserTrustScore(guildId, userId) {
-  return TrustScoreService.calculateTrustScore(guildId, userId);
+export async function getUserTrustScore(guildId, userId) {
+  return await TrustScoreService.calculateTrustScore(guildId, userId);
 }
 

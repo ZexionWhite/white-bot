@@ -16,9 +16,9 @@ export function startTempbanScheduler(client) {
         for (const case_ of expiredTempbans) {
           try {
             await guild.bans.remove(case_.target_id, "Tempban expired automatically");
-            CasesService.deactivateCase(guild.id, case_.id);
+            await CasesService.deactivateCase(guild.id, case_.id);
             
-            const autoCase = CasesService.createCase(
+            const autoCase = await CasesService.createCase(
               guild.id,
               "UNBAN",
               case_.target_id,
@@ -27,7 +27,7 @@ export function startTempbanScheduler(client) {
             );
 
             // Send to modlog
-            const settings = SettingsRepo.getGuildSettings(guild.id);
+            const settings = await SettingsRepo.getGuildSettings(guild.id);
             if (settings.modlog_channel_id) {
               const modlogChannel = await guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
               if (modlogChannel) {
@@ -44,10 +44,10 @@ export function startTempbanScheduler(client) {
         }
 
         // Check expired mutes
-        const expiredMutes = CasesRepo.getActiveMutes.all(guild.id, now);
+        const expiredMutes = await CasesRepo.getActiveMutes.all(guild.id, now);
         for (const case_ of expiredMutes) {
           try {
-            const settings = SettingsRepo.getGuildSettings(guild.id);
+            const settings = await SettingsRepo.getGuildSettings(guild.id);
             if (settings.mute_role_id) {
               const muteRole = await guild.roles.fetch(settings.mute_role_id).catch(() => null);
               if (muteRole) {
@@ -58,9 +58,9 @@ export function startTempbanScheduler(client) {
               }
             }
             
-            CasesService.deactivateCase(guild.id, case_.id);
+            await CasesService.deactivateCase(guild.id, case_.id);
             
-            const autoCase = CasesService.createCase(
+            const autoCase = await CasesService.createCase(
               guild.id,
               "UNMUTE",
               case_.target_id,
@@ -99,9 +99,9 @@ export function startTempbanScheduler(client) {
               }
             }
             
-            CasesService.deactivateCase(guild.id, case_.id);
+            await CasesService.deactivateCase(guild.id, case_.id);
             
-            const autoCase = CasesService.createCase(
+            const autoCase = await CasesService.createCase(
               guild.id,
               "UNTIMEOUT",
               case_.target_id,
@@ -110,7 +110,7 @@ export function startTempbanScheduler(client) {
             );
 
             // Send to modlog
-            const settings = SettingsRepo.getGuildSettings(guild.id);
+            const settings = await SettingsRepo.getGuildSettings(guild.id);
             if (settings.modlog_channel_id) {
               const modlogChannel = await guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
               if (modlogChannel) {

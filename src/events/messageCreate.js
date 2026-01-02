@@ -15,10 +15,10 @@ export default async function messageCreate(client, message) {
   }
 
   try {
-    incrementMessageCount.run(message.guild.id, message.author.id);
+    await incrementMessageCount.run(message.guild.id, message.author.id);
     
     const content = message.content ? (message.content.length > 200 ? message.content.substring(0, 200) : message.content) : null;
-    MessagesRepo.insertMessage.run(
+    await MessagesRepo.insertMessage.run(
       message.guild.id,
       message.author.id,
       message.channel.id,
@@ -26,7 +26,7 @@ export default async function messageCreate(client, message) {
       content,
       Date.now()
     );
-    MessagesRepo.cleanupOldMessages.run(message.guild.id, message.author.id, message.guild.id, message.author.id);
+    await MessagesRepo.cleanupOldMessages.run(message.guild.id, message.author.id, message.guild.id, message.author.id);
   } catch (error) {
     log.error("messageCreate", `Error al procesar mensaje para ${message.author?.tag || message.author?.id} en ${message.guild.name}:`, error.message);
   }

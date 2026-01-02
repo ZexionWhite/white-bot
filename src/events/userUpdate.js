@@ -20,7 +20,7 @@ export default async function userUpdate(client, oldUser, newUser) {
   const newUrl = newUser?.displayAvatarURL?.({ size: 512, extension: "png" }) ?? null;
 
   for (const [, guild] of client.guilds.cache) {
-    const cfg = getSettings.get(guild.id);
+    const cfg = await getSettings.get(guild.id);
     const logId = cfg?.avatar_log_channel_id;
     if (!logId) continue;
 

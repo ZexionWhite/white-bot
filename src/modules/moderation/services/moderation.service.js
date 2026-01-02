@@ -5,7 +5,7 @@ import * as SettingsRepo from "../db/settings.repo.js";
 import { getSettings } from "../../../db.js";
 
 export async function warn(guild, target, moderator, reason) {
-  const case_ = CasesService.createCase(
+  const case_ = await CasesService.createCase(
     guild.id,
     "WARN",
     target.id,
@@ -27,7 +27,7 @@ export async function warn(guild, target, moderator, reason) {
 }
 
 export async function mute(guild, target, moderator, reason, duration = null) {
-  const settings = SettingsRepo.getGuildSettings(guild.id);
+  const settings = await SettingsRepo.getGuildSettings(guild.id);
   if (!settings.mute_role_id) {
     throw new Error("No hay rol de mute configurado. Usa /createmuterole o /setmuterole");
   }
@@ -41,7 +41,7 @@ export async function mute(guild, target, moderator, reason, duration = null) {
 
   await target.roles.add(muteRole, reason || "Mute aplicado");
 
-  const case_ = CasesService.createCase(
+  const case_ = await CasesService.createCase(
     guild.id,
     "MUTE",
     target.id,
@@ -64,7 +64,7 @@ export async function mute(guild, target, moderator, reason, duration = null) {
 }
 
 export async function unmute(guild, target, moderator, reason) {
-  const settings = SettingsRepo.getGuildSettings(guild.id);
+  const settings = await SettingsRepo.getGuildSettings(guild.id);
   if (!settings.mute_role_id) {
     throw new Error("No hay rol de mute configurado");
   }
@@ -80,14 +80,14 @@ export async function unmute(guild, target, moderator, reason) {
 
   await target.roles.remove(muteRole, reason || "Unmute aplicado");
 
-  const activeCases = CasesService.getActiveCases(guild.id, target.id);
+  const activeCases = await CasesService.getActiveCases(guild.id, target.id);
   for (const case_ of activeCases) {
     if (case_.type === "MUTE") {
-      CasesService.deactivateCase(guild.id, case_.id);
+      await CasesService.deactivateCase(guild.id, case_.id);
     }
   }
 
-  const case_ = CasesService.createCase(
+  const case_ = await CasesService.createCase(
     guild.id,
     "UNMUTE",
     target.id,
@@ -113,7 +113,7 @@ export async function timeout(guild, target, moderator, reason, duration) {
 
   await target.timeout(duration, reason || "Timeout aplicado");
 
-  const case_ = CasesService.createCase(
+  const case_ = await CasesService.createCase(
     guild.id,
     "TIMEOUT",
     target.id,
@@ -142,14 +142,14 @@ export async function untimeout(guild, target, moderator, reason) {
 
   await target.timeout(null, reason || "Timeout removido");
 
-  const activeCases = CasesService.getActiveCases(guild.id, target.id);
+  const activeCases = await CasesService.getActiveCases(guild.id, target.id);
   for (const case_ of activeCases) {
     if (case_.type === "TIMEOUT") {
-      CasesService.deactivateCase(guild.id, case_.id);
+      await CasesService.deactivateCase(guild.id, case_.id);
     }
   }
 
-  const case_ = CasesService.createCase(
+  const case_ = await CasesService.createCase(
     guild.id,
     "UNTIMEOUT",
     target.id,
@@ -173,7 +173,7 @@ export async function untimeout(guild, target, moderator, reason) {
 export async function kick(guild, target, moderator, reason) {
   await target.kick(reason || "Kick aplicado");
 
-  const case_ = CasesService.createCase(
+  const case_ = await CasesService.createCase(
     guild.id,
     "KICK",
     target.id,
@@ -200,7 +200,7 @@ export async function ban(guild, targetId, moderator, reason, deleteDays = 0) {
     deleteMessageSeconds: deleteDays * 24 * 60 * 60
   });
 
-  const case_ = CasesService.createCase(
+  const case_ = await CasesService.createCase(
     guild.id,
     "BAN",
     targetId,
@@ -219,7 +219,7 @@ export async function tempban(guild, targetId, moderator, reason, duration) {
     deleteMessageSeconds: 0
   });
 
-  const case_ = CasesService.createCase(
+  const case_ = await CasesService.createCase(
     guild.id,
     "TEMPBAN",
     targetId,
@@ -255,7 +255,7 @@ export async function softban(guild, targetId, moderator, reason, deleteDays = 1
 
   await guild.bans.remove(targetId, "Softban: unban automático");
 
-  const case_ = CasesService.createCase(
+  const case_ = await CasesService.createCase(
     guild.id,
     "SOFTBAN",
     targetId,
@@ -269,14 +269,14 @@ export async function softban(guild, targetId, moderator, reason, deleteDays = 1
 export async function unban(guild, targetId, moderator, reason) {
   await guild.bans.remove(targetId, reason || "Unban aplicado");
 
-  const activeCases = CasesService.getActiveCases(guild.id, targetId);
+  const activeCases = await CasesService.getActiveCases(guild.id, targetId);
   for (const case_ of activeCases) {
     if (case_.type === "BAN" || case_.type === "TEMPBAN") {
-      CasesService.deactivateCase(guild.id, case_.id);
+      await CasesService.deactivateCase(guild.id, case_.id);
     }
   }
 
-  const case_ = CasesService.createCase(
+  const case_ = await CasesService.createCase(
     guild.id,
     "UNBAN",
     targetId,

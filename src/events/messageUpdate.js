@@ -14,7 +14,7 @@ export default async function messageUpdate(client, oldMessage, newMessage) {
   if (!newMessage?.guild) return;
   if (newMessage.author?.bot) return;
 
-  const cfg = getSettings.get(newMessage.guild.id);
+  const cfg = await getSettings.get(newMessage.guild.id);
   const logId = cfg?.message_log_channel_id;
   if (!logId) return;
 

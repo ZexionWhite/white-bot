@@ -5,7 +5,7 @@ import { log } from "../core/logger/index.js";
 
 export default async function guildMemberRemove(client, member) {
   try {
-    const cfg = getSettings.get(member.guild.id);
+    const cfg = await getSettings.get(member.guild.id);
     if (!cfg?.log_channel_id) return;
 
     const ch = await member.guild.channels.fetch(cfg.log_channel_id).catch((err) => {

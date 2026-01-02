@@ -52,8 +52,12 @@ export function createModlogEmbed(case_, target, moderator, dmSent = null) {
       iconURL: moderator.displayAvatarURL?.() || moderator.avatarURL?.() || null 
     })
     .setDescription(description)
-    .setFooter({ text: `Case #${case_.id}` })
-    .setTimestamp(case_.created_at);
+    .setFooter({ text: `Case #${case_.id}` });
+  
+  // Solo setear timestamp si created_at es válido
+  if (case_.created_at && typeof case_.created_at === 'number' && case_.created_at > 0) {
+    embed.setTimestamp(case_.created_at);
+  }
 
   return embed;
 }
@@ -119,7 +123,8 @@ export function createCaseEmbed(case_, target, moderator) {
   description += `\n**Reason:** ${case_.reason || "No reason"}`;
   
   if (case_.deleted_at) {
-    description += `\n**Deleted:** <t:${Math.floor(case_.deleted_at / 1000)}:R>\n**Deleted by:** <@${case_.deleted_by}>\n**Deletion reason:** ${case_.deleted_reason || "No reason"}`;
+    const deletedByMention = case_.deleted_by ? `<@${case_.deleted_by}>` : "Usuario desconocido";
+    description += `\n**Deleted:** <t:${Math.floor(case_.deleted_at / 1000)}:R>\n**Deleted by:** ${deletedByMention}\n**Deletion reason:** ${case_.deleted_reason || "No reason"}`;
   }
   
   const embed = new EmbedBuilder()
@@ -129,8 +134,12 @@ export function createCaseEmbed(case_, target, moderator) {
       iconURL: moderator.displayAvatarURL?.() || moderator.avatarURL?.() || null 
     })
     .setDescription(description)
-    .setFooter({ text: `Case #${case_.id}` })
-    .setTimestamp(case_.created_at);
+    .setFooter({ text: `Case #${case_.id}` });
+  
+  // Solo setear timestamp si created_at es válido
+  if (case_.created_at && typeof case_.created_at === 'number' && case_.created_at > 0) {
+    embed.setTimestamp(case_.created_at);
+  }
 
   return embed;
 }

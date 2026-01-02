@@ -47,6 +47,10 @@ export function registerEvents(client) {
   // Errores y advertencias del cliente
   client.on("error", (error) => {
     log.error("Client", "Error del cliente Discord:", error.message);
+    console.error("[Client] Error completo:", error);
+    if (error.stack) {
+      console.error("[Client] Stack trace:", error.stack);
+    }
   });
 
   client.on("warn", (warning) => {

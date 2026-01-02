@@ -91,7 +91,7 @@ export async function registerModerationExtraPrefixCommands() {
           return ctx.reply({ content: "❌ No tienes permisos para usar este comando." });
         }
         
-        const case_ = CasesService.getCase(ctx.guild.id, caseId);
+        const case_ = await CasesService.getCase(ctx.guild.id, caseId);
         if (!case_) {
           return ctx.reply({ embeds: [createErrorEmbed(`Case #${caseId} no encontrado`)] });
         }

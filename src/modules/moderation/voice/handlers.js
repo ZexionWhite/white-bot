@@ -1,4 +1,4 @@
-import { PermissionFlagsBits } from "discord.js";
+import { PermissionFlagsBits, MessageFlags } from "discord.js";
 import { updateVoiceModEmbed } from "./utils.js";
 import { log } from "../../../core/logger/index.js";
 
@@ -7,7 +7,7 @@ export async function handleVoiceModComponent(client, itx, customId) {
       !itx.memberPermissions.has(PermissionFlagsBits.MoveMembers)) {
     return itx.reply({ 
       content: "❌ No tienes permisos para usar esta acción.", 
-      ephemeral: true 
+      flags: MessageFlags.Ephemeral
     });
   }
 
@@ -22,7 +22,7 @@ export async function handleVoiceModComponent(client, itx, customId) {
     const channel = await itx.guild.channels.fetch(channelId).catch(() => null);
     
     if (!channel?.isVoiceBased()) {
-      return itx.reply({ content: "❌ Canal no encontrado o inválido.", ephemeral: true });
+      return itx.reply({ content: "❌ Canal no encontrado o inválido.", flags: MessageFlags.Ephemeral });
     }
 
     try {
@@ -30,7 +30,7 @@ export async function handleVoiceModComponent(client, itx, customId) {
       await updateVoiceModEmbed(client, channelId, itx.guild.id);
       return itx.deferUpdate();
     } catch (error) {
-      return itx.reply({ content: "❌ No pude moverte. ¿Estás en un canal de voz?", ephemeral: true });
+      return itx.reply({ content: "❌ No pude moverte. ¿Estás en un canal de voz?", flags: MessageFlags.Ephemeral });
     }
   }
 
@@ -39,12 +39,12 @@ export async function handleVoiceModComponent(client, itx, customId) {
     const targetMember = await itx.guild.members.fetch(userId).catch(() => null);
     
     if (!targetMember) {
-      return itx.reply({ content: "❌ Usuario no encontrado.", ephemeral: true });
+      return itx.reply({ content: "❌ Usuario no encontrado.", flags: MessageFlags.Ephemeral });
     }
 
     const moderatorChannel = itx.member.voice?.channel;
     if (!moderatorChannel) {
-      return itx.reply({ content: "❌ No estás en un canal de voz.", ephemeral: true });
+      return itx.reply({ content: "❌ No estás en un canal de voz.", flags: MessageFlags.Ephemeral });
     }
 
     const oldChannelId = targetMember.voice.channel?.id;
@@ -55,7 +55,7 @@ export async function handleVoiceModComponent(client, itx, customId) {
       await updateVoiceModEmbed(client, moderatorChannel.id, itx.guild.id);
       return itx.deferUpdate();
     } catch (error) {
-      return itx.reply({ content: "❌ No pude mover al usuario. Verifica permisos y jerarquía.", ephemeral: true });
+      return itx.reply({ content: "❌ No pude mover al usuario. Verifica permisos y jerarquía.", flags: MessageFlags.Ephemeral });
     }
   }
 
@@ -64,12 +64,12 @@ export async function handleVoiceModComponent(client, itx, customId) {
     const sourceChannel = await itx.guild.channels.fetch(channelId).catch(() => null);
     
     if (!sourceChannel?.isVoiceBased()) {
-      return itx.reply({ content: "❌ Canal no encontrado.", ephemeral: true });
+      return itx.reply({ content: "❌ Canal no encontrado.", flags: MessageFlags.Ephemeral });
     }
 
     const moderatorChannel = itx.member.voice?.channel;
     if (!moderatorChannel) {
-      return itx.reply({ content: "❌ No estás en un canal de voz.", ephemeral: true });
+      return itx.reply({ content: "❌ No estás en un canal de voz.", flags: MessageFlags.Ephemeral });
     }
 
     const members = Array.from(sourceChannel.members.values());
@@ -80,7 +80,7 @@ export async function handleVoiceModComponent(client, itx, customId) {
     );
 
     if (nonMods.length === 0) {
-      return itx.reply({ content: "❌ No hay usuarios no-moderadores en ese canal.", ephemeral: true });
+      return itx.reply({ content: "❌ No hay usuarios no-moderadores en ese canal.", flags: MessageFlags.Ephemeral });
     }
 
     try {
@@ -89,7 +89,7 @@ export async function handleVoiceModComponent(client, itx, customId) {
       if (moderatorChannel.id !== channelId) await updateVoiceModEmbed(client, moderatorChannel.id, itx.guild.id);
       return itx.deferUpdate();
     } catch (error) {
-      return itx.reply({ content: "❌ No pude mover algunos usuarios. Verifica permisos.", ephemeral: true });
+      return itx.reply({ content: "❌ No pude mover algunos usuarios. Verifica permisos.", flags: MessageFlags.Ephemeral });
     }
   }
 
@@ -98,11 +98,11 @@ export async function handleVoiceModComponent(client, itx, customId) {
     const targetMember = await itx.guild.members.fetch(userId).catch(() => null);
     
     if (!targetMember) {
-      return itx.reply({ content: "❌ Usuario no encontrado.", ephemeral: true });
+      return itx.reply({ content: "❌ Usuario no encontrado.", flags: MessageFlags.Ephemeral });
     }
 
     if (!targetMember.voice.channel) {
-      return itx.reply({ content: "❌ El usuario no está en un canal de voz.", ephemeral: true });
+      return itx.reply({ content: "❌ El usuario no está en un canal de voz.", flags: MessageFlags.Ephemeral });
     }
 
     const channelId = targetMember.voice.channel.id;
@@ -113,7 +113,7 @@ export async function handleVoiceModComponent(client, itx, customId) {
       await updateVoiceModEmbed(client, channelId, itx.guild.id);
       return itx.deferUpdate();
     } catch (error) {
-      return itx.reply({ content: "❌ No pude cambiar el estado de mute. Verifica permisos y jerarquía.", ephemeral: true });
+      return itx.reply({ content: "❌ No pude cambiar el estado de mute. Verifica permisos y jerarquía.", flags: MessageFlags.Ephemeral });
     }
   }
 
@@ -122,7 +122,7 @@ export async function handleVoiceModComponent(client, itx, customId) {
     const channel = await itx.guild.channels.fetch(channelId).catch(() => null);
     
     if (!channel?.isVoiceBased()) {
-      return itx.reply({ content: "❌ Canal no encontrado.", ephemeral: true });
+      return itx.reply({ content: "❌ Canal no encontrado.", flags: MessageFlags.Ephemeral });
     }
 
     const members = Array.from(channel.members.values());
@@ -134,7 +134,7 @@ export async function handleVoiceModComponent(client, itx, customId) {
     );
 
     if (nonMods.length === 0) {
-      return itx.reply({ content: "❌ Todos los usuarios no-moderadores ya están muteados.", ephemeral: true });
+      return itx.reply({ content: "❌ Todos los usuarios no-moderadores ya están muteados.", flags: MessageFlags.Ephemeral });
     }
 
     try {
@@ -142,7 +142,7 @@ export async function handleVoiceModComponent(client, itx, customId) {
       await updateVoiceModEmbed(client, channelId, itx.guild.id);
       return itx.deferUpdate();
     } catch (error) {
-      return itx.reply({ content: "❌ No pude mutear algunos usuarios. Verifica permisos.", ephemeral: true });
+      return itx.reply({ content: "❌ No pude mutear algunos usuarios. Verifica permisos.", flags: MessageFlags.Ephemeral });
     }
   }
 
@@ -151,14 +151,14 @@ export async function handleVoiceModComponent(client, itx, customId) {
     const channel = await itx.guild.channels.fetch(channelId).catch(() => null);
     
     if (!channel?.isVoiceBased()) {
-      return itx.reply({ content: "❌ Canal no encontrado.", ephemeral: true });
+      return itx.reply({ content: "❌ Canal no encontrado.", flags: MessageFlags.Ephemeral });
     }
 
     const members = Array.from(channel.members.values());
     const muted = members.filter(m => m.voice.serverMute);
 
     if (muted.length === 0) {
-      return itx.reply({ content: "❌ No hay usuarios muteados en ese canal.", ephemeral: true });
+      return itx.reply({ content: "❌ No hay usuarios muteados en ese canal.", flags: MessageFlags.Ephemeral });
     }
 
     try {
@@ -167,7 +167,7 @@ export async function handleVoiceModComponent(client, itx, customId) {
       return itx.deferUpdate();
     } catch (error) {
       log.error("voiceModHandlers", `Error al desmutear usuarios en canal ${channelId}:`, error.message);
-      return itx.reply({ content: "❌ No pude desmutear algunos usuarios. Verifica permisos.", ephemeral: true });
+      return itx.reply({ content: "❌ No pude desmutear algunos usuarios. Verifica permisos.", flags: MessageFlags.Ephemeral });
     }
   }
 

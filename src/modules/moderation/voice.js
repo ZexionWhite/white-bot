@@ -1,4 +1,4 @@
-import { PermissionFlagsBits } from "discord.js";
+import { PermissionFlagsBits, MessageFlags } from "discord.js";
 import { voiceModEmbed, createVoiceModComponents } from "./voice/embeds.js";
 
 export default async function handleVoiceMod(client, itx) {
@@ -6,7 +6,7 @@ export default async function handleVoiceMod(client, itx) {
       !itx.memberPermissions.has(PermissionFlagsBits.MoveMembers)) {
     return itx.reply({ 
       content: "❌ No tienes permisos. Se requiere `MuteMembers` o `MoveMembers`.", 
-      ephemeral: true 
+      flags: MessageFlags.Ephemeral
     });
   }
 
@@ -43,19 +43,19 @@ export default async function handleVoiceMod(client, itx) {
     if (members.length === 0) {
       return itx.reply({ 
         content: "❌ No hay usuarios en ese canal de voz.", 
-        ephemeral: true 
+        flags: MessageFlags.Ephemeral
       });
     }
 
     const embed = voiceModEmbed(targetChannel, members, itx.member, client);
     const components = createVoiceModComponents(targetChannel, members, itx.member, null, client);
 
-    const reply = await itx.reply({ 
+    await itx.reply({ 
       embeds: [embed], 
-      components, 
-      ephemeral: false,
-      fetchReply: true
+      components
     });
+
+    const reply = await itx.fetchReply();
 
     const key = `${itx.guild.id}_${targetChannel.id}`;
     client.voiceModMessages.set(key, {
@@ -92,12 +92,12 @@ export default async function handleVoiceMod(client, itx) {
     const embed = voiceModEmbed(targetChannel, members, itx.member, client);
     const components = createVoiceModComponents(targetChannel, members, itx.member, targetMember, client);
 
-    const reply = await itx.reply({ 
+    await itx.reply({ 
       embeds: [embed], 
-      components, 
-      ephemeral: false,
-      fetchReply: true
+      components
     });
+
+    const reply = await itx.fetchReply();
 
     const key = `${itx.guild.id}_${targetChannel.id}`;
     client.voiceModMessages.set(key, {

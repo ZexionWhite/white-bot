@@ -64,9 +64,15 @@ export async function createUserinfoOverview(member, guild) {
 export async function createUserinfoSanctions(member, guild) {
   const sanctions = await UserinfoService.getUserSanctions(guild.id, member.id);
 
+  const targetName = member.user.tag || member.user.username || "Unknown";
+  const targetDisplay = `${targetName} (${member.id})`;
+
   const embed = new EmbedBuilder()
-    .setColor(0xff0000)
-    .setAuthor({ name: `${member.user.tag} - Sanctions`, iconURL: member.user.displayAvatarURL() });
+    .setColor(0x0099ff)
+    .setAuthor({
+      name: targetDisplay,
+      iconURL: member.user.displayAvatarURL?.() || member.user.avatarURL?.() || null
+    });
 
   if (sanctions.length === 0) {
     embed.setDescription("No sanctions recorded");
@@ -86,18 +92,40 @@ export async function createUserinfoSanctions(member, guild) {
     UNBAN: "unban"
   };
 
+  // Contar por tipo
+  const counts = {
+    warned: 0,
+    muted: 0,
+    timeouted: 0,
+    kicked: 0,
+    banned: 0
+  };
+
+  sanctions.forEach(s => {
+    const caseType = s.type?.toUpperCase();
+    if (caseType === "WARN") counts.warned++;
+    else if (caseType === "MUTE") counts.muted++;
+    else if (caseType === "TIMEOUT") counts.timeouted++;
+    else if (caseType === "KICK") counts.kicked++;
+    else if (caseType === "BAN" || caseType === "TEMPBAN" || caseType === "SOFTBAN") counts.banned++;
+  });
+
+  // Limitar a 10 casos
   const fields = sanctions.slice(0, 10).map(s => {
     const actionName = s.type ? (TYPE_NAMES[s.type] || s.type.toLowerCase()) : "unknown";
-    const actionCapitalized = actionName.charAt(0).toUpperCase() + actionName.slice(1);
-    
+
     return {
-      name: `${actionCapitalized} • Case #${s.id}`,
-      value: `${s.reason || "No reason"}\n<t:${Math.floor(s.created_at / 1000)}:R>`,
+      name: `Case #${s.id} - ${actionName}`,
+      value: s.reason || "No reason",
       inline: false
     };
   });
 
   embed.addFields(fields);
+
+  // Footer con conteos
+  const footerText = `Warned: ${counts.warned} | Muted: ${counts.muted} | Timeouted: ${counts.timeouted} | Kicked: ${counts.kicked} | Banned: ${counts.banned}`;
+  embed.setFooter({ text: footerText });
 
   return embed;
 }

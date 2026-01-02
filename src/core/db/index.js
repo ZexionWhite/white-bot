@@ -92,12 +92,30 @@ export function exec(sql) {
 
 /**
  * Helper para obtener información de tabla
- * SQLite: PRAGMA table_info
- * PostgreSQL: información_schema.columns
+ * SQLite: PRAGMA table_info (síncrono)
+ * PostgreSQL: información_schema.columns (async)
  * @param {string} table - Nombre de la tabla
  * @returns {Promise<Array>|Array} Información de las columnas
+ * @note En SQLite es síncrono, en PostgreSQL es async. Solo usar en SQLite al nivel de módulo.
  */
-export async function pragmaTableInfo(table) {
+export function pragmaTableInfo(table) {
+  const instance = getDriverInstance();
+  
+  if (instance instanceof PostgresDriver) {
+    // PostgreSQL: async - no usar al nivel de módulo
+    throw new Error("pragmaTableInfo es async en PostgreSQL. No usar al nivel de módulo.");
+  } else {
+    // SQLite: usar PRAGMA (síncrono)
+    return instance.pragmaTableInfo(table);
+  }
+}
+
+/**
+ * Versión async de pragmaTableInfo para PostgreSQL
+ * @param {string} table - Nombre de la tabla
+ * @returns {Promise<Array>} Información de las columnas
+ */
+export async function pragmaTableInfoAsync(table) {
   const instance = getDriverInstance();
   
   if (instance instanceof PostgresDriver) {
@@ -111,8 +129,8 @@ export async function pragmaTableInfo(table) {
     `, [table]);
     return result.rows;
   } else {
-    // SQLite: usar PRAGMA (síncrono)
-    return instance.pragmaTableInfo(table);
+    // SQLite: usar PRAGMA (síncrono pero lo retornamos como Promise para compatibilidad)
+    return Promise.resolve(instance.pragmaTableInfo(table));
   }
 }
 

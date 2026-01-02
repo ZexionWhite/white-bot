@@ -3,13 +3,16 @@
  * Internamente usa src/core/db/ para abstracción
  * TODO: En FASE 2, este archivo será refactorizado o eliminado
  */
-import { getNative, prepare, exec, pragmaTableInfo } from "./core/db/index.js";
+import { getNative, prepare, exec, pragmaTableInfo, getDriverType } from "./core/db/index.js";
 import { log } from "./core/logger/index.js";
 
 // Obtener instancia nativa de SQLite para compatibilidad
 const db = getNative();
 
-exec(`
+// Ejecutar CREATE TABLE solo si es SQLite (PostgreSQL usa migraciones)
+const driverType = getDriverType();
+if (driverType === "sqlite") {
+  exec(`
   CREATE TABLE IF NOT EXISTS guild_settings (
     guild_id TEXT PRIMARY KEY,
     welcome_channel_id TEXT,
@@ -123,8 +126,16 @@ exec(`
     created_at INTEGER NOT NULL
   );
 `);
+}
 
+// ensureColumn solo funciona en SQLite (PostgreSQL usa migraciones)
+// SQLite tiene pragmaTableInfo síncrono, PostgreSQL lo tiene async
 function ensureColumn(table, column, ddl) {
+  if (driverType !== "sqlite") {
+    return; // PostgreSQL usa migraciones, no ensureColumn
+  }
+  
+  // En SQLite, pragmaTableInfo es síncrono
   const cols = pragmaTableInfo(table).map(c => c.name);
   if (!cols.includes(column)) {
     exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
@@ -132,18 +143,21 @@ function ensureColumn(table, column, ddl) {
   }
 }
 
-ensureColumn("guild_settings", "welcome_cd_minutes", "welcome_cd_minutes INTEGER DEFAULT 60");
-ensureColumn("guild_settings", "booster_announce_channel_id", "booster_announce_channel_id TEXT");
-ensureColumn("guild_settings", "info_channel_id", "info_channel_id TEXT");
-ensureColumn("guild_settings", "message_log_channel_id", "message_log_channel_id TEXT");
-ensureColumn("guild_settings", "avatar_log_channel_id", "avatar_log_channel_id TEXT");
-ensureColumn("guild_settings", "nickname_log_channel_id", "nickname_log_channel_id TEXT");
-ensureColumn("guild_settings", "voice_log_channel_id", "voice_log_channel_id TEXT");
-ensureColumn("guild_settings", "modlog_channel_id", "modlog_channel_id TEXT");
-ensureColumn("guild_settings", "blacklist_channel_id", "blacklist_channel_id TEXT");
-ensureColumn("guild_settings", "mute_role_id", "mute_role_id TEXT");
-ensureColumn("guild_settings", "dm_on_punish", "dm_on_punish INTEGER DEFAULT 1");
-ensureColumn("guild_settings", "command_prefix", "command_prefix TEXT DEFAULT 'capy!'");
+// Solo ejecutar ensureColumn en SQLite (al nivel de módulo solo funciona para SQLite síncrono)
+if (driverType === "sqlite") {
+  ensureColumn("guild_settings", "welcome_cd_minutes", "welcome_cd_minutes INTEGER DEFAULT 60");
+  ensureColumn("guild_settings", "booster_announce_channel_id", "booster_announce_channel_id TEXT");
+  ensureColumn("guild_settings", "info_channel_id", "info_channel_id TEXT");
+  ensureColumn("guild_settings", "message_log_channel_id", "message_log_channel_id TEXT");
+  ensureColumn("guild_settings", "avatar_log_channel_id", "avatar_log_channel_id TEXT");
+  ensureColumn("guild_settings", "nickname_log_channel_id", "nickname_log_channel_id TEXT");
+  ensureColumn("guild_settings", "voice_log_channel_id", "voice_log_channel_id TEXT");
+  ensureColumn("guild_settings", "modlog_channel_id", "modlog_channel_id TEXT");
+  ensureColumn("guild_settings", "blacklist_channel_id", "blacklist_channel_id TEXT");
+  ensureColumn("guild_settings", "mute_role_id", "mute_role_id TEXT");
+  ensureColumn("guild_settings", "dm_on_punish", "dm_on_punish INTEGER DEFAULT 1");
+  ensureColumn("guild_settings", "command_prefix", "command_prefix TEXT DEFAULT 'capy!'");
+}
 
 export const getSettings = prepare(`
   SELECT *

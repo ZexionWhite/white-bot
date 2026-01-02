@@ -3,30 +3,17 @@
  * Maneja la creación de columnas adicionales y cambios de esquema
  */
 
-import { getDriverType, getDriver } from "./index.js";
+import { getDriverType, getDriver, pragmaTableInfoAsync } from "./index.js";
 import { log } from "../logger/index.js";
 
 /**
  * Obtiene información de columnas de una tabla
  * @param {string} tableName - Nombre de la tabla
- * @returns {Promise<Array>|Array} Array con información de columnas
+ * @returns {Promise<Array>} Array con nombres de columnas
  */
 async function getTableColumns(tableName) {
-  const driverType = getDriverType();
-  const driver = getDriver();
-
-  if (driverType === "postgres") {
-    const pool = driver.getPool();
-    const result = await pool.query(`
-      SELECT column_name as name
-      FROM information_schema.columns
-      WHERE table_name = $1
-    `, [tableName]);
-    return result.rows.map(r => r.name);
-  } else {
-    // SQLite
-    return driver.pragmaTableInfo(tableName).map(c => c.name);
-  }
+  const cols = await pragmaTableInfoAsync(tableName);
+  return cols.map(c => c.name);
 }
 
 /**

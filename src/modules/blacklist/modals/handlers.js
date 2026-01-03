@@ -193,7 +193,7 @@ async function handleBlacklistEditModal(itx, payload, reason) {
   if (settings.blacklist_channel_id) {
     const blacklistChannel = await itx.guild.channels.fetch(settings.blacklist_channel_id).catch(() => null);
     if (blacklistChannel && blacklistChannel.isTextBased()) {
-      await blacklistChannel.send({ embeds: [embed] });
+      await sendLog(blacklistChannel, { embeds: [embed] }, "blacklist");
     }
   }
 

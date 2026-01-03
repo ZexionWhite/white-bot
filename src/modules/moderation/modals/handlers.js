@@ -373,7 +373,7 @@ async function handleSoftbanModal(itx, payload, reason) {
     const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
     if (modlogChannel) {
       const embed = createModlogEmbed(case_, target.user, itx.user, null);
-      await modlogChannel.send({ embeds: [embed] });
+      await sendLog(modlogChannel, { embeds: [embed] }, "moderation");
     }
   }
 

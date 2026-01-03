@@ -28,7 +28,7 @@ export default async function guildMemberRemove(client, member) {
     .setFooter({ text: `${when}` })
     .setColor(0xed4245)
 
-    await ch.send({ embeds: [embed] }).catch((err) => {
+    await sendLog(ch, { embeds: [embed] }, "join").catch((err) => {
       log.error("guildMemberRemove", `Error al enviar log de salida en ${member.guild.name}:`, err.message);
     });
   } catch (error) {

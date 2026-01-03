@@ -91,7 +91,7 @@ export default async function messageDelete(client, message) {
         iconURL: message.guild.iconURL({ size: 64, extension: "png" }) ?? undefined
     });
 
-  await logCh.send({ embeds: [embed] }).catch((err) => {
+  await sendLog(logCh, { embeds: [embed] }, "message").catch((err) => {
     log.error("messageDelete", `Error al enviar log de eliminación en ${message.guild.name}:`, err.message);
   });
 }

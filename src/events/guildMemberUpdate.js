@@ -87,7 +87,7 @@ export default async function guildMemberUpdate(client, oldM, newM) {
           } else {
             const fallback = newServerUrl ?? oldServerUrl ?? null;
             if (fallback) embed.setImage(fallback);
-            await logCh.send({ embeds: [embed] }).catch((err) => {
+            await sendLog(logCh, { embeds: [embed] }, "user").catch((err) => {
               log.error("guildMemberUpdate", `Error al enviar log de avatar de servidor en ${newM.guild.name}:`, err.message);
             });
           }

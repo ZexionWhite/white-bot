@@ -74,7 +74,7 @@ export default async function messageUpdate(client, oldMessage, newMessage) {
       iconURL: guildIcon
     });
 
-  await logCh.send({ embeds: [embed] }).catch((err) => {
+  await sendLog(logCh, { embeds: [embed] }, "message").catch((err) => {
     log.error("messageUpdate", `Error al enviar log de edición en ${newMessage.guild.name}:`, err.message);
   });
 }

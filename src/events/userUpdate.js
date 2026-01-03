@@ -61,13 +61,13 @@ export default async function userUpdate(client, oldUser, newUser) {
     if (composed) {
       const file = new AttachmentBuilder(composed, { name: "avatar-before-after.png" });
       embed.setImage("attachment://avatar-before-after.png");
-      await logCh.send({ embeds: [embed], files: [file] }).catch((err) => {
+      await sendLog(logCh, { embeds: [embed], files: [file] }, "user").catch((err) => {
         log.error("userUpdate", `Error al enviar log de avatar con imagen compuesta en ${guild.name}:`, err.message);
       });
     } else {
       const fallback = newUrl ?? oldUrl ?? null;
       if (fallback) embed.setImage(fallback);
-      await logCh.send({ embeds: [embed] }).catch((err) => {
+      await sendLog(logCh, { embeds: [embed] }, "user").catch((err) => {
         log.error("userUpdate", `Error al enviar log de avatar en ${guild.name}:`, err.message);
       });
     }

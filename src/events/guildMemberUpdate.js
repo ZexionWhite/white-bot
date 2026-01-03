@@ -5,6 +5,7 @@ import { TZ } from "../config.js";
 import { composeBeforeAfter } from "../utils/beforeAfter.js";
 import { EMOJIS } from "../config/emojis.js";
 import { log } from "../core/logger/index.js";
+import { sendLog } from "../core/webhooks/index.js";
 
 export default async function guildMemberUpdate(client, oldM, newM) {
   const cfg = (await getSettings.get(newM.guild.id)) ?? {};
@@ -80,7 +81,7 @@ export default async function guildMemberUpdate(client, oldM, newM) {
           if (composed) {
             const file = new AttachmentBuilder(composed, { name: "server-avatar-before-after.png" });
             embed.setImage("attachment://server-avatar-before-after.png");
-            await logCh.send({ embeds: [embed], files: [file] }).catch((err) => {
+            await sendLog(logCh, { embeds: [embed], files: [file] }, "user").catch((err) => {
               log.error("guildMemberUpdate", `Error al enviar log de avatar de servidor con imagen compuesta en ${newM.guild.name}:`, err.message);
             });
           } else {
@@ -152,7 +153,7 @@ export default async function guildMemberUpdate(client, oldM, newM) {
               iconURL: newM.guild.iconURL({ size: 64, extension: "png" }) ?? undefined
             });
 
-          await ch.send({ embeds: [embed] }).catch((err) => {
+          await sendLog(ch, { embeds: [embed] }, "user").catch((err) => {
             log.error("guildMemberUpdate", `Error al enviar log de nickname en ${newM.guild.name}:`, err.message);
           });
         }

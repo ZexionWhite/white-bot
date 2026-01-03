@@ -2,6 +2,7 @@ import { welcomeEmbed, logJoinEmbed } from "../modules/settings/ui/welcome.js";
 import { getSettings } from "../db.js";
 import { getCooldown, setCooldown } from "../core/redis/index.js";
 import { log } from "../core/logger/index.js";
+import { sendLog } from "../core/webhooks/index.js";
 
 export default async function guildMemberAdd(client, member) {
   try {
@@ -12,7 +13,7 @@ export default async function guildMemberAdd(client, member) {
     }
 
     const cdMin = Number.isFinite(cfg.welcome_cd_minutes) ? cfg.welcome_cd_minutes : 60;
-    const last = ((await getCooldown.get(member.guild.id, member.id, "welcome")) || {}).last_ts ?? 0;
+    const last = await getCooldown(member.guild.id, member.id, "welcome") ?? 0;
     const now = Date.now();
     const canSendWelcome = now - last >= cdMin * 60_000;
 
@@ -43,7 +44,7 @@ export default async function guildMemberAdd(client, member) {
         return null;
       });
       if (logChannel?.isTextBased()) {
-        await logChannel.send({ embeds: [logJoinEmbed(member)] }).catch((err) => {
+        await sendLog(logChannel, { embeds: [logJoinEmbed(member)] }, "join").catch((err) => {
           log.error("guildMemberAdd", `Error al enviar log de join en ${member.guild.name}:`, err.message);
         });
       }

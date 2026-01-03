@@ -5,6 +5,7 @@ import * as SettingsRepo from "../../moderation/db/settings.repo.js";
 import { createBlacklistEmbed, createSuccessEmbed, createErrorEmbed } from "../ui/embeds.js";
 import { getPendingAction, deletePendingAction, validateReason } from "../../moderation/modals/helpers.js";
 import { log } from "../../../core/logger/index.js";
+import { sendLog } from "../../../core/webhooks/index.js";
 
 /**
  * Handles modal submission for blacklist commands
@@ -136,7 +137,7 @@ async function handleBlacklistAddModal(itx, payload, reason) {
     if (blacklistChannel && blacklistChannel.isTextBased()) {
       // Enviar embed principal
       const embed = createBlacklistEmbed(entry, target, itx.user);
-      await blacklistChannel.send({ embeds: [embed] });
+      await sendLog(blacklistChannel, { embeds: [embed] }, "blacklist");
 
       // Si hay archivo adjunto, reenviarlo por separado (sin guardar en DB)
       if (payload.evidenceAttachmentUrl) {
@@ -145,10 +146,10 @@ async function handleBlacklistAddModal(itx, payload, reason) {
           if (response.ok) {
             const buffer = Buffer.from(await response.arrayBuffer());
             const attachment = new AttachmentBuilder(buffer, { name: payload.evidenceAttachmentName || "evidence" });
-            await blacklistChannel.send({ 
+            await sendLog(blacklistChannel, {
               content: `**Evidence for Entry #${entry.id}**`,
-              files: [attachment] 
-            });
+              files: [attachment]
+            }, "blacklist");
           }
         } catch (error) {
           // Si falla la descarga/reenvío, solo loguear el error pero no fallar la operación

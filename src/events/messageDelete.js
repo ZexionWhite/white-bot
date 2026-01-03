@@ -3,6 +3,7 @@ import { getSettings } from "../db.js";
 import { TZ } from "../config.js";
 import { EMOJIS } from "../config/emojis.js";
 import { log } from "../core/logger/index.js";
+import { sendLog } from "../core/webhooks/index.js";
 
 function truncate(str, n = 1000) {
   if (!str) return "(no content)";

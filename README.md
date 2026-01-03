@@ -1,6 +1,6 @@
-# Capybot — Discord.js v14 + SQLite
+# Capybot — Discord.js v14 + PostgreSQL + Redis
 
-A feature-rich, production-ready Discord bot built with **Discord.js v14** and **SQLite**. Capybot provides comprehensive server management tools including welcome messages, color autoroles, boost announcements, comprehensive logging, voice moderation, **complete moderation system**, **blacklist management**, **user information tracking**, and user statistics tracking.
+A feature-rich, production-ready Discord bot built with **Discord.js v14**, **PostgreSQL**, and **Redis**. Capybot provides comprehensive server management tools including welcome messages, color autoroles, boost announcements, comprehensive logging (via webhooks), voice moderation, **complete moderation system**, **blacklist management**, **user information tracking**, and user statistics tracking.
 
 ---
 
@@ -60,6 +60,8 @@ A feature-rich, production-ready Discord bot built with **Discord.js v14** and *
 
 ### 📝 Comprehensive Logging System
 
+All logs use **Discord Webhooks** for improved performance and to eliminate rate limits, with automatic fallback to `channel.send()` if webhooks are unavailable.
+
 #### Message Logs
 - **Message deletion tracking** with content, attachments, and deleter information
 - **Message edit tracking** with before/after content comparison
@@ -109,11 +111,21 @@ A feature-rich, production-ready Discord bot built with **Discord.js v14** and *
 - **Permission-based access**: requires `MuteMembers` or `MoveMembers` permissions
 
 ### 🛠️ Utility Commands
-- **`/help`**: Interactive help system with categorized command list
-- **`/config`**: View current server configuration (moderator-only)
-- **`/ping`**: Bot latency, API ping, database ping, uptime, and memory usage
+- **`/help`** / **`capy!help`**: Interactive help system with categorized command list
+- **`/config`** / **`capy!config`**: View current server configuration (moderator-only)
+- **`/ping`** / **`capy!ping`**: Bot latency, API ping, database ping, uptime, and memory usage
 - **`/preview`**: Preview embeds (boost, welcome) before they're sent
-- **`/user [user]`**: Comprehensive user information with multiple views
+- **`/user [user]`** / **`capy!user [user]`**: Comprehensive user information with multiple views
+
+### 🔧 Prefix Commands
+
+The bot supports both slash commands and prefix commands (using `capy!` prefix):
+
+- **Moderation**: `warn`, `ban`, `kick`, `mute`, `timeout`, `tempban`, `history`, `case`, `clear`, `unban`
+- **Utilities**: `ping`, `help`, `config`
+- **Information**: `user`
+
+Use `capy!help` to see all available prefix commands with descriptions and aliases.
 
 ---
 
@@ -121,9 +133,12 @@ A feature-rich, production-ready Discord bot built with **Discord.js v14** and *
 
 - **Node.js** (ES Modules / `"type": "module"`)
 - **discord.js v14** — Modern Discord API wrapper
-- **better-sqlite3** — Embedded SQLite database (zero external services)
+- **PostgreSQL** — Primary relational database (production)
+- **Redis** — Cache and temporary state storage (optional, with fallback)
+- **ioredis** — Redis client for Node.js
 - **sharp** — Image processing for avatar before/after compositions
 - **dotenv** — Environment variable management
+- **Discord Webhooks** — High-performance logging system
 
 ---
 
@@ -161,9 +176,17 @@ A feature-rich, production-ready Discord bot built with **Discord.js v14** and *
 
 ```
 src/
+├── core/                    # Core infrastructure
+│   ├── commands/            # Command kernel (slash & prefix)
+│   ├── config/              # Environment configuration
+│   ├── db/                  # Database abstraction (PostgreSQL)
+│   ├── redis/               # Redis client & helpers (cache, sessions, cooldowns)
+│   ├── webhooks/            # Webhook management for logging
+│   ├── logger/              # Unified logging system
+│   └── errors/              # Error handling
 ├── modules/
 │   ├── moderation/          # Moderation system
-│   │   ├── commands/        # Slash command handlers
+│   │   ├── commands/        # Slash & prefix command handlers
 │   │   ├── services/        # Business logic
 │   │   ├── db/              # Database repositories
 │   │   ├── ui/              # Embeds and components
@@ -201,7 +224,7 @@ src/
 │   ├── guildMemberRemove.js # Leave logs
 │   ├── guildMemberUpdate.js # Boost & server avatar/nickname logs
 │   ├── userUpdate.js        # Global avatar logs
-│   ├── messageCreate.js     # Message counting
+│   ├── messageCreate.js     # Message counting & prefix commands
 │   ├── messageUpdate.js     # Message edit logs
 │   ├── messageDelete.js     # Message delete logs
 │   ├── voiceStateUpdate.js  # Voice logs & time tracking
@@ -223,8 +246,6 @@ src/
 ├── config.js                # Configuration (timezone, GIFs)
 ├── db.js                    # Database schema & prepared statements
 └── index.js                 # Bot entry point
-data/
-└── bot.db                   # SQLite database (auto-created)
 ```
 
 ---
@@ -239,6 +260,14 @@ Create a `.env` file (never commit it):
 BOT_TOKEN=your_bot_token_here
 CLIENT_ID=your_application_id_here
 GUILD_ID_PRUEBA=your_test_guild_id  # Optional: speeds up command registration
+
+# Database (PostgreSQL)
+DATABASE_URL=postgresql://user:password@host:5432/database
+DB_PROVIDER=postgres
+
+# Redis (optional, for cache and performance)
+REDIS_URL=redis://localhost:6379
+USE_REDIS=true  # Set to false to disable Redis (fallback to PostgreSQL only)
 ```
 
 ### Bot Configuration
@@ -470,8 +499,8 @@ Ensure your `package.json` includes:
 
 | Command | Description | Permission |
 |---------|-------------|------------|
-| `/history [user] [type] [limit]` | View user's sanction history | Moderate Members |
-| `/case [id]` | View a specific case | Moderate Members |
+| `/history [user] [type] [limit]` / `capy!history <user>` | View user's sanction history | Moderate Members |
+| `/case [id]` / `capy!case <id>` | View a specific case | Moderate Members |
 | `/editcase [id]` | Edit a case's reason (modal for new reason) | Moderate Members |
 | `/remove [id] [reason]` | Delete/revert a case | Moderate Members |
 
@@ -479,7 +508,7 @@ Ensure your `package.json` includes:
 
 | Command | Description | Permission |
 |---------|-------------|------------|
-| `/clear [amount] [user]` | Delete messages from channel | Manage Messages |
+| `/clear [amount] [user]` / `capy!clear <amount> [user]` | Delete messages from channel | Manage Messages |
 | `/lock [channel] [reason]` | Lock a channel | Manage Channels |
 | `/unlock [channel] [reason]` | Unlock a channel | Manage Channels |
 | `/slowmode [seconds] [channel]` | Set slowmode | Manage Channels |
@@ -497,7 +526,7 @@ Ensure your `package.json` includes:
 
 | Command | Description | Permission |
 |---------|-------------|------------|
-| `/user [user]` | View comprehensive user information (Overview, Sanctions, Blacklist, Voice Activity, Recent Messages, Permissions, Statistics) | Moderate Members |
+| `/user [user]` / `capy!user [user]` | View comprehensive user information (Overview, Sanctions, Blacklist, Voice Activity, Recent Messages, Permissions, Statistics) | Moderate Members |
 
 ### Voice Moderation Commands
 
@@ -515,13 +544,39 @@ Ensure your `package.json` includes:
 | `/modconfig command [command] [effect] [user/role]` | Configure permissions for specific command | Manage Guild |
 | `/modconfig reset [confirm]` | Reset all permission policies | Manage Guild |
 
+### Prefix Commands
+
+All commands can also be used with the `capy!` prefix (e.g., `capy!ping`, `capy!help`, `capy!warn @user 1h Spam`).
+
+**Moderation Prefix Commands**:
+- `capy!warn <user> [duration] <reason>` - Warn a user
+- `capy!ban <user> [duration] <reason>` - Ban a user
+- `capy!kick <user> <reason>` - Kick a user
+- `capy!mute <user> [duration] <reason>` - Mute a user
+- `capy!timeout <user> <duration> <reason>` - Apply timeout
+- `capy!tempban <user> <duration> <reason>` - Temporary ban
+- `capy!history <user>` - View user sanction history
+- `capy!case <id>` - View a specific case
+- `capy!clear <amount> [user]` - Delete messages
+- `capy!unban <user>` - Unban a user
+
+**Utility Prefix Commands**:
+- `capy!ping` - Show bot latency and status
+- `capy!help` - Show all prefix commands
+- `capy!config` - View server configuration
+
+**Info Prefix Commands**:
+- `capy!user [user]` - View comprehensive user information
+
+Use `capy!help` to see all available prefix commands with descriptions and aliases.
+
 ### Utility Commands
 
 | Command | Description | Permission |
 |---------|-------------|------------|
-| `/help` | Interactive help system with categorized commands | Everyone |
-| `/config` | View current server configuration | Manage Guild |
-| `/ping` | Show bot latency, uptime, and memory | Everyone |
+| `/help` / `capy!help` | Interactive help system with categorized commands | Everyone |
+| `/config` / `capy!config` | View current server configuration | Manage Guild |
+| `/ping` / `capy!ping` | Show bot latency, uptime, and memory | Everyone |
 
 ---
 
@@ -734,10 +789,14 @@ Stores context for modal interactions:
 - Voice moderation embeds auto-update when voice states change
 - Color autoroles automatically remove previous colors when selecting a new one
 - Booster-only colors require the user to have the configured Booster role
-- Moderation commands use modals for collecting reasons (better UX)
+- Moderation commands use modals for collecting reasons (better UX), prefix commands accept reason directly
 - Temporary sanctions automatically expire and create "un" cases
 - Permission system supports both module and command-level control
 - Blacklist is completely separate from the moderation case system
+- **All logs use Discord Webhooks** for improved performance and to eliminate rate limits
+- Redis is optional - bot works fully without it (fallback to PostgreSQL)
+- Webhooks are automatically created and cached - no manual setup required
+- Both slash commands (`/command`) and prefix commands (`capy!command`) are supported
 
 ---
 

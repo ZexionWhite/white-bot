@@ -4,6 +4,7 @@ import { getVoiceSession, setVoiceSession, deleteVoiceSession } from "../core/re
 import { voiceStateEmbed } from "../modules/settings/ui/voice.js";
 import * as VoiceRepo from "../modules/moderation/db/voice.repo.js";
 import { log } from "../core/logger/index.js";
+import { sendLog } from "../core/webhooks/index.js";
 
 export default async function voiceStateUpdate(client, oldState, newState) {
   try {
@@ -143,7 +144,7 @@ export default async function voiceStateUpdate(client, oldState, newState) {
     const embed = voiceStateEmbed(oldState, newState, sessionForEmbed);
     if (!embed) return;
 
-    await logCh.send({ embeds: [embed] }).catch((err) => {
+    await sendLog(logCh, { embeds: [embed] }, "voice").catch((err) => {
       log.error("voiceStateUpdate", `Error al enviar log de voz en ${guild.name}:`, err.message);
     });
   } catch (error) {

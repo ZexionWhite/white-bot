@@ -44,14 +44,59 @@ export async function registerUtilitiesPrefixCommands() {
       permissions: null,
       argsSchema: emptySchema,
       execute: async (ctx) => {
-        // Help command necesita una interaction, por ahora devolvemos mensaje simple
-        return ctx.reply({ 
-          content: "📚 **Comandos disponibles:**\n\n" +
-                   "**Moderación:** `warn`, `ban`, `kick`, `mute`, `timeout`, `tempban`, `history`, `case`, `clear`, `unban`\n" +
-                   "**Utilidades:** `ping`, `help`, `config`\n" +
-                   "**Info:** `user`\n\n" +
-                   "Usa `/help` para más información detallada."
-        });
+        const { getAllCommands } = await import("../../../core/commands/commandRegistry.js");
+        const { EmbedBuilder } = await import("discord.js");
+        
+        const allCommands = getAllCommands();
+        
+        // Agrupar comandos por categoría (basado en módulo de origen)
+        const moderationCommands = [];
+        const utilityCommands = [];
+        const infoCommands = [];
+        
+        const moderationNames = new Set(["warn", "ban", "kick", "mute", "timeout", "tempban", "history", "case", "clear", "unban"]);
+        const utilityNames = new Set(["ping", "help", "config"]);
+        const infoNames = new Set(["user"]);
+        
+        for (const cmd of allCommands) {
+          const cmdName = cmd.name.toLowerCase();
+          if (moderationNames.has(cmdName)) {
+            const aliases = cmd.aliases && cmd.aliases.length > 0 ? ` (${cmd.aliases.join(", ")})` : "";
+            moderationCommands.push(`\`${cmdName}${aliases}\` - ${cmd.description || "Sin descripción"}`);
+          } else if (utilityNames.has(cmdName)) {
+            const aliases = cmd.aliases && cmd.aliases.length > 0 ? ` (${cmd.aliases.join(", ")})` : "";
+            utilityCommands.push(`\`${cmdName}${aliases}\` - ${cmd.description || "Sin descripción"}`);
+          } else if (infoNames.has(cmdName)) {
+            const aliases = cmd.aliases && cmd.aliases.length > 0 ? ` (${cmd.aliases.join(", ")})` : "";
+            infoCommands.push(`\`${cmdName}${aliases}\` - ${cmd.description || "Sin descripción"}`);
+          }
+        }
+        
+        const embed = new EmbedBuilder()
+          .setTitle("📚 Comandos Prefix Disponibles")
+          .setDescription("Todos los comandos disponibles usando el prefijo `capy!`")
+          .setColor(0x5865f2)
+          .addFields(
+            {
+              name: "🔨 Moderación",
+              value: moderationCommands.join("\n") || "Ninguno",
+              inline: false
+            },
+            {
+              name: "🛠️ Utilidades",
+              value: utilityCommands.join("\n") || "Ninguno",
+              inline: false
+            },
+            {
+              name: "ℹ️ Información",
+              value: infoCommands.join("\n") || "Ninguno",
+              inline: false
+            }
+          )
+          .setFooter({ text: "Usa `/help` para ver información detallada de comandos slash" })
+          .setTimestamp();
+        
+        return ctx.reply({ embeds: [embed] });
       }
     },
     {

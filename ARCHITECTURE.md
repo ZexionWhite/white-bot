@@ -4,7 +4,7 @@ Este documento describe la arquitectura general del proyecto, sus componentes pr
 
 ## Visión General
 
-Capybot es un bot de Discord construido con Node.js (ESM), discord.js v14, y SQLite (con migración planificada a PostgreSQL). El bot está diseñado con una arquitectura modular que facilita la escalabilidad y el mantenimiento.
+Capybot es un bot de Discord construido con Node.js (ESM), discord.js v14, PostgreSQL, y Redis (opcional). El bot está diseñado con una arquitectura modular que facilita la escalabilidad y el mantenimiento. Utiliza webhooks de Discord para logging de alto rendimiento.
 
 ## Estructura de Directorios
 
@@ -14,7 +14,9 @@ src/
 │   ├── commands/            # Command Kernel (soporte para slash y prefix commands)
 │   ├── config/              # Configuración y validación de variables de entorno
 │   ├── constants/           # Constantes compartidas
-│   ├── db/                  # Abstracción de base de datos (SQLite actual, preparado para PostgreSQL)
+│   ├── db/                  # Abstracción de base de datos (PostgreSQL)
+│   ├── redis/               # Cliente Redis y helpers (cache, sesiones, cooldowns, rate limiting)
+│   ├── webhooks/            # Gestión de webhooks para logging
 │   ├── discord/             # Utilidades de Discord (registro de eventos)
 │   ├── errors/              # Clases de error y helpers
 │   └── logger/              # Sistema de logging unificado
@@ -70,16 +72,32 @@ Sistema unificado para manejar comandos slash y prefix commands.
 
 ### 2. Sistema de Base de Datos (`src/core/db/`)
 
-Abstracción que permite cambiar de SQLite a PostgreSQL sin modificar el código de los módulos.
+Abstracción que permite cambiar entre adaptadores de base de datos sin modificar el código de los módulos.
 
 - **`interface.js`**: Interfaz genérica `DatabaseDriver` y `PreparedStatement`
-- **`sqlite-adapter.js`**: Implementación para SQLite (better-sqlite3)
-- **`postgres-adapter.js`**: Placeholder para PostgreSQL (FASE 2)
+- **`sqlite-adapter.js`**: Implementación para SQLite (better-sqlite3, legacy)
+- **`postgres-adapter.js`**: Implementación para PostgreSQL (pg)
 - **`index.js`**: Punto de entrada que exporta helpers y el driver actual
 
-**Uso actual**: `src/db.js` usa internamente `src/core/db/` pero mantiene la API legacy para compatibilidad.
+**Uso actual**: PostgreSQL es el driver por defecto. `src/db.js` usa internamente `src/core/db/` y mantiene la API legacy para compatibilidad.
 
-**Migración futura**: En FASE 2, se cambiará el driver en `src/core/db/index.js` y se actualizarán los repositorios para usar queries PostgreSQL.
+### 2.1. Sistema de Redis (`src/core/redis/`)
+
+Sistema opcional de cache y estado temporal que complementa PostgreSQL.
+
+- **`client.js`**: Cliente Redis (ioredis) con manejo de errores y reconexión automática
+- **`helpers.js`**: Funciones básicas (get, set, del, exists, ttl, incr)
+- **`cache.js`**: Cache-aside para configuraciones de guild
+- **`cooldowns.js`**: Sistema de cooldowns con Redis como store primario
+- **`sessions.js`**: Sesiones temporales (voice, modals) con TTL automático
+- **`ratelimit.js`**: Rate limiting con contadores atómicos
+- **`cache-extended.js`**: Helpers genéricos para cache de datos extendidos
+
+**Características**:
+- Fallback completo a PostgreSQL si Redis no está disponible
+- Feature flag `USE_REDIS` para habilitar/deshabilitar
+- TTL automático para todas las entradas
+- Cache en memoria como fallback adicional
 
 ### 3. Sistema de Logging (`src/core/logger/`)
 
@@ -250,41 +268,44 @@ Tablas principales:
 
 ## Estado y Escalabilidad
 
-### Actual (SQLite)
-- Base de datos embebida (un archivo)
-- Preparado para múltiples servidores (guild_id como clave)
-- Sin pooling (better-sqlite3 es síncrono)
-
-### Futuro (PostgreSQL + Redis - FASE 2-3)
-- PostgreSQL para persistencia
-- Redis para cache y estado temporal
-- Pool de conexiones
-- Escalabilidad horizontal (múltiples instancias del bot)
+### Actual (PostgreSQL + Redis)
+- PostgreSQL como base de datos principal (persistencia)
+- Redis para cache y estado temporal (opcional, con fallback completo)
+- Pool de conexiones PostgreSQL
+- Cache-aside para configuraciones frecuentes
+- Cooldowns y sesiones en Redis con TTL automático
+- Rate limiting con contadores atómicos
+- Webhooks para logging (elimina rate limits)
+- Preparado para escalabilidad horizontal (múltiples instancias del bot)
 
 ## Roadmap de Mejoras
 
-### FASE 1 (En progreso)
+### FASE 1 (Completada)
 - ✅ Abstracción de base de datos
 - ✅ Logging unificado
-- 🔄 Estandarización de errores
-- ⏳ Optimización de queries
-- ⏳ Documentación
+- ✅ Estandarización de errores
 
-### FASE 2 (Planificada)
-- Migración a PostgreSQL
-- Scripts de migración de datos
-- Actualización de repositorios
+### FASE 2 (Completada)
+- ✅ Migración a PostgreSQL
+- ✅ Scripts de migración de datos
+- ✅ Actualización de repositorios
+- ✅ Pool de conexiones
 
-### FASE 3 (Planificada)
-- Integración con Redis
-- Cache de configuraciones
-- Cache de datos frecuentes
-- Rate limiting mejorado
+### FASE 3 (Completada)
+- ✅ Integración con Redis
+- ✅ Cache de configuraciones (settings)
+- ✅ Cache de datos frecuentes (extendido)
+- ✅ Cooldowns en Redis
+- ✅ Sesiones temporales en Redis
+- ✅ Rate limiting mejorado
 
-### FASE 4 (Planificada)
-- Sistema de webhooks para logging
-- Queue system para mensajes
-- Eliminación de rate limits de Discord
+### FASE 4 (Completada)
+- ✅ Sistema de webhooks para logging
+- ✅ Manager centralizado de webhooks
+- ✅ Cache de webhooks (Redis + memoria)
+- ✅ Fallback seguro a channel.send()
+- ✅ Migración de todos los logs a webhooks
+- ⏳ Queue system para mensajes (futuro)
 
 ### FASE 5 (Planificada)
 - Módulo musical

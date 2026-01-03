@@ -4,6 +4,7 @@ import { TZ } from "../config.js";
 import { composeBeforeAfter } from "../utils/beforeAfter.js";
 import { EMOJIS } from "../config/emojis.js";
 import { log } from "../core/logger/index.js";
+import { sendLog } from "../core/webhooks/index.js";
 
 function fmtNow() {
   return new Intl.DateTimeFormat("es-AR", {

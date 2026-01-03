@@ -34,7 +34,6 @@ try {
   process.exit(1);
 }
 
-// Crear cliente de Discord
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,

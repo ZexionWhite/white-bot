@@ -8,10 +8,11 @@ export function getIntroEmbed(client) {
       "**Capybot** es un bot de moderación completo diseñado para gestionar tu servidor de Discord de manera eficiente.\n\n" +
       "**Funcionalidades principales:**\n" +
       "• Sistema completo de moderación y sanciones\n" +
-      "• Logs automáticos de eventos importantes\n" +
+      "• Logs automáticos mediante webhooks (sin rate limits)\n" +
       "• Herramientas de gestión de usuarios y canales\n" +
       "• Sistema de blacklist y casos\n" +
-      "• Moderación avanzada de canales de voz\n\n"
+      "• Moderación avanzada de canales de voz\n" +
+      "• Comandos slash (`/comando`) y prefix (`capy!comando`)\n\n"
     )
     .setThumbnail(client.user.displayAvatarURL())
     .setColor(0x393a41)
@@ -223,10 +224,15 @@ export function getUtilitiesEmbed() {
       {
         name: "Información del Bot",
         value: [
-          "`/ping` – Muestra latencia y estado del bot",
-          "`/help` – Muestra este centro de ayuda",
-          "`/config` – Muestra la configuración actual del servidor"
+          "`/ping` / `capy!ping` – Muestra latencia y estado del bot",
+          "`/help` / `capy!help` – Muestra este centro de ayuda",
+          "`/config` / `capy!config` – Muestra la configuración actual del servidor"
         ].join("\n"),
+        inline: false
+      },
+      {
+        name: "Comandos Prefix",
+        value: "El bot también soporta comandos con prefijo `capy!`. Usa `capy!help` para ver todos los comandos prefix disponibles. Los comandos más comunes incluyen:\n• Moderación: `capy!warn`, `capy!ban`, `capy!kick`, `capy!mute`, `capy!timeout`, `capy!tempban`, `capy!history`, `capy!case`, `capy!clear`, `capy!unban`\n• Utilidades: `capy!ping`, `capy!help`, `capy!config`\n• Información: `capy!user`",
         inline: false
       },
       {

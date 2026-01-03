@@ -1,7 +1,10 @@
-import { getSettings, startVoiceSession, endVoiceSession, getVoiceSession, incrementVoiceTime } from "../db.js";
+import { getSettings, incrementVoiceTime } from "../db.js";
+import { startVoiceSession as startVoiceSessionDB, endVoiceSession as endVoiceSessionDB, getVoiceSession as getVoiceSessionDB } from "../db.js";
+import { getVoiceSession, setVoiceSession, deleteVoiceSession } from "../core/redis/index.js";
 import { voiceStateEmbed } from "../modules/settings/ui/voice.js";
 import * as VoiceRepo from "../modules/moderation/db/voice.repo.js";
 import { log } from "../core/logger/index.js";
+import { sendLog } from "../core/webhooks/index.js";
 
 export default async function voiceStateUpdate(client, oldState, newState) {
   try {
@@ -23,7 +26,16 @@ export default async function voiceStateUpdate(client, oldState, newState) {
     let sessionForEmbed = null;
     
     if (oldChannelId) {
-      const session = await getVoiceSession.get(guildId, userId);
+      // Intentar obtener sesión de Redis primero, fallback a PostgreSQL
+      let session = await getVoiceSession(guildId, userId);
+      if (!session) {
+        // Fallback a PostgreSQL
+        const dbSession = await getVoiceSessionDB.get(guildId, userId);
+        if (dbSession) {
+          session = { channel_id: dbSession.channel_id, join_timestamp: dbSession.join_timestamp };
+        }
+      }
+      
       if (session) {
         sessionForEmbed = session;
         const joinTime = session.join_timestamp;
@@ -37,32 +49,40 @@ export default async function voiceStateUpdate(client, oldState, newState) {
           }
         }
         
+        // Eliminar sesión de Redis y PostgreSQL
+        await deleteVoiceSession(guildId, userId);
         try {
-          await endVoiceSession.run(guildId, userId);
+          await endVoiceSessionDB.run(guildId, userId);
         } catch (err) {
-          log.error("voiceStateUpdate", `Error al finalizar sesión de voz para ${member.user.tag} en ${guild.name}:`, err.message);
+          log.error("voiceStateUpdate", `Error al eliminar sesión de voz de PostgreSQL:`, err.message);
         }
       }
     }
 
-    if (newChannelId) {
+    if (newChannelId && !oldChannelId) {
+      // Guardar sesión en Redis y PostgreSQL
+      await setVoiceSession(guildId, userId, newChannelId, now);
       try {
-        await startVoiceSession.run(guildId, userId, newChannelId, now);
+        await startVoiceSessionDB.run(guildId, userId, newChannelId, now);
         await VoiceRepo.insertVoiceActivity.run(guildId, userId, "JOIN", newChannelId, now);
         await VoiceRepo.cleanupOldVoiceActivity.run(guildId, userId, guildId, userId);
       } catch (err) {
-        log.error("voiceStateUpdate", `Error al iniciar sesión de voz para ${member.user.tag} en ${guild.name}:`, err.message);
+        log.error("voiceStateUpdate", `Error al iniciar sesión de voz en PostgreSQL para ${member.user.tag} en ${guild.name}:`, err.message);
       }
-    }
-
-    if (oldChannelId && newChannelId && oldChannelId !== newChannelId) {
+    } else if (newChannelId && oldChannelId && oldChannelId !== newChannelId) {
+      // Movimiento entre canales: eliminar sesión anterior y crear nueva
+      await deleteVoiceSession(guildId, userId);
+      await setVoiceSession(guildId, userId, newChannelId, now);
       try {
+        await endVoiceSessionDB.run(guildId, userId);
+        await startVoiceSessionDB.run(guildId, userId, newChannelId, now);
         await VoiceRepo.insertVoiceActivity.run(guildId, userId, "MOVE", newChannelId, now);
         await VoiceRepo.cleanupOldVoiceActivity.run(guildId, userId, guildId, userId);
       } catch (err) {
-        log.error("voiceStateUpdate", `Error al registrar movimiento de voz:`, err.message);
+        log.error("voiceStateUpdate", `Error al mover sesión de voz:`, err.message);
       }
     }
+
 
     if (oldChannelId && !newChannelId) {
       try {
@@ -124,7 +144,7 @@ export default async function voiceStateUpdate(client, oldState, newState) {
     const embed = voiceStateEmbed(oldState, newState, sessionForEmbed);
     if (!embed) return;
 
-    await logCh.send({ embeds: [embed] }).catch((err) => {
+    await sendLog(logCh, { embeds: [embed] }, "voice").catch((err) => {
       log.error("voiceStateUpdate", `Error al enviar log de voz en ${guild.name}:`, err.message);
     });
   } catch (error) {

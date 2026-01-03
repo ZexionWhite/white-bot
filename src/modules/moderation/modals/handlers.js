@@ -5,6 +5,7 @@ import * as SettingsRepo from "../db/settings.repo.js";
 import * as ModlogService from "../services/modlog.service.js";
 import { createModlogEmbed, createSuccessEmbed, createErrorEmbed, createCaseEmbed } from "../ui/embeds.js";
 import { createSanctionMessage } from "../ui/messages.js";
+import { sendLog } from "../../../core/webhooks/index.js";
 import { getPendingAction, deletePendingAction, validateReason } from "./helpers.js";
 import { parseDuration } from "../../../utils/duration.js";
 import { log } from "../../../core/logger/index.js";
@@ -212,7 +213,7 @@ async function handleUnmuteModal(itx, payload, reason) {
     const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
     if (modlogChannel) {
       const embed = createModlogEmbed(case_, target.user, itx.user, dmSent);
-      await modlogChannel.send({ embeds: [embed] });
+      await sendLog(modlogChannel, { embeds: [embed] }, "moderation");
     }
   }
 
@@ -268,7 +269,7 @@ async function handleUntimeoutModal(itx, payload, reason) {
     const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
     if (modlogChannel) {
       const embed = createModlogEmbed(case_, target.user, itx.user, dmSent);
-      await modlogChannel.send({ embeds: [embed] });
+      await sendLog(modlogChannel, { embeds: [embed] }, "moderation");
     }
   }
 
@@ -372,7 +373,7 @@ async function handleSoftbanModal(itx, payload, reason) {
     const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
     if (modlogChannel) {
       const embed = createModlogEmbed(case_, target.user, itx.user, null);
-      await modlogChannel.send({ embeds: [embed] });
+      await sendLog(modlogChannel, { embeds: [embed] }, "moderation");
     }
   }
 

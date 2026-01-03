@@ -3,6 +3,7 @@ import { getSettings } from "../db.js";
 import { TZ } from "../config.js";
 import { EMOJIS } from "../config/emojis.js";
 import { log } from "../core/logger/index.js";
+import { sendLog } from "../core/webhooks/index.js";
 
 function truncate(str, n = 1000) {
   if (!str) return "(no content)";
@@ -73,7 +74,7 @@ export default async function messageUpdate(client, oldMessage, newMessage) {
       iconURL: guildIcon
     });
 
-  await logCh.send({ embeds: [embed] }).catch((err) => {
+  await sendLog(logCh, { embeds: [embed] }, "message").catch((err) => {
     log.error("messageUpdate", `Error al enviar log de edición en ${newMessage.guild.name}:`, err.message);
   });
 }

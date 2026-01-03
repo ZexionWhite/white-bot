@@ -56,7 +56,27 @@ export async function handleConfigColorSelect(itx) {
   return handleColorSelect(itx, selectedRoleId);
 }
 
+async function handleConfigColorStatus(itx, customId) {
+  const parts = customId.split(":");
+  const status = parts[0].split("-").pop(); // "free" o "premium"
+  const selectedRoleId = parts[1];
+  
+  if (!selectedRoleId) return;
+  
+  const { handleColorStatusChange } = await import("./commands/config-colors.js");
+  const newStatus = status === "premium";
+  return handleColorStatusChange(itx, selectedRoleId, newStatus);
+}
+
+async function handleConfigColorBack(itx) {
+  const { handleBack } = await import("./commands/config-colors.js");
+  return handleBack(itx);
+}
+
 export const autorolesComponentHandlers = {
   "color-select": handleColorSelect,
-  "config-color-select": handleConfigColorSelect
+  "config-color-select": handleConfigColorSelect,
+  "config-color-free": handleConfigColorStatus,
+  "config-color-premium": handleConfigColorStatus,
+  "config-color-back": handleConfigColorBack
 };

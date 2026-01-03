@@ -33,7 +33,7 @@ export function startTempbanScheduler(client) {
               if (modlogChannel) {
                 const target = await client.users.fetch(case_.target_id).catch(() => ({ id: case_.target_id }));
                 const embed = createModlogEmbed(autoCase, target, client.user);
-                await modlogChannel.send({ embeds: [embed] });
+                await sendLog(modlogChannel, { embeds: [embed] }, "moderation");
               }
             }
 
@@ -74,7 +74,7 @@ export function startTempbanScheduler(client) {
               if (modlogChannel) {
                 const target = await client.users.fetch(case_.target_id).catch(() => ({ id: case_.target_id }));
                 const embed = createModlogEmbed(autoCase, target, client.user);
-                await modlogChannel.send({ embeds: [embed] });
+                await sendLog(modlogChannel, { embeds: [embed] }, "moderation");
               }
             }
 
@@ -116,7 +116,7 @@ export function startTempbanScheduler(client) {
               if (modlogChannel) {
                 const target = await client.users.fetch(case_.target_id).catch(() => ({ id: case_.target_id }));
                 const embed = createModlogEmbed(autoCase, target, client.user);
-                await modlogChannel.send({ embeds: [embed] });
+                await sendLog(modlogChannel, { embeds: [embed] }, "moderation");
               }
             }
 

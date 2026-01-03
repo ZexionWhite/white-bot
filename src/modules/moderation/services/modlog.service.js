@@ -5,6 +5,7 @@
 import * as SettingsRepo from "../db/settings.repo.js";
 import { createModlogEmbed } from "../ui/embeds.js";
 import { log } from "../../../core/logger/index.js";
+import { sendLog } from "../../../core/webhooks/index.js";
 
 /**
  * Envía un caso de moderación al canal de modlog
@@ -36,7 +37,7 @@ export async function sendToModlog(guild, case_, targetUser, moderatorUser, dmSe
     }
 
     const embed = createModlogEmbed(case_, targetUser, moderatorUser, dmSent);
-    await modlogChannel.send({ embeds: [embed] });
+    await sendLog(modlogChannel, { embeds: [embed] }, "moderation");
     
     return true;
   } catch (error) {

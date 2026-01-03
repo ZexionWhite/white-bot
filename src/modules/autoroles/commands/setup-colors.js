@@ -37,8 +37,12 @@ export async function handle(itx) {
         updated++;
       }
 
-      // Guardar en BD (todos son free por defecto, se pueden configurar después con /config-colors)
-      await insertColorRole.run(guild.id, role.id, color.name, color.hex, 0);
+      // Colores premium por defecto: Negro, Blanco, Rojo, Verde, Rosa, Violeta
+      const premiumColors = ["Negro", "Blanco", "Rojo", "Verde", "Rosa", "Violeta"];
+      const isPremium = premiumColors.includes(color.name);
+      
+      // Guardar en BD (premium por defecto si está en la lista, free en caso contrario)
+      await insertColorRole.run(guild.id, role.id, color.name, color.hex, isPremium ? 1 : 0);
     } catch (error) {
       errors.push(`${color.name}: ${error.message}`);
     }

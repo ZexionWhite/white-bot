@@ -3,6 +3,7 @@ import { getSettings } from "../db.js";
 import { TZ } from "../config.js";
 import { EMOJIS } from "../config/emojis.js";
 import { log } from "../core/logger/index.js";
+import { sendLog } from "../core/webhooks/index.js";
 
 function truncate(str, n = 1000) {
   if (!str) return "(no content)";
@@ -90,7 +91,7 @@ export default async function messageDelete(client, message) {
         iconURL: message.guild.iconURL({ size: 64, extension: "png" }) ?? undefined
     });
 
-  await logCh.send({ embeds: [embed] }).catch((err) => {
+  await sendLog(logCh, { embeds: [embed] }, "message").catch((err) => {
     log.error("messageDelete", `Error al enviar log de eliminación en ${message.guild.name}:`, err.message);
   });
 }

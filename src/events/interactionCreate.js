@@ -85,12 +85,10 @@ export default async function interactionCreate(client, itx) {
       // Voice moderation select menu (mod_menu_*)
       if (customId.startsWith("mod_menu_")) {
         const selectedValue = itx.values[0];
-        // Crear un objeto similar a itx pero con customId del valor seleccionado
-        const fakeItx = {
-          ...itx,
-          customId: selectedValue
-        };
-        const result = await handleVoiceModComponent(client, fakeItx, selectedValue);
+        // Hacer deferUpdate primero para select menus
+        await itx.deferUpdate();
+        // Llamar al handler con la interacción original pero el customId del valor seleccionado
+        const result = await handleVoiceModComponent(client, itx, selectedValue);
         if (result !== null) return result;
       }
     }

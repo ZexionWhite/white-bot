@@ -2,6 +2,7 @@ import { EmbedBuilder } from "discord.js";
 import { getSettings } from "../db.js";
 import { TZ } from "../config.js";
 import { log } from "../core/logger/index.js";
+import { sendLog } from "../core/webhooks/index.js";
 
 export default async function guildMemberRemove(client, member) {
   try {
@@ -27,7 +28,7 @@ export default async function guildMemberRemove(client, member) {
     .setFooter({ text: `${when}` })
     .setColor(0xed4245)
 
-    await ch.send({ embeds: [embed] }).catch((err) => {
+    await sendLog(ch, { embeds: [embed] }, "join").catch((err) => {
       log.error("guildMemberRemove", `Error al enviar log de salida en ${member.guild.name}:`, err.message);
     });
   } catch (error) {

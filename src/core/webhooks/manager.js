@@ -2,8 +2,15 @@
  * Manager centralizado de Webhooks para logging
  * Maneja creación, cache y validación de webhooks por canal
  */
+import { readFileSync, existsSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import { get, set, del, isRedisAvailable } from "../redis/index.js";
 import { log } from "../logger/index.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const ASSETS_WEBHOOKS_DIR = join(__dirname, "../../assets/webhooks");
 
 /**
  * Cache en memoria (fallback si Redis no está disponible)
@@ -24,33 +31,60 @@ function webhookCacheKey(channelId) {
 const WEBHOOK_CACHE_TTL = 3600;
 
 /**
+ * Lee un archivo de avatar desde assets/webhooks/
+ * @param {string} filename - Nombre del archivo (ej: "logger.png", "guard.png")
+ * @returns {Buffer|null} - Buffer del archivo o null si no existe
+ */
+function loadWebhookAvatar(filename) {
+  if (!filename) return null;
+  
+  try {
+    const filePath = join(ASSETS_WEBHOOKS_DIR, filename);
+    if (!existsSync(filePath)) {
+      log.debug("Webhooks", `Avatar no encontrado: ${filePath}`);
+      return null;
+    }
+    
+    const buffer = readFileSync(filePath);
+    return buffer;
+  } catch (error) {
+    log.debug("Webhooks", `Error al cargar avatar ${filename}: ${error.message}`);
+    return null;
+  }
+}
+
+/**
  * Tipos de logs y sus configuraciones
  */
 export const WEBHOOK_CONFIGS = {
   moderation: {
-    username: "Moderation Logs",
-    avatar: null, // Por defecto, usar avatar del bot
+    username: "CapyGuard",
+    avatar: loadWebhookAvatar("guard.png") || loadWebhookAvatar("guard.jpg") || loadWebhookAvatar("guard.gif") // src/assets/webhooks/guard.*
   },
   blacklist: {
-    username: "Blacklist Logs",
-    avatar: null,
+    username: "CapyGuard",
+    avatar: loadWebhookAvatar("guard.png") || loadWebhookAvatar("guard.jpg") || loadWebhookAvatar("guard.gif") // src/assets/webhooks/guard.*
   },
   message: {
-    username: "Message Logs",
-    avatar: null,
+    username: "CapyLogger",
+    avatar: loadWebhookAvatar("logger.png") || loadWebhookAvatar("logger.jpg") || loadWebhookAvatar("logger.gif") // src/assets/webhooks/logger.*
   },
   voice: {
-    username: "Voice Logs",
-    avatar: null,
+    username: "CapyLogger",
+    avatar: loadWebhookAvatar("logger.png") || loadWebhookAvatar("logger.jpg") || loadWebhookAvatar("logger.gif") // src/assets/webhooks/logger.*
   },
   user: {
-    username: "User Logs",
-    avatar: null,
+    username: "CapyLogger",
+    avatar: loadWebhookAvatar("logger.png") || loadWebhookAvatar("logger.jpg") || loadWebhookAvatar("logger.gif") // src/assets/webhooks/logger.*
   },
   join: {
-    username: "Join Logs",
-    avatar: null,
+    username: "CapyLogger",
+    avatar: loadWebhookAvatar("logger.png") || loadWebhookAvatar("logger.jpg") || loadWebhookAvatar("logger.gif") // src/assets/webhooks/logger.*
   },
+  default: {
+    username: "capybot",
+    avatar: null // Se usará el avatar del bot por defecto
+  }
 };
 
 /**
@@ -114,7 +148,7 @@ export async function getOrCreateWebhook(channel, type = "moderation") {
 
   // Crear nuevo webhook
   try {
-    const config = WEBHOOK_CONFIGS[type] || WEBHOOK_CONFIGS.moderation;
+    const config = WEBHOOK_CONFIGS[type] || WEBHOOK_CONFIGS.default || WEBHOOK_CONFIGS.moderation;
     const webhook = await channel.createWebhook({
       name: config.username,
       avatar: config.avatar || undefined,

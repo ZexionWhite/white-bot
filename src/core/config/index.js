@@ -16,7 +16,10 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   // Base de datos: DATABASE_URL para PostgreSQL, o DB_PROVIDER=sqlite para SQLite
   DATABASE_URL: z.string().url().optional(),
-  DB_PROVIDER: z.enum(["sqlite", "postgres"]).default("sqlite")
+  DB_PROVIDER: z.enum(["sqlite", "postgres"]).default("sqlite"),
+  // Redis: opcional, solo usado si USE_REDIS=true
+  REDIS_URL: z.string().optional(),
+  USE_REDIS: z.union([z.string().transform(val => val === "true"), z.boolean()]).optional().default(false)
 });
 
 /**

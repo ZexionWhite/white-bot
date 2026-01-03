@@ -1,7 +1,11 @@
-import { getSettings, upsertSettings } from "../../../db.js";
+import { getSettings as getSettingsQuery, upsertSettings } from "../../../db.js";
+import { getCachedSettings, invalidateSettingsCache } from "../../../core/redis/cache.js";
 
 export async function getGuildSettings(guildId) {
-  return (await getSettings.get(guildId)) || {};
+  // Usar cache-aside: Redis -> PostgreSQL -> Cache
+  return await getCachedSettings(guildId, async () => {
+    return (await getSettingsQuery.get(guildId)) || {};
+  }) || {};
 }
 
 export async function updateGuildSettings(guildId, updates) {
@@ -26,5 +30,8 @@ export async function updateGuildSettings(guildId, updates) {
     dm_on_punish: updates.dm_on_punish ?? current.dm_on_punish ?? 1,
     command_prefix: updates.command_prefix ?? current.command_prefix ?? "capy!"
   });
+  
+  // Invalidar cache después de actualizar
+  await invalidateSettingsCache(guildId);
 }
 

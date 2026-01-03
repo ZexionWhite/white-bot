@@ -1,5 +1,6 @@
 import { welcomeEmbed, logJoinEmbed } from "../modules/settings/ui/welcome.js";
-import { getSettings, getCooldown, setCooldown } from "../db.js";
+import { getSettings } from "../db.js";
+import { getCooldown, setCooldown } from "../core/redis/index.js";
 import { log } from "../core/logger/index.js";
 
 export default async function guildMemberAdd(client, member) {
@@ -26,7 +27,7 @@ export default async function guildMemberAdd(client, member) {
           log.error("guildMemberAdd", `Error al enviar mensaje de bienvenida en ${member.guild.name}:`, err.message);
         });
         try { 
-          await setCooldown.run(member.guild.id, member.id, "welcome", now); 
+          await setCooldown(member.guild.id, member.id, "welcome", now); 
           log.info("guildMemberAdd", `Welcome enviado a ${member.user.tag} en ${member.guild.name}`);
         } catch (err) {
           log.error("guildMemberAdd", `Error al guardar cooldown:`, err.message);

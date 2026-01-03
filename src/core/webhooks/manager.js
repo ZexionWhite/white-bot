@@ -33,7 +33,7 @@ const WEBHOOK_CACHE_TTL = 3600;
 /**
  * Lee un archivo de avatar desde assets/webhooks/
  * @param {string} filename - Nombre del archivo (ej: "logger.png", "guard.png")
- * @returns {Buffer|null} - Buffer del archivo o null si no existe
+ * @returns {string|null} - Data URL del archivo o null si no existe
  */
 function loadWebhookAvatar(filename) {
   if (!filename) return null;
@@ -46,7 +46,12 @@ function loadWebhookAvatar(filename) {
     }
     
     const buffer = readFileSync(filePath);
-    return buffer;
+    const mimeType = filename.endsWith('.png') ? 'image/png' : 
+                     filename.endsWith('.jpg') || filename.endsWith('.jpeg') ? 'image/jpeg' :
+                     filename.endsWith('.gif') ? 'image/gif' : 'image/png';
+    
+    const base64 = buffer.toString('base64');
+    return `data:${mimeType};base64,${base64}`;
   } catch (error) {
     log.debug("Webhooks", `Error al cargar avatar ${filename}: ${error.message}`);
     return null;

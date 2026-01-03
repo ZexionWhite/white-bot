@@ -1,14 +1,14 @@
 /**
  * Sistema de envío de logs mediante webhooks con fallback seguro
  */
-import { type MessageCreateOptions, type WebhookClient, type GuildTextBasedChannel, WebhookClient as DiscordWebhookClient } from "discord.js";
+import { WebhookClient } from "discord.js";
 import { getOrCreateWebhook, invalidateWebhookCache, hasWebhookPermissions } from "./manager.js";
 import { log } from "../logger/index.js";
 
 /**
  * Envía un log mediante webhook con fallback a channel.send()
- * @param {GuildTextBasedChannel} channel - Canal donde enviar el log
- * @param {MessageCreateOptions} options - Opciones del mensaje (content, embeds, etc.)
+ * @param {import("discord.js").GuildTextBasedChannel} channel - Canal donde enviar el log
+ * @param {import("discord.js").MessageCreateOptions} options - Opciones del mensaje (content, embeds, etc.)
  * @param {string} type - Tipo de log (moderation, blacklist, message, voice, user, join)
  * @returns {Promise<boolean>} true si se envió correctamente, false en caso contrario
  */
@@ -73,8 +73,8 @@ export async function sendLog(channel, options, type = "moderation") {
 
 /**
  * Envía múltiples logs (útil para batching futuro)
- * @param {GuildTextBasedChannel} channel
- * @param {MessageCreateOptions[]} messages
+ * @param {import("discord.js").GuildTextBasedChannel} channel
+ * @param {import("discord.js").MessageCreateOptions[]} messages
  * @param {string} type
  * @returns {Promise<number>} Número de mensajes enviados exitosamente
  */

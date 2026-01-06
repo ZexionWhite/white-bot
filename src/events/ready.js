@@ -2,10 +2,19 @@ import { startAvatarScheduler } from "../utils/avatarManager.js";
 import { showBanner } from "../utils/consoleBanner.js";
 import { startTempbanScheduler } from "../modules/moderation/schedulers/tempban.js";
 import { startActivityRotator } from "../utils/activityRotator.js";
+import { runAllMigrations } from "../core/db/migrations.js";
+import { log } from "../core/logger/index.js";
 
 let avatarInterval = null;
 
-export default function ready(client) {
+export default async function ready(client) {
+  // Ejecutar migraciones automáticamente (solo crea/agrega, nunca elimina datos)
+  try {
+    await runAllMigrations();
+  } catch (error) {
+    log.error("Ready", `Error ejecutando migraciones: ${error.message}`);
+    // No bloquear el inicio del bot si las migraciones fallan
+  }
   showBanner();
   
   const guilds = client.guilds.cache.size;

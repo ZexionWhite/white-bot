@@ -35,6 +35,7 @@ export async function registerInfoPrefixCommands() {
       aliases: ["userinfo", "info", "usuario"],
       description: "Información detallada de un usuario",
       permissions: null,
+      module: "info",
       argsSchema: userSchema,
       execute: async (ctx) => {
         const locale = await getLocaleForGuildId(ctx.guild.id);

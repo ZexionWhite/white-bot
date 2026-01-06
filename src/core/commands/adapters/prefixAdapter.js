@@ -51,11 +51,14 @@ export async function handlePrefixCommand(message) {
   }
   
   try {
-    // Validar argumentos con zod
-    const parsed = command.argsSchema.parse({
-      // El parser de argumentos debe convertir args[1...] al formato esperado
-      rawArgs: args.slice(1)
-    });
+    // Validar argumentos con zod (solo si argsSchema existe)
+    let parsed = { rawArgs: args.slice(1) };
+    if (command.argsSchema) {
+      parsed = command.argsSchema.parse({
+        // El parser de argumentos debe convertir args[1...] al formato esperado
+        rawArgs: args.slice(1)
+      });
+    }
     
     // Crear contexto
     const ctx = await createCommandContextFromMessage(message, parsed);

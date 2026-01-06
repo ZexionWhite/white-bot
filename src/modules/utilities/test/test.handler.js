@@ -256,7 +256,7 @@ export async function handleTestSelect(itx, client) {
         break;
 
       case "config":
-        embed = configEmbed(itx.guild, generateMockSettings(itx.guild), locale);
+        embed = await configEmbed(itx.guild, generateMockSettings(itx.guild), locale);
         break;
 
       case "voicestate":

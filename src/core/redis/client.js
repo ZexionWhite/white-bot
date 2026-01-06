@@ -22,15 +22,15 @@ export async function initRedis() {
   connectionAttempted = true;
 
   try {
-    const env = getEnv();
-    const useRedis = env.USE_REDIS === "true" || env.USE_REDIS === true;
+    const config = getConfig();
+    const useRedis = config.USE_REDIS === "true" || config.USE_REDIS === true;
     
     if (!useRedis) {
       log.info("Redis", "Redis deshabilitado (USE_REDIS=false o no configurado)");
       return false;
     }
 
-    const redisUrl = env.REDIS_URL || process.env.REDIS_URL;
+    const redisUrl = config.REDIS_URL || process.env.REDIS_URL;
     
     if (!redisUrl) {
       log.warn("Redis", "USE_REDIS=true pero REDIS_URL no está configurado. Redis deshabilitado.");
@@ -79,12 +79,37 @@ export async function initRedis() {
       log.info("Redis", `Reconectando a Redis en ${ms}ms...`);
     });
 
-    // Test de conexión (ioredis se conecta automáticamente)
-    await redisClient.ping();
-    
-    redisEnabled = true;
-    log.info("Redis", "Redis inicializado correctamente");
-    return true;
+    // Esperar a que Redis esté listo antes de hacer ping
+    // ioredis se conecta automáticamente, pero debemos esperar el evento "ready"
+    return new Promise((resolve) => {
+      const timeout = setTimeout(() => {
+        log.warn("Redis", "Timeout esperando conexión a Redis (5s). El bot continuará sin Redis.");
+        redisEnabled = false;
+        resolve(false);
+      }, 5000);
+
+      redisClient.once("ready", async () => {
+        clearTimeout(timeout);
+        try {
+          // Test de conexión
+          await redisClient.ping();
+          redisEnabled = true;
+          log.info("Redis", "Redis inicializado correctamente");
+          resolve(true);
+        } catch (error) {
+          log.warn("Redis", `Error en ping de Redis: ${error.message}. El bot continuará sin Redis.`);
+          redisEnabled = false;
+          resolve(false);
+        }
+      });
+
+      redisClient.once("error", (err) => {
+        clearTimeout(timeout);
+        // El error ya se maneja en el listener general, solo resolvemos
+        redisEnabled = false;
+        resolve(false);
+      });
+    });
   } catch (error) {
     log.warn("Redis", `No se pudo conectar a Redis: ${error.message}. El bot continuará sin Redis.`);
     redisEnabled = false;

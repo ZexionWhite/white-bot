@@ -47,13 +47,10 @@ export const componentHandlers = {
     const newPage = action === "next" ? parseInt(page) + 1 : parseInt(page) - 1;
     const CasesService = await import("./moderation/services/cases.service.js");
     
-    // Obtener casos paginados (10 por página)
     const cases = await CasesService.getUserCases(itx.guild.id, userId, type === "all" ? null : type, 10, (newPage - 1) * 10);
     
-    // Obtener todos los casos para contar por tipo (sin paginación, solo para contar)
     const allCases = await CasesService.getUserCases(itx.guild.id, userId, null, 10000, 0);
-    
-    // Contar por tipo
+
     const counts = {
       warned: 0,
       muted: 0,

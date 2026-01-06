@@ -112,27 +112,15 @@ export const settingsSlashCommands = [
     ),
   new SlashCommandBuilder()
     .setName("locale")
-    .setDescription("Manage server language / Gestionar idioma del servidor")
+    .setDescription("Configure the server language")
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-    .addSubcommand(sc =>
-      sc.setName("view")
-       .setDescription("View current language / Ver idioma actual")
-    )
-    .addSubcommand(sc =>
-      sc.setName("set")
-       .setDescription("Set server language / Establecer idioma del servidor")
-       .addStringOption(o =>
-         o.setName("language")
-          .setDescription("Language / Idioma")
-          .setRequired(true)
-          .addChoices(
-            { name: "Español (España)", value: "es-ES" },
-            { name: "English (US)", value: "en-US" }
-          )
+    .addStringOption(o =>
+      o.setName("language")
+       .setDescription("Language to use for this server")
+       .setRequired(true)
+       .addChoices(
+         { name: "Español", value: "es-ES" },
+         { name: "English", value: "en-US" }
        )
-    )
-    .addSubcommand(sc =>
-      sc.setName("auto")
-       .setDescription("Use automatic detection / Usar detección automática")
     )
 ];

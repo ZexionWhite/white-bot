@@ -58,84 +58,84 @@ export const moderationSlashCommands = [
   
   new SlashCommandBuilder()
     .setName("history")
-    .setDescription("Ver historial de sanciones de un usuario")
-    .addUserOption(o => o.setName("user").setDescription("Usuario").setRequired(true)),
+    .setDescription("View a user's moderation history")
+    .addUserOption(o => o.setName("user").setDescription("User to view history for").setRequired(true)),
   
   new SlashCommandBuilder()
     .setName("case")
-    .setDescription("Ver un case específico")
-    .addIntegerOption(o => o.setName("id").setDescription("ID del case").setRequired(true)),
-  
-  new SlashCommandBuilder()
-    .setName("editcase")
-    .setDescription("Edit a case reason")
+    .setDescription("View details of a moderation case")
     .addIntegerOption(o => o.setName("id").setDescription("Case ID").setRequired(true)),
   
   new SlashCommandBuilder()
+    .setName("editcase")
+    .setDescription("Edit a moderation case")
+    .addIntegerOption(o => o.setName("id").setDescription("Case ID to edit").setRequired(true)),
+  
+  new SlashCommandBuilder()
     .setName("remove")
-    .setDescription("Eliminar un case")
-    .addIntegerOption(o => o.setName("id").setDescription("ID del case").setRequired(true))
-    .addStringOption(o => o.setName("reason").setDescription("Razón de eliminación")),
+    .setDescription("Remove a moderation case")
+    .addIntegerOption(o => o.setName("id").setDescription("Case ID to remove").setRequired(true))
+    .addStringOption(o => o.setName("reason").setDescription("Reason for removal")),
   
   new SlashCommandBuilder()
     .setName("clear")
-    .setDescription("Eliminar mensajes de un canal")
-    .addIntegerOption(o => o.setName("amount").setDescription("Cantidad de mensajes (1-100)").setRequired(true).setMinValue(1).setMaxValue(100))
-    .addUserOption(o => o.setName("user").setDescription("Usuario específico (opcional)")),
+    .setDescription("Delete multiple messages from a channel")
+    .addIntegerOption(o => o.setName("amount").setDescription("Number of messages to delete").setRequired(true).setMinValue(1).setMaxValue(100))
+    .addUserOption(o => o.setName("user").setDescription("Specific user to delete messages from (optional)")),
   
   new SlashCommandBuilder()
     .setName("lock")
-    .setDescription("Bloquear un canal")
-    .addChannelOption(o => o.setName("channel").setDescription("Canal a bloquear"))
-    .addStringOption(o => o.setName("reason").setDescription("Razón")),
+    .setDescription("Lock a text channel")
+    .addChannelOption(o => o.setName("channel").setDescription("Channel to lock"))
+    .addStringOption(o => o.setName("reason").setDescription("Reason for locking")),
   
   new SlashCommandBuilder()
     .setName("unlock")
-    .setDescription("Desbloquear un canal")
-    .addChannelOption(o => o.setName("channel").setDescription("Canal a desbloquear"))
-    .addStringOption(o => o.setName("reason").setDescription("Razón")),
+    .setDescription("Unlock a text channel")
+    .addChannelOption(o => o.setName("channel").setDescription("Channel to unlock"))
+    .addStringOption(o => o.setName("reason").setDescription("Reason for unlocking")),
   
   new SlashCommandBuilder()
     .setName("slowmode")
-    .setDescription("Configurar slowmode en un canal")
-    .addIntegerOption(o => o.setName("seconds").setDescription("Segundos (0-21600)").setRequired(true).setMinValue(0).setMaxValue(21600))
-    .addChannelOption(o => o.setName("channel").setDescription("Canal")),
+    .setDescription("Set slowmode rate limit for a channel")
+    .addIntegerOption(o => o.setName("seconds").setDescription("Slowmode delay in seconds").setRequired(true).setMinValue(0).setMaxValue(21600))
+    .addChannelOption(o => o.setName("channel").setDescription("Channel to set slowmode for")),
   
   new SlashCommandBuilder()
     .setName("createmuterole")
-    .setDescription("Crea y configura un rol de mute")
+    .setDescription("Create and configure a mute role for this server")
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
   
   new SlashCommandBuilder()
     .setName("setmuterole")
-    .setDescription("Configura qué rol usar como mute")
+    .setDescription("Set an existing role as the mute role")
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-    .addRoleOption(o => o.setName("role").setDescription("Rol de mute").setRequired(true)),
+    .addRoleOption(o => o.setName("role").setDescription("Role to use for muting").setRequired(true)),
   
   new SlashCommandBuilder()
     .setName("setmodlog")
-    .setDescription("Configura el canal de modlog")
+    .setDescription("Set the moderation log channel")
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-    .addChannelOption(o => o.setName("channel").setDescription("Canal de modlog").setRequired(true)),
+    .addChannelOption(o => o.setName("channel").setDescription("Channel for moderation logs").setRequired(true)),
   
   new SlashCommandBuilder()
     .setName("voice-mod")
-    .setDescription("Herramientas de moderación de canales de voz")
+    .setDescription("Moderate users in voice channels")
     .addSubcommand(sc =>
       sc.setName("channel")
-       .setDescription("Modera usuarios en un canal de voz")
+       .setDescription("Moderate all users in a voice channel")
        .addChannelOption(o =>
-         o.setName("canal")
-          .setDescription("Canal de voz a moderar (opcional, usa el canal actual si no se especifica)")
+         o.setName("channel")
+          .setDescription("Voice channel to moderate (optional, uses current channel if not specified)")
           .addChannelTypes(ChannelType.GuildVoice, ChannelType.GuildStageVoice)
        )
     )
     .addSubcommand(sc =>
       sc.setName("user")
-       .setDescription("Modera un usuario específico en voz")
+       .setDescription("Moderate a specific user in voice")
        .addUserOption(o =>
-         o.setName("usuario")
-          .setDescription("Usuario a moderar")
+         o.setName("user")
+          .setDescription("User to moderate")
           .setRequired(true)
        )
     )

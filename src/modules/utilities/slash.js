@@ -3,46 +3,52 @@ import { SlashCommandBuilder, PermissionFlagsBits, ChannelType } from "discord.j
 export const utilitiesSlashCommands = [
   new SlashCommandBuilder()
     .setName("preview")
-    .setDescription("Previsualiza embeds (boost, bienvenida, etc.)")
+    .setDescription("Preview embed messages")
     .addSubcommand(sc =>
       sc.setName("boost")
-       .setDescription("Previsualiza el embed de boost")
+       .setDescription("Preview the boost embed")
        .addUserOption(o =>
-         o.setName("usuario").setDescription("Miembro a simular (opcional)")
+         o.setName("user")
+          .setDescription("Member to simulate (optional)")
        )
        .addBooleanOption(o =>
-         o.setName("publico").setDescription("Envíalo al canal (si no, es ephemeral)")
+         o.setName("public")
+          .setDescription("Send to channel (if false, sends as ephemeral)")
        )
        .addIntegerOption(o =>
-         o.setName("boosts").setDescription("Forzar cantidad de boosts (opcional)").setMinValue(0)
+         o.setName("boosts")
+          .setDescription("Force boost count (optional)")
+          .setMinValue(0)
        )
     )
     .addSubcommand(sc =>
       sc.setName("welcome")
-       .setDescription("Previsualiza el embed de bienvenida")
+       .setDescription("Preview the welcome embed")
        .addUserOption(o =>
-         o.setName("usuario").setDescription("Miembro a simular (opcional)")
+         o.setName("user")
+          .setDescription("Member to simulate (optional)")
        )
        .addBooleanOption(o =>
-         o.setName("publico").setDescription("Envíalo al canal (si no, es ephemeral)")
+         o.setName("public")
+          .setDescription("Send to channel (if false, sends as ephemeral)")
        )
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 
   new SlashCommandBuilder()
     .setName("ping")
-    .setDescription("Mide latencia y estado del bot")
+    .setDescription("Check bot latency and status")
     .addBooleanOption(o =>
-      o.setName("publico")
-       .setDescription("Si true, lo muestra en el canal (default: ephemeral)")
+      o.setName("public")
+       .setDescription("If true, shows in channel (default: ephemeral)")
     ),
 
   new SlashCommandBuilder()
     .setName("help")
-    .setDescription("Muestra información sobre todos los comandos disponibles"),
+    .setDescription("View help information and available commands"),
 
   new SlashCommandBuilder()
     .setName("config")
-    .setDescription("Muestra la configuración actual del servidor (solo moderadores)")
+    .setDescription("View current server configuration")
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild | PermissionFlagsBits.ManageRoles)
 ];

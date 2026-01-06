@@ -18,10 +18,10 @@ export function initializeLavalink(discordClient) {
     return lavalinkManager;
   }
 
-  const host = getEnv("LAVALINK_HOST", "localhost");
-  const port = parseInt(getEnv("LAVALINK_PORT", "2333"), 10);
-  const password = getEnv("LAVALINK_PASSWORD", "youshallnotpass");
-  const secure = getEnv("LAVALINK_SECURE", "false").toLowerCase() === "true";
+  const host = process.env.LAVALINK_HOST || "localhost";
+  const port = parseInt(process.env.LAVALINK_PORT || "2333", 10);
+  const password = process.env.LAVALINK_PASSWORD || "youshallnotpass";
+  const secure = (process.env.LAVALINK_SECURE || "false").toLowerCase() === "true";
 
   lavalinkManager = new LavalinkManager({
     nodes: [

@@ -14,9 +14,9 @@ const SPOTIFY_REGEX = /^(https?:\/\/)?(open\.)?spotify\.com\/(track|album|playli
  * @param {string} query - Query de búsqueda o URL
  * @returns {Promise<{loadType: string, tracks: Array, playlistInfo?: object}>}
  */
-export async function resolveQuery(query) {
-  const client = getLavalinkClient();
-  if (!client) {
+export async function resolveQuery(query, requester = null) {
+  const manager = getLavalinkClient();
+  if (!manager) {
     throw new Error("Cliente de Lavalink no inicializado");
   }
 
@@ -24,7 +24,7 @@ export async function resolveQuery(query) {
     // Si es URL de YouTube, cargar directo
     if (YOUTUBE_REGEX.test(query)) {
       log.debug("Search", `Resolviendo URL de YouTube: ${query}`);
-      const result = await client.rest.loadTracks(query);
+      const result = await manager.search({ query, source: "ytsearch" }, requester);
       return result;
     }
 
@@ -34,7 +34,7 @@ export async function resolveQuery(query) {
       
       // Intentar con LavaSrc (spsearch)
       try {
-        const spotifyResult = await client.rest.loadTracks(`spsearch:${query}`);
+        const spotifyResult = await manager.search({ query: `spsearch:${query}`, source: "spsearch" }, requester);
         if (spotifyResult && spotifyResult.tracks && spotifyResult.tracks.length > 0) {
           return spotifyResult;
         }
@@ -43,7 +43,7 @@ export async function resolveQuery(query) {
       }
 
       // Fallback: parsear metadata y buscar en YouTube
-      return await resolveSpotifyMirroring(query);
+      return await resolveSpotifyMirroring(query, requester);
     }
 
     // Si es texto, buscar primero con ytmsearch, luego ytsearch
@@ -51,7 +51,7 @@ export async function resolveQuery(query) {
     
     // Intentar ytmsearch primero (mejor calidad)
     try {
-      const ytmResult = await client.rest.loadTracks(`ytmsearch:${query}`);
+      const ytmResult = await manager.search({ query, source: "ytmsearch" }, requester);
       if (ytmResult && ytmResult.tracks && ytmResult.tracks.length > 0) {
         return ytmResult;
       }
@@ -60,7 +60,7 @@ export async function resolveQuery(query) {
     }
 
     // Fallback a ytsearch
-    const ytResult = await client.rest.loadTracks(`ytsearch:${query}`);
+    const ytResult = await manager.search({ query, source: "ytsearch" }, requester);
     return ytResult;
 
   } catch (error) {
@@ -74,8 +74,8 @@ export async function resolveQuery(query) {
  * @param {string} spotifyUrl - URL de Spotify
  * @returns {Promise<{loadType: string, tracks: Array}>}
  */
-async function resolveSpotifyMirroring(spotifyUrl) {
-  const client = getLavalinkClient();
+async function resolveSpotifyMirroring(spotifyUrl, requester = null) {
+  const manager = getLavalinkClient();
   
   // Extraer tipo y ID de la URL de Spotify
   const match = spotifyUrl.match(/spotify\.com\/(track|album|playlist|artist)\/([a-zA-Z0-9]+)/);
@@ -96,7 +96,7 @@ async function resolveSpotifyMirroring(spotifyUrl) {
   // Intentar búsqueda genérica (el usuario debería proporcionar el nombre si es posible)
   // Por ahora, intentamos con spsearch de LavaSrc que debería manejar esto
   try {
-    const result = await client.rest.loadTracks(`spsearch:${spotifyUrl}`);
+    const result = await manager.search({ query: `spsearch:${spotifyUrl}`, source: "spsearch" }, requester);
     if (result && result.tracks && result.tracks.length > 0) {
       return result;
     }
@@ -106,7 +106,7 @@ async function resolveSpotifyMirroring(spotifyUrl) {
   }
 
   // Último recurso: buscar en YouTube con el ID (probablemente no funcione bien)
-  const ytResult = await client.rest.loadTracks(`ytsearch:${id}`);
+  const ytResult = await manager.search({ query: id, source: "ytsearch" }, requester);
   return ytResult;
 }
 

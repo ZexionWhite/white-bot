@@ -27,7 +27,7 @@ export function getPlayer(guildId) {
 
   if (!players.has(guildId)) {
     const player = client.createPlayer({
-      guildId,
+      guildId: guildId,
       voiceChannelId: null,
       textChannelId: null,
       selfDeaf: true,
@@ -123,7 +123,23 @@ export async function playTrack(guildId, track) {
   if (!player) return false;
 
   try {
-    await player.play({ track: track.encoded });
+    // La estructura del track de lavalink-client puede variar
+    // Si tiene encoded directamente
+    if (track.encoded) {
+      await player.play({ track: { encoded: track.encoded } });
+    }
+    // Si tiene track.encoded (estructura anidada)
+    else if (track.track && track.track.encoded) {
+      await player.play({ track: { encoded: track.track.encoded } });
+    }
+    // Si tiene identifier
+    else if (track.info && track.info.identifier) {
+      await player.play({ track: { identifier: track.info.identifier } });
+    }
+    // Intentar con el track completo como clientTrack (formato de lavalink-client)
+    else {
+      await player.play({ clientTrack: track });
+    }
     return true;
   } catch (error) {
     log.error("Player", `Error reproduciendo track en guild ${guildId}:`, error);

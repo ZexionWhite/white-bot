@@ -124,7 +124,7 @@ export async function addSimilarTracks(guildId) {
 
   try {
     // Buscar con ytmsearch
-    const result = await client.rest.loadTracks(`ytmsearch:${searchQuery}`);
+    const result = await client.search({ query: searchQuery, source: "ytmsearch" }, null);
     
     if (!result || !result.tracks || result.tracks.length === 0) {
       log.debug("Autoplay", "No se encontraron tracks similares");

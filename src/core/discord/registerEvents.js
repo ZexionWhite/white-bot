@@ -44,6 +44,19 @@ export function registerEvents(client) {
   // Eventos de voz
   client.on("voiceStateUpdate", (oldState, newState) => voiceStateUpdate(client, oldState, newState));
 
+  // Eventos raw para Lavalink
+  client.on("raw", async (data) => {
+    try {
+      const { getLavalinkClient } = await import("../../modules/music/services/lavalink.service.js");
+      const lavalink = getLavalinkClient();
+      if (lavalink && lavalink.sendRawData) {
+        lavalink.sendRawData(data);
+      }
+    } catch (error) {
+      // Ignorar si Lavalink no está inicializado
+    }
+  });
+
   // Errores y advertencias del cliente
   client.on("error", (error) => {
     log.error("Client", "Error del cliente Discord:", error.message);

@@ -51,7 +51,7 @@ export async function handle(itx) {
 
   try {
     // Resolver query
-    const result = await resolveQuery(query);
+    const result = await resolveQuery(query, itx.user.id);
 
     if (!result || !result.tracks || result.tracks.length === 0) {
       return itx.editReply({

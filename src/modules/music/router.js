@@ -22,7 +22,7 @@ export const musicHandlers = {
   stop: stop.handle,
   pause: pause.handle,
   resume: resume.handle,
-  clear: clear.handle,
+  clearqueue: clear.handle,
   loop: loop.handle,
   shuffle: shuffle.handle,
   autoplay: autoplay.handle,

@@ -49,7 +49,7 @@ export const musicSlashCommands = [
     .setDescription("Resume playback"),
 
   new SlashCommandBuilder()
-    .setName("clear")
+    .setName("clearqueue")
     .setDescription("Clear the playback queue"),
 
   new SlashCommandBuilder()

@@ -40,15 +40,19 @@ export default async function ready(client) {
   startTempbanScheduler(client);
   startActivityRotator(client);
 
-  // Inicializar Lavalink
-  try {
-    initializeLavalink(client);
-    log.info("Ready", "✅ Lavalink inicializado correctamente");
-  } catch (error) {
+  // Inicializar Lavalink (no bloquea - async)
+  initializeLavalink(client).then((manager) => {
+    if (manager) {
+      log.info("Ready", "✅ Lavalink inicializado correctamente");
+    } else {
+      log.warn("Ready", "⚠️ Lavalink no disponible. El bot continuará sin funcionalidad de música.");
+      log.warn("Ready", "Verifica: LAVALINK_HOST, LAVALINK_PORT, LAVALINK_PASSWORD y red Docker.");
+    }
+  }).catch((error) => {
     log.error("Ready", `❌ Error inicializando Lavalink: ${error.message}`);
     if (error.stack) {
       log.error("Ready", `Stack trace: ${error.stack}`);
     }
     log.warn("Ready", "El bot continuará sin funcionalidad de música. Verifica la configuración de Lavalink.");
-  }
+  });
 }

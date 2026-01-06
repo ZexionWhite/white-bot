@@ -17,6 +17,10 @@ const SPOTIFY_REGEX = /^(https?:\/\/)?(open\.)?spotify\.com\/(track|album|playli
 export async function resolveQuery(query, requester = null) {
   const manager = getLavalinkClient();
   if (!manager) {
+    const { isLavalinkReady } = await import("./lavalink.service.js");
+    if (!isLavalinkReady()) {
+      throw new Error("Lavalink no está disponible");
+    }
     throw new Error("Cliente de Lavalink no inicializado");
   }
 

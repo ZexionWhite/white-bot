@@ -13,7 +13,10 @@
     "dj_setrole_permission": "Necesitas el permiso 'Gestionar Servidor' para configurar el rol DJ",
     "dj_role_not_found": "Rol no encontrado",
     "skip_amount_invalid": "La cantidad debe ser un número positivo",
-    "page_invalid": "Número de página inválido"
+    "page_invalid": "Número de página inválido",
+    "lavalink_unavailable": "Lavalink no está disponible actualmente. Verifica LAVALINK_HOST, LAVALINK_PORT, LAVALINK_PASSWORD o la red Docker. El bot continuará funcionando sin música.",
+    "lavalink_auth_failed": "Error de autenticación con Lavalink. Verifica que LAVALINK_PASSWORD coincida con la configuración del servidor Lavalink.",
+    "lavalink_dns_failed": "No se puede resolver el hostname de Lavalink. Verifica LAVALINK_HOST. Si usas servicios separados en Dokploy, asegúrate de que estén en la misma red o usa una IP/host público."
   },
   "success": {
     "play_single": "Añadido a la cola: **{title}**",

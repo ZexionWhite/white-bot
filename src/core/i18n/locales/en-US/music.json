@@ -13,7 +13,10 @@
     "dj_setrole_permission": "You need the 'Manage Server' permission to set the DJ role",
     "dj_role_not_found": "Role not found",
     "skip_amount_invalid": "Amount must be a positive number",
-    "page_invalid": "Invalid page number"
+    "page_invalid": "Invalid page number",
+    "lavalink_unavailable": "Lavalink is currently unavailable. Check LAVALINK_HOST, LAVALINK_PORT, LAVALINK_PASSWORD or Docker network. The bot will continue without music functionality.",
+    "lavalink_auth_failed": "Lavalink authentication failed. Verify that LAVALINK_PASSWORD matches your Lavalink server configuration.",
+    "lavalink_dns_failed": "Cannot resolve Lavalink hostname. Check LAVALINK_HOST. If using separate services in Dokploy, ensure they're on the same network or use a public IP/hostname."
   },
   "success": {
     "play_single": "Added to queue: **{title}**",

@@ -3,6 +3,7 @@
  * Activa o desactiva el autoplay
  */
 import { getLocaleForGuildId, t } from "../../../core/i18n/index.js";
+import { checkLavalinkAvailability } from "../services/lavalink-guard.js";
 import { canControl } from "../services/permissions.service.js";
 import { setAutoplay } from "../events/trackEnd.js";
 import { createErrorEmbed } from "../ui/embeds.js";
@@ -13,6 +14,15 @@ export async function handle(itx) {
   }
 
   const locale = await getLocaleForGuildId(itx.guild.id);
+
+  // Verificar que Lavalink esté disponible
+  const lavalinkCheck = checkLavalinkAvailability(locale);
+  if (!lavalinkCheck.available) {
+    return itx.reply({
+      embeds: [lavalinkCheck.errorEmbed],
+      ephemeral: true
+    });
+  }
 
   // Verificar permisos
   if (!canControl(itx.member)) {

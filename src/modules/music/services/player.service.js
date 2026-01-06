@@ -41,21 +41,32 @@ export function getPlayer(guildId) {
     });
 
     player.on("trackEnd", async (data) => {
-      log.debug("Player", `Track terminado en guild ${guildId}`, data);
-      // Llamar al handler de trackEnd
-      const { handleTrackEnd } = await import("../events/trackEnd.js");
-      // El evento trackEnd de lavalink-client puede tener diferentes estructuras
-      // Intentar obtener el track y la razón
-      const track = data?.track || player.track || null;
-      const reason = data?.reason || "FINISHED";
-      if (track) {
-        await handleTrackEnd(guildId, track, reason);
-      } else {
-        // Si no hay track en el evento, intentar obtenerlo del player
-        const currentTrack = player.track;
-        if (currentTrack) {
-          await handleTrackEnd(guildId, currentTrack, reason);
+      try {
+        log.debug("Player", `Track terminado en guild ${guildId}`, data);
+        // Llamar al handler de trackEnd
+        const { handleTrackEnd } = await import("../events/trackEnd.js");
+        // El evento trackEnd de lavalink-client puede tener diferentes estructuras
+        // Intentar obtener el track y la razón
+        const track = data?.track || player.track || null;
+        const reason = data?.reason || "FINISHED";
+        if (track) {
+          await handleTrackEnd(guildId, track, reason).catch((error) => {
+            log.error("Player", `Error en handleTrackEnd para guild ${guildId}:`, error);
+            // NO hacer throw - solo loggear
+          });
+        } else {
+          // Si no hay track en el evento, intentar obtenerlo del player
+          const currentTrack = player.track;
+          if (currentTrack) {
+            await handleTrackEnd(guildId, currentTrack, reason).catch((error) => {
+              log.error("Player", `Error en handleTrackEnd para guild ${guildId}:`, error);
+              // NO hacer throw
+            });
+          }
         }
+      } catch (error) {
+        log.error("Player", `Error en evento trackEnd para guild ${guildId}:`, error);
+        // NO hacer throw - evitar crash
       }
     });
 
@@ -65,14 +76,33 @@ export function getPlayer(guildId) {
 
     player.on("trackException", (data) => {
       log.error("Player", `Excepción en track guild ${guildId}:`, data);
+      // NO hacer throw - solo loggear
     });
 
     player.on("connectionUpdate", (state) => {
-      if (state === "DISCONNECTED") {
-        log.info("Player", `Desconectado de guild ${guildId}`);
-        cleanup(guildId);
+      try {
+        if (state === "DISCONNECTED") {
+          log.info("Player", `Desconectado de guild ${guildId}`);
+          cleanup(guildId);
+        }
+      } catch (error) {
+        log.error("Player", `Error en connectionUpdate para guild ${guildId}:`, error);
+        // NO hacer throw
       }
     });
+
+    // Prevenir errores no capturados del player
+    if (typeof player.on === "function") {
+      // Agregar listener genérico de error si existe
+      try {
+        player.on("error", (error) => {
+          log.error("Player", `Error en player guild ${guildId}:`, error);
+          // NO hacer throw
+        });
+      } catch (err) {
+        // El player puede no tener evento error, ignorar
+      }
+    }
 
     players.set(guildId, player);
   }

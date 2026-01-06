@@ -3,6 +3,7 @@
  * Salta la canción actual o múltiples canciones
  */
 import { getLocaleForGuildId, t } from "../../../core/i18n/index.js";
+import { checkLavalinkAvailability } from "../services/lavalink-guard.js";
 import { canControl } from "../services/permissions.service.js";
 import { getQueue } from "../services/queue.service.js";
 import { getPlayer, stop, playTrack, isPlaying } from "../services/player.service.js";
@@ -15,6 +16,15 @@ export async function handle(itx) {
   }
 
   const locale = await getLocaleForGuildId(itx.guild.id);
+
+  // Verificar que Lavalink esté disponible
+  const lavalinkCheck = checkLavalinkAvailability(locale);
+  if (!lavalinkCheck.available) {
+    return itx.reply({
+      embeds: [lavalinkCheck.errorEmbed],
+      ephemeral: true
+    });
+  }
 
   // Verificar permisos
   if (!canControl(itx.member)) {

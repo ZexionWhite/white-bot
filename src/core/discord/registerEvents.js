@@ -49,11 +49,17 @@ export function registerEvents(client) {
     try {
       const { getLavalinkClient } = await import("../../modules/music/services/lavalink.service.js");
       const lavalink = getLavalinkClient();
-      if (lavalink && lavalink.sendRawData) {
-        lavalink.sendRawData(data);
+      if (lavalink && typeof lavalink.sendRawData === "function") {
+        try {
+          lavalink.sendRawData(data);
+        } catch (error) {
+          // Error al enviar raw data - NO crashear, solo loggear
+          log.debug("Lavalink", "Error enviando raw data:", error.message);
+        }
       }
     } catch (error) {
-      // Ignorar si Lavalink no está inicializado
+      // Ignorar si Lavalink no está inicializado o hay cualquier error
+      // NO hacer throw - permitir que el bot continúe
     }
   });
 
@@ -73,14 +79,48 @@ export function registerEvents(client) {
 
 /**
  * Registra handlers de proceso (unhandledRejection, uncaughtException)
+ * NO debe crashear el bot por errores de Lavalink o errores no críticos
  */
 export function registerProcessHandlers(client) {
   process.on("unhandledRejection", (reason, promise) => {
-    log.error("Process", "Unhandled Rejection at:", promise, "reason:", reason);
+    const errorMsg = reason instanceof Error ? reason.message : String(reason);
+    const errorStack = reason instanceof Error ? reason.stack : undefined;
+    
+    log.error("Process", "Unhandled Rejection:", {
+      reason: errorMsg,
+      stack: errorStack,
+      promise: promise
+    });
+    
+    // NO hacer exit - permitir que el bot continúe
+    // Errores de Lavalink NO son críticos
+    if (errorMsg.includes("Lavalink") || errorMsg.includes("ERR_UNHANDLED_ERROR") || errorMsg.includes("WebSocket")) {
+      log.warn("Process", "Error relacionado con Lavalink capturado. El bot continuará sin funcionalidad de música.");
+      return;
+    }
   });
 
   process.on("uncaughtException", (error) => {
-    log.error("Process", "Uncaught Exception:", error);
-    process.exit(1);
+    log.error("Process", "Uncaught Exception:", {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      code: error.code
+    });
+    
+    // Solo hacer exit si es un error crítico del sistema
+    // Errores de Lavalink/WebSocket NO son críticos
+    if (error.message?.includes("Lavalink") || 
+        error.message?.includes("ERR_UNHANDLED_ERROR") || 
+        error.message?.includes("WebSocket") ||
+        error.code === "ERR_UNHANDLED_ERROR") {
+      log.warn("Process", "Error relacionado con Lavalink capturado. El bot continuará sin funcionalidad de música.");
+      return; // NO hacer exit
+    }
+    
+    // Para errores críticos del sistema (out of memory, etc.), hacer exit
+    // Pero la mayoría de errores de aplicación pueden ser manejados
+    log.error("Process", "Error crítico detectado. Verifica logs para más detalles.");
+    // NO hacer exit automáticamente - permitir recuperación
   });
 }

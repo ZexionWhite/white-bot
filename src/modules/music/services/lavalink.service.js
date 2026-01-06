@@ -23,6 +23,16 @@ export function initializeLavalink(discordClient) {
   const password = process.env.LAVALINK_PASSWORD || "youshallnotpass";
   const secure = (process.env.LAVALINK_SECURE || "false").toLowerCase() === "true";
 
+  log.info("Lavalink", `Configurando conexión a Lavalink...`);
+  log.info("Lavalink", `  Host: ${host}`);
+  log.info("Lavalink", `  Port: ${port}`);
+  log.info("Lavalink", `  Secure: ${secure}`);
+  log.info("Lavalink", `  Password: ${password ? "***" : "NO CONFIGURADA"}`);
+
+  if (!password || password === "youshallnotpass") {
+    log.warn("Lavalink", "⚠️ Usando contraseña por defecto. Configura LAVALINK_PASSWORD en tus variables de entorno.");
+  }
+
   lavalinkManager = new LavalinkManager({
     nodes: [
       {
@@ -30,7 +40,9 @@ export function initializeLavalink(discordClient) {
         host,
         port,
         id: "Main Node",
-        secure
+        secure,
+        retryAmount: 5,
+        retryDelay: 10000
       }
     ],
     sendToShard: (guildId, payload) => {
@@ -47,21 +59,35 @@ export function initializeLavalink(discordClient) {
 
   // Eventos de conexión
   lavalinkManager.on("nodeConnect", (node) => {
-    log.info("Lavalink", `Nodo conectado: ${node.id}`);
+    log.info("Lavalink", `✅ Nodo conectado: ${node.id} (${node.host}:${node.port})`);
   });
 
   lavalinkManager.on("nodeDisconnect", (node, reason) => {
-    log.warn("Lavalink", `Nodo desconectado: ${node.id} - ${reason}`);
+    log.warn("Lavalink", `⚠️ Nodo desconectado: ${node.id} - Razón: ${reason}`);
   });
 
   lavalinkManager.on("nodeError", (node, error) => {
-    log.error("Lavalink", `Error en nodo ${node.id}:`, error);
+    log.error("Lavalink", `❌ Error en nodo ${node.id}:`, error);
+    if (error.message) {
+      log.error("Lavalink", `   Mensaje: ${error.message}`);
+    }
+    if (error.code) {
+      log.error("Lavalink", `   Código: ${error.code}`);
+    }
+  });
+
+  lavalinkManager.on("nodeReconnect", (node) => {
+    log.info("Lavalink", `🔄 Reconectando nodo: ${node.id}`);
   });
 
   // Inicializar
-  lavalinkManager.init(discordClient.user);
-
-  log.info("Lavalink", `Cliente inicializado - Host: ${host}:${port}, Secure: ${secure}`);
+  try {
+    lavalinkManager.init(discordClient.user);
+    log.info("Lavalink", `✅ Cliente inicializado - Host: ${host}:${port}, Secure: ${secure}`);
+  } catch (error) {
+    log.error("Lavalink", `❌ Error al inicializar Lavalink:`, error);
+    throw error;
+  }
 
   return lavalinkManager;
 }

@@ -43,8 +43,12 @@ export default async function ready(client) {
   // Inicializar Lavalink
   try {
     initializeLavalink(client);
-    log.info("Ready", "Lavalink inicializado correctamente");
+    log.info("Ready", "✅ Lavalink inicializado correctamente");
   } catch (error) {
-    log.error("Ready", `Error inicializando Lavalink: ${error.message}`);
+    log.error("Ready", `❌ Error inicializando Lavalink: ${error.message}`);
+    if (error.stack) {
+      log.error("Ready", `Stack trace: ${error.stack}`);
+    }
+    log.warn("Ready", "El bot continuará sin funcionalidad de música. Verifica la configuración de Lavalink.");
   }
 }

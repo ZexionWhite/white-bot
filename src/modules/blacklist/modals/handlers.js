@@ -88,12 +88,14 @@ export async function handleBlacklistModal(itx) {
     log.error("handleBlacklistModal", `Error en modal ${command}:`, error);
     console.error(`[modal:${command}] Error:`, error);
     
+    const errorLocale = itx.guild ? await getLocaleForGuild(itx.guild) : DEFAULT_LOCALE;
+    
     // Si la interacción no ha sido respondida, responder con error
     if (itx.isRepliable() && !itx.replied && !itx.deferred) {
       try {
         return await itx.reply({ 
-          embeds: [createErrorEmbed(`Ocurrió un error al procesar la acción. Por favor, intenta de nuevo.`)], 
-          ephemeral: true 
+          embeds: [createErrorEmbed(t(errorLocale, "common.errors.unknown_error"), errorLocale)], 
+          flags: MessageFlags.Ephemeral 
         });
       } catch (replyError) {
         // Si falla, puede ser porque la interacción expiró (Unknown interaction)

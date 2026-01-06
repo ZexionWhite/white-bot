@@ -20,7 +20,7 @@
     },
     "user_left": {
       "title": "Usuario Abandonó",
-      "description": "**{tag}** (\`{id}\`) usuario abandonó el servidor."
+      "description": "**{tag}** (`{id}`) usuario abandonó el servidor."
     },
     "user_joined": {
       "title": "📥 Miembro Unido",
@@ -60,20 +60,20 @@
   "voice": {
     "joined": {
       "title": "🔊 Usuario se unió a voz",
-      "description": "**{username}** (\`{userId}\`) se unió a un canal de voz.",
+      "description": "**{username}** (`{userId}`) se unió a un canal de voz.",
       "field_channel": "Canal",
       "footer": "Voice state update • {when}"
     },
     "left": {
       "title": "🔇 Usuario salió de voz",
-      "description": "**{username}** (\`{userId}\`) salió del canal de voz.",
+      "description": "**{username}** (`{userId}`) salió del canal de voz.",
       "field_previous_channel": "Canal anterior",
       "field_time_in_channel": "Tiempo en canal",
       "footer": "Voice state update • {when}"
     },
     "moved": {
       "title": "🔄 Usuario se movió de canal",
-      "description": "**{username}** (\`{userId}\`) cambió de canal de voz.",
+      "description": "**{username}** (`{userId}`) cambió de canal de voz.",
       "field_from": "Desde",
       "field_to": "Hacia",
       "field_time_in_previous_channel": "Tiempo en canal anterior",

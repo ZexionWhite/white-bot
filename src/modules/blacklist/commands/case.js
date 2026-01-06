@@ -6,9 +6,9 @@ import { getLocaleForGuild, t, DEFAULT_LOCALE } from "../../../core/i18n/index.j
 import { MessageFlags } from "discord.js";
 
 export async function handle(itx) {
+  const locale = itx.guild ? await getLocaleForGuild(itx.guild) : DEFAULT_LOCALE;
+  
   try {
-    const locale = itx.guild ? await getLocaleForGuild(itx.guild) : DEFAULT_LOCALE;
-    
     if (!itx.inGuild()) {
       return itx.reply({ content: `❌ ${t(locale, "common.errors.guild_only")}`, flags: MessageFlags.Ephemeral });
     }
@@ -54,8 +54,6 @@ export async function handle(itx) {
   } catch (error) {
     log.error("blacklist case", `Error al ejecutar comando blacklist case:`, error);
     console.error("[blacklist case] Error completo:", error);
-    
-    const locale = itx.guild ? await getLocaleForGuild(itx.guild) : DEFAULT_LOCALE;
     
     // Si la interacción no ha sido respondida, responder con error
     if (!itx.replied && !itx.deferred) {

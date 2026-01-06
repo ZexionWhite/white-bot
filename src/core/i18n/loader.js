@@ -31,7 +31,6 @@ const TRANSLATION_MODULES = [
   "common",
   "moderation",
   "logging",
-  "help",
   "config",
   "blacklist",
   "info",

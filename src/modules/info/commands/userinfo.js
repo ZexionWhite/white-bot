@@ -32,9 +32,9 @@ export async function handle(itx) {
 }
 
 export async function handleSelectMenu(itx, targetId, view) {
+  const locale = itx.guild ? await getLocaleForGuild(itx.guild) : DEFAULT_LOCALE;
+  
   try {
-    const locale = itx.guild ? await getLocaleForGuild(itx.guild) : DEFAULT_LOCALE;
-    
     const targetMember = await itx.guild.members.fetch(targetId).catch(() => null);
     if (!targetMember) {
       return itx.update({ embeds: [createErrorEmbed(t(locale, "common.errors.user_not_found"), locale)], components: [] });
@@ -70,7 +70,6 @@ export async function handleSelectMenu(itx, targetId, view) {
     return itx.update({ embeds: [embed], components });
   } catch (error) {
     log.error("userinfo", `Error en handleSelectMenu para view "${view}":`, error);
-    const locale = itx.guild ? await getLocaleForGuild(itx.guild) : DEFAULT_LOCALE;
     return itx.update({ 
       embeds: [createErrorEmbed(t(locale, "common.errors.unknown_error"), locale)], 
       components: [] 

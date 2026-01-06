@@ -121,7 +121,6 @@ export async function registerModerationExtraPrefixCommands() {
           return ctx.reply({ embeds: [createErrorEmbed(t(locale, "common.errors.case_not_found", { caseId }), locale)] });
         }
         
-        const locale = await getLocaleForGuild(ctx.guild);
         const target = await ctx.raw.client.users.fetch(case_.target_id).catch(() => ({ id: case_.target_id }));
         const moderator = await ctx.raw.client.users.fetch(case_.moderator_id).catch(() => ({ id: case_.moderator_id }));
         

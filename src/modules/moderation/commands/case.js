@@ -5,13 +5,14 @@ import { log } from "../../../core/logger/index.js";
 import { getLocaleForGuild } from "../../../core/i18n/index.js";
 
 export async function handle(itx) {
+  const locale = itx.guild ? await getLocaleForGuild(itx.guild) : "es-ES";
+  
   try {
     if (!itx.inGuild()) {
       return itx.reply({ content: "Este comando solo funciona en servidores.", ephemeral: true });
     }
 
     const caseId = itx.options.getInteger("id", true);
-    const locale = await getLocaleForGuild(itx.guild);
 
     if (!await PermService.canExecuteCommand(itx.member, "case")) {
       return itx.reply({ embeds: [createErrorEmbed("No tienes permisos para usar este comando", locale)], ephemeral: true });
@@ -56,7 +57,6 @@ export async function handle(itx) {
     // Si la interacción no ha sido respondida, responder con error
     if (!itx.replied && !itx.deferred) {
       try {
-        const locale = await getLocaleForGuild(itx.guild);
         return await itx.reply({ 
           embeds: [createErrorEmbed("Ocurrió un error al mostrar el case. Por favor, intenta de nuevo.", locale)], 
           ephemeral: true 

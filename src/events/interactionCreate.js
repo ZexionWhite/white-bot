@@ -1,8 +1,9 @@
-import { PermissionFlagsBits } from "discord.js";
+import { PermissionFlagsBits, MessageFlags } from "discord.js";
 import * as utilitiesModule from "../modules/utilities/index.js";
 import { commandHandlers, componentHandlers, autocompleteHandlers } from "../modules/registry.js";
 import { handleVoiceModComponent } from "../modules/moderation/voice/handlers.js";
 import { log } from "../core/logger/index.js";
+import { getLocaleForGuild, t } from "../core/i18n/index.js";
 
 export default async function interactionCreate(client, itx) {
   try {
@@ -46,7 +47,8 @@ export default async function interactionCreate(client, itx) {
       log.debug("interactionCreate", `Comando ejecutado: ${name} por ${itx.user.tag} en ${itx.guild?.name || "DM"}`);
       
       if (!itx.inGuild() && name !== "test") {
-        return itx.reply({ content: "Este comando solo funciona en servidores.", ephemeral: true });
+        const locale = await getLocaleForGuild(itx.guild);
+        return itx.reply({ content: `❌ ${t(locale, "common.errors.guild_only")}`, flags: MessageFlags.Ephemeral });
       }
 
       // Handlers desde registry (moderation, blacklist, info, permissions, autoroles, settings, utilities)
@@ -111,7 +113,8 @@ export default async function interactionCreate(client, itx) {
   } catch (error) {
     log.error("interactionCreate", `Error inesperado al procesar interacción:`, error.message);
     if (itx.isRepliable() && !itx.replied && !itx.deferred) {
-      itx.reply({ content: "❌ Ocurrió un error al procesar esta interacción.", ephemeral: true }).catch(() => {});
+      const locale = itx.guild ? await getLocaleForGuild(itx.guild) : "es-ES";
+      itx.reply({ content: `❌ ${t(locale, "common.errors.interaction_error")}`, flags: MessageFlags.Ephemeral }).catch(() => {});
     }
   }
 }

@@ -35,7 +35,8 @@ const TRANSLATION_MODULES = [
   "config",
   "blacklist",
   "info",
-  "voice"
+  "voice",
+  "utilities"
 ];
 
 /**

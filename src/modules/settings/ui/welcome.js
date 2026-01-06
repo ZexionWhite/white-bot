@@ -2,9 +2,13 @@ import { EmbedBuilder } from "discord.js";
 import { WELCOME_GIF_URL } from "../../../config.js";
 import { t, getLocaleForGuild, DEFAULT_LOCALE } from "../../../core/i18n/index.js";
 
-export function welcomeEmbed(member, { autorolesChannelId = null } = {}) {
+export async function welcomeEmbed(member, { autorolesChannelId = null } = {}, locale = null) {
+  if (!locale) {
+    locale = await getLocaleForGuild(member.guild);
+  }
+  
   const embed = new EmbedBuilder()
-    .setTitle(`¡Bienvenido/a a ${member.guild.name}!`)
+    .setTitle(t(locale, "common.labels.welcome_title", { guildName: member.guild.name }))
     .setThumbnail(member.user.displayAvatarURL({ size: 128, extension: "png" }))
     .setImage(WELCOME_GIF_URL)
     .setColor(0x5865f2)

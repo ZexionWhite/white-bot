@@ -1,0 +1,251 @@
+{
+  "help": {
+    "intro": {
+      "title": "Capybot – Help Center",
+      "description": "**Capybot** is a complete moderation bot designed to efficiently manage your Discord server.\n\n**Main features:**\n• Complete moderation and sanctions system\n• Automatic logs via webhooks (no rate limits)\n• User and channel management tools\n• Blacklist and cases system\n• Advanced voice channel moderation\n• Slash commands (`/command`) and prefix commands (`capy!command`)\n\n",
+      "footer": "Select a category from the menu to view available commands"
+    },
+    "menu": {
+      "placeholder": "Select a category...",
+      "intro": "Introduction",
+      "config": "Configuration",
+      "moderation": "Moderation",
+      "cases": "Cases and Tools",
+      "blacklist": "Blacklist",
+      "info": "Information",
+      "voice": "Voice",
+      "utilities": "Utilities"
+    },
+    "buttons": {
+      "close": "Close help"
+    },
+    "config": {
+      "title": "Server Configuration",
+      "description": "Commands to configure different aspects of the bot on your server.",
+      "fields": {
+        "welcome_channel": {
+          "name": "Welcome Channel",
+          "value": "`/set welcome [channel] [cooldown]`\nConfigures the channel where the bot will send welcome messages. The cooldown prevents spam when many users join together (default: 60 seconds)."
+        },
+        "server_logs": {
+          "name": "Server Logs",
+          "value_join": "`/set join-log [channel]` – Logs member joins and leaves",
+          "value_message": "`/set message-log [channel]` – Logs deleted or edited messages",
+          "value_avatar": "`/set avatar-log [channel]` – Logs avatar changes",
+          "value_nickname": "`/set nickname-log [channel]` – Logs nickname changes",
+          "value_voice": "`/set voice-log [channel]` – Logs voice channel activity"
+        },
+        "boosters": {
+          "name": "Boosters and Announcements",
+          "value_boost": "`/set boost-channel [channel]` – Channel for boost announcements",
+          "value_info": "`/set info-channel [channel]` – Information and perks channel",
+          "value_role": "`/set booster-role [role]` – Sets the booster role"
+        },
+        "moderation": {
+          "name": "Moderation",
+          "value_modlog": "`/setmodlog [channel]` – Channel for logging sanctions",
+          "value_blacklist": "`/setblacklistchannel [channel]` – Channel for blacklist",
+          "value_createmute": "`/createmuterole` – Automatically creates the Muted role",
+          "value_setmute": "`/setmuterole [role]` – Selects an existing role for mute"
+        }
+      },
+      "footer": "All these commands require the 'Manage Server' permission"
+    },
+    "moderation": {
+      "title": "Sanctions and Moderation",
+      "description": "Commands to sanction and moderate users on the server.",
+      "fields": {
+        "warnings": {
+          "name": "Warnings and Mutes",
+          "value_warn": "`/warn [user]` – Sends a formal warning (reason will be requested via modal)",
+          "value_mute": "`/mute [user] [duration]` – Mutes with mute role (reason will be requested via modal)",
+          "value_unmute": "`/unmute [user]` – Removes the mute (reason will be requested via modal)"
+        },
+        "timeouts": {
+          "name": "Timeouts",
+          "value_timeout": "`/timeout [user] [duration]` – Applies native Discord timeout (reason will be requested via modal)",
+          "value_untimeout": "`/untimeout [user]` – Removes an active timeout (reason will be requested via modal)"
+        },
+        "bans": {
+          "name": "Kicks and Bans",
+          "value_kick": "`/kick [user]` – Kicks without banning (reason will be requested via modal)",
+          "value_ban": "`/ban [user] [days]` – Permanently bans (reason will be requested via modal)",
+          "value_tempban": "`/tempban [user] [duration]` – Temporarily bans (reason will be requested via modal)",
+          "value_softban": "`/softban [user] [days]` – Ban + unban to clean messages (reason will be requested via modal)",
+          "value_unban": "`/unban [user]` – Removes an active ban (reason will be requested via modal)"
+        }
+      },
+      "footer": "Require moderation permissions according to the action"
+    },
+    "cases": {
+      "title": "Cases and Tools",
+      "description": "Tools to manage moderation cases and channels.",
+      "fields": {
+        "case_management": {
+          "name": "Case Management",
+          "value_history": "`/history [user] [type] [limit]` – Complete sanctions history",
+          "value_case": "`/case [id]` – Details of a specific case",
+          "value_editcase": "`/editcase [id]` – Edits a case's reason (new reason will be requested via modal)",
+          "value_remove": "`/remove [id] [reason]` – Removes or reverts a sanction"
+        },
+        "channel_management": {
+          "name": "Channel Management",
+          "value_clear": "`/clear [amount] [user]` – Deletes recent messages",
+          "value_lock": "`/lock [channel] [reason]` – Locks a channel",
+          "value_unlock": "`/unlock [channel] [reason]` – Unlocks a channel",
+          "value_slowmode": "`/slowmode [seconds] [channel]` – Sets slowmode"
+        }
+      },
+      "footer": "Require moderation permissions"
+    },
+    "blacklist": {
+      "title": "Blacklist System",
+      "description": "Manage the server's blacklist to record problematic users.",
+      "fields": {
+        "management": {
+          "name": "Blacklist Management",
+          "value_add": "`/blacklist add [user] [severity]` – Adds a user with persistent record (reason and evidence will be requested via modal)",
+          "value_history": "`/blacklist history [user]` – Shows complete history",
+          "value_edit": "`/blacklist edit [caseid] [new_severity]` – Edits an entry (new reason and evidence will be requested via modal)",
+          "value_remove": "`/blacklist remove [caseid] [reason]` – Removes an entry leaving a record"
+        },
+        "severities": {
+          "name": "Severities",
+          "value": "**LOW** – Low | **MEDIUM** – Medium | **HIGH** – High | **CRITICAL** – Critical"
+        }
+      },
+      "footer": "Requires moderation permissions"
+    },
+    "info": {
+      "title": "User Information",
+      "description": "Commands to get detailed information about server users.",
+      "fields": {
+        "advanced": {
+          "name": "Advanced Information",
+          "value": "`/user [user]`\nShows complete user information:\n• Overview with roles and permissions\n• Sanctions history\n• Recent voice activity\n• Recent messages\n• Permissions and overrides\n• Trust score (0-100)\n• Statistics (voice time, messages)"
+        }
+      },
+      "footer": "Requires moderation permissions"
+    },
+    "voice": {
+      "title": "Voice Moderation",
+      "description": "Specialized tools for moderating voice channels.",
+      "fields": {
+        "channel": {
+          "name": "Channel Moderation",
+          "value": "`/voice-mod channel [channel]`\nShows an interactive panel with all users in the channel:\n• View mute/deafen status\n• Mute/unmute users\n• Move users between channels\n• Mass actions"
+        },
+        "user": {
+          "name": "User Moderation",
+          "value": "`/voice-mod user [user]`\nInteractive panel for a specific user:\n• View their current status\n• Mute/unmute\n• Move to your channel\n• All available actions"
+        }
+      },
+      "footer": "Requires MuteMembers or MoveMembers permissions"
+    },
+    "utilities": {
+      "title": "Utilities and Others",
+      "description": "Useful commands and additional tools.",
+      "fields": {
+        "preview": {
+          "name": "Preview",
+          "value_boost": "`/preview boost [user]` – Previews the boost message",
+          "value_welcome": "`/preview welcome [user]` – Previews the welcome message"
+        },
+        "autoroles": {
+          "name": "Color Autoroles",
+          "value_setup": "`/setupcolors` – Automatically creates color roles",
+          "value_menu": "`/color-menu` – Posts the interactive selection menu"
+        },
+        "bot_info": {
+          "name": "Bot Information",
+          "value_ping": "`/ping` / `capy!ping` – Shows bot latency and status",
+          "value_help": "`/help` / `capy!help` – Shows this help center",
+          "value_config": "`/config` / `capy!config` – Shows current server configuration"
+        },
+        "prefix": {
+          "name": "Prefix Commands",
+          "value": "The bot also supports prefix commands `capy!`. Use `capy!help` to see all available prefix commands. Most common commands include:\n• Moderation: `capy!warn`, `capy!ban`, `capy!kick`, `capy!mute`, `capy!timeout`, `capy!tempban`, `capy!history`, `capy!case`, `capy!clear`, `capy!unban`\n• Utilities: `capy!ping`, `capy!help`, `capy!config`\n• Information: `capy!user`"
+        },
+        "permissions": {
+          "name": "Advanced Permissions",
+          "value_view": "`/modconfig view [type] [user/role]` – View current permission policies",
+          "value_module": "`/modconfig module [module] [effect] [user/role]` – Configure permissions for an entire module",
+          "value_command": "`/modconfig command [command] [effect] [user/role]` – Configure permissions for a specific command",
+          "value_reset": "`/modconfig reset [confirm]` – Reset all permission policies"
+        }
+      },
+      "footer": "Some commands require administrator permissions"
+    },
+    "errors": {
+      "close_verify": "Could not verify message owner.",
+      "close_permission": "Only the user who executed the command can close this help.",
+      "close_delete_error": "Could not delete message. It may have already been deleted."
+    }
+  },
+  "config": {
+    "title": "{guildName} Configuration",
+    "fields": {
+      "welcome_channel": "📥 Welcome Channel",
+      "log_channel": "📋 Admin Logs Channel",
+      "message_log": "💬 Message Logs",
+      "avatar_log": "🖼️ Avatar Logs",
+      "nickname_log": "👤 Nickname Logs",
+      "voice_log": "🎤 Voice Logs",
+      "modlog": "🛡️ Modlog",
+      "blacklist_channel": "📋 Blacklist Channel",
+      "boost_channel": "Boost Channel",
+      "info_channel": "ℹ️ Info Channel",
+      "mute_role": "🔇 Mute Role",
+      "booster_role": "Booster Role",
+      "welcome_cooldown": "⏱️ Welcome Cooldown",
+      "command_prefix": "🔧 Command Prefix",
+      "dm_on_punish": "📨 DM on Punish",
+      "autorole_channel": "🎨 Autorole Channel"
+    },
+    "not_configured": "*Not configured*",
+    "role_not_found": "*(role not found)*",
+    "cooldown_minutes": "{minutes} minutes",
+    "dm_enabled": "Enabled",
+    "dm_disabled": "Disabled",
+    "errors": {
+      "permission_denied": "You don't have permission to view configuration. Requires `ManageGuild` or `ManageRoles`."
+    }
+  },
+  "ping": {
+    "title": "🏓 Pong",
+    "fields": {
+      "api": "API (WS)",
+      "round_trip": "Round-trip",
+      "db": "DB",
+      "uptime": "Uptime",
+      "memory": "Memory",
+      "guilds": "Guilds"
+    },
+    "not_available": "–"
+  },
+  "preview": {
+    "boost_sent": "Boost preview sent ✅",
+    "welcome_sent": "Welcome preview sent ✅",
+    "boost_footer": "{count} boosts • {when}",
+    "errors": {
+      "no_permission": "No permission.",
+      "member_not_found": "Could not find that member."
+    }
+  },
+  "prefix": {
+    "help": {
+      "title": "📚 Available Prefix Commands",
+      "description": "All available commands using the `capy!` prefix",
+      "fields": {
+        "moderation": "🔨 Moderation",
+        "utilities": "🛠️ Utilities",
+        "info": "ℹ️ Information"
+      },
+      "none": "None",
+      "footer": "Use `/help` to see detailed information about slash commands"
+    },
+    "config": {
+      "error_permission": "❌ You don't have permission to view configuration."
+    }
+  }
+}

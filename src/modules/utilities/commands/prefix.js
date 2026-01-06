@@ -1,11 +1,7 @@
-/**
- * Prefix command registrations para utilities
- */
-
-import { z } from "zod";
 import { PermissionFlagsBits, EmbedBuilder } from "discord.js";
-import * as helpHandler from "../help.js";
-import * as configHandler from "../config.js";
+import { getLocaleForGuildId, t } from "../../../core/i18n/index.js";
+
+const emptySchema = null;
 
 /**
  * Registra comandos de utilities para prefix
@@ -13,87 +9,101 @@ import * as configHandler from "../config.js";
 export async function registerUtilitiesPrefixCommands() {
   const { registerCommands } = await import("../../../core/commands/commandRegistry.js");
   
-  const emptySchema = z.object({}).transform(() => ({}));
-  
   registerCommands([
     {
       name: "ping",
-      aliases: [],
-      description: "Mide latencia y estado del bot",
-      permissions: null, // Sin permisos requeridos
+      aliases: ["latency", "pong"],
+      description: "Shows bot latency and status",
+      permissions: null,
       argsSchema: emptySchema,
       execute: async (ctx) => {
-        // Para prefix, siempre mostramos público
-        const embed = new (await import("discord.js")).EmbedBuilder()
-          .setTitle("🏓 Pong")
+        const locale = await getLocaleForGuildId(ctx.guild.id);
+        const t0 = Date.now();
+        const api = Math.round(ctx.raw.client.ws.ping);
+
+        let dbMs = null;
+        try {
+          const { prepare } = await import("../../../core/db/index.js");
+          const s = Date.now();
+          await prepare("SELECT 1").get();
+          dbMs = Date.now() - s;
+        } catch { }
+
+        const up = process.uptime();
+        const h = Math.floor(up / 3600);
+        const m = Math.floor((up % 3600) / 60);
+        const s = Math.floor(up % 60);
+        const mem = Math.round(process.memoryUsage().heapUsed / 1024 / 1024);
+
+        const embed = new EmbedBuilder()
+          .setTitle(t(locale, "utilities.ping.title"))
           .addFields(
-            { name: "API (WS)", value: `${Math.round(ctx.raw.client.ws.ping)} ms`, inline: true },
-            { name: "Uptime", value: `${Math.floor(process.uptime() / 3600)}h ${Math.floor((process.uptime() % 3600) / 60)}m`, inline: true },
-            { name: "Memoria", value: `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)} MB`, inline: true },
-            { name: "Guilds", value: `${ctx.raw.client.guilds.cache.size}`, inline: true }
+            { name: t(locale, "utilities.ping.fields.api"), value: `${api} ms`, inline: true },
+            { name: t(locale, "utilities.ping.fields.round_trip"), value: `${Date.now() - t0} ms`, inline: true },
+            { name: t(locale, "utilities.ping.fields.db"), value: dbMs !== null ? `${dbMs} ms` : t(locale, "utilities.ping.not_available"), inline: true },
+            { name: t(locale, "utilities.ping.fields.uptime"), value: `${h}h ${m}m ${s}s`, inline: true },
+            { name: t(locale, "utilities.ping.fields.memory"), value: `${mem} MB`, inline: true },
+            { name: t(locale, "utilities.ping.fields.guilds"), value: `${ctx.raw.client.guilds.cache.size}`, inline: true }
           )
           .setColor(0x5865f2)
           .setTimestamp();
+
         return ctx.reply({ embeds: [embed] });
       }
     },
     {
       name: "help",
-      aliases: ["h", "ayuda"],
-      description: "Muestra información sobre todos los comandos disponibles",
+      aliases: ["ayuda", "commands"],
+      description: "Shows available prefix commands",
       permissions: null,
       argsSchema: emptySchema,
       execute: async (ctx) => {
-        const { getAllCommands } = await import("../../../core/commands/commandRegistry.js");
-        const { EmbedBuilder } = await import("discord.js");
+        const locale = await getLocaleForGuildId(ctx.guild.id);
+        const { commandRegistry } = await import("../../../core/commands/commandRegistry.js");
+        const commands = commandRegistry.getAllCommands();
         
-        const allCommands = getAllCommands();
-        
-        // Agrupar comandos por categoría (basado en módulo de origen)
         const moderationCommands = [];
         const utilityCommands = [];
         const infoCommands = [];
         
-        const moderationNames = new Set(["warn", "ban", "kick", "mute", "timeout", "tempban", "history", "case", "clear", "unban"]);
-        const utilityNames = new Set(["ping", "help", "config"]);
-        const infoNames = new Set(["user"]);
-        
-        for (const cmd of allCommands) {
-          const cmdName = cmd.name.toLowerCase();
-          if (moderationNames.has(cmdName)) {
+        for (const cmdName in commands) {
+          const cmd = commands[cmdName];
+          if (cmdName !== cmd.name) continue; // Skip aliases
+          
+          if (cmd.module === "moderation") {
             const aliases = cmd.aliases && cmd.aliases.length > 0 ? ` (${cmd.aliases.join(", ")})` : "";
             moderationCommands.push(`\`${cmdName}${aliases}\` - ${cmd.description || "Sin descripción"}`);
-          } else if (utilityNames.has(cmdName)) {
+          } else if (cmd.module === "utilities") {
             const aliases = cmd.aliases && cmd.aliases.length > 0 ? ` (${cmd.aliases.join(", ")})` : "";
             utilityCommands.push(`\`${cmdName}${aliases}\` - ${cmd.description || "Sin descripción"}`);
-          } else if (infoNames.has(cmdName)) {
+          } else if (cmd.module === "info") {
             const aliases = cmd.aliases && cmd.aliases.length > 0 ? ` (${cmd.aliases.join(", ")})` : "";
             infoCommands.push(`\`${cmdName}${aliases}\` - ${cmd.description || "Sin descripción"}`);
           }
         }
         
         const embed = new EmbedBuilder()
-          .setTitle("📚 Comandos Prefix Disponibles")
-          .setDescription("Todos los comandos disponibles usando el prefijo `capy!`")
+          .setTitle(t(locale, "utilities.prefix.help.title"))
+          .setDescription(t(locale, "utilities.prefix.help.description"))
           .setColor(0x5865f2)
           .addFields(
             {
-              name: "🔨 Moderación",
-              value: moderationCommands.join("\n") || "Ninguno",
+              name: t(locale, "utilities.prefix.help.fields.moderation"),
+              value: moderationCommands.join("\n") || t(locale, "utilities.prefix.help.none"),
               inline: false
             },
             {
-              name: "🛠️ Utilidades",
-              value: utilityCommands.join("\n") || "Ninguno",
+              name: t(locale, "utilities.prefix.help.fields.utilities"),
+              value: utilityCommands.join("\n") || t(locale, "utilities.prefix.help.none"),
               inline: false
             },
             {
-              name: "ℹ️ Información",
-              value: infoCommands.join("\n") || "Ninguno",
+              name: t(locale, "utilities.prefix.help.fields.info"),
+              value: infoCommands.join("\n") || t(locale, "utilities.prefix.help.none"),
               inline: false
             }
           )
-          .setFooter({ text: "Usa `/help` para ver información detallada de comandos slash" })
+          .setFooter({ text: t(locale, "utilities.prefix.help.footer") })
           .setTimestamp();
         
         return ctx.reply({ embeds: [embed] });
@@ -102,20 +112,21 @@ export async function registerUtilitiesPrefixCommands() {
     {
       name: "config",
       aliases: ["cfg", "configuracion"],
-      description: "Muestra la configuración actual del servidor",
+      description: "Shows current server configuration",
       permissions: PermissionFlagsBits.ManageGuild | PermissionFlagsBits.ManageRoles,
       argsSchema: emptySchema,
       execute: async (ctx) => {
+        const locale = await getLocaleForGuildId(ctx.guild.id);
         const { getSettings } = await import("../../../db.js");
         const { configEmbed } = await import("../ui/config.js");
         
         if (!ctx.member?.permissions.has(PermissionFlagsBits.ManageGuild) && 
             !ctx.member?.permissions.has(PermissionFlagsBits.ManageRoles)) {
-          return ctx.reply({ content: "❌ No tienes permisos para ver la configuración." });
+          return ctx.reply({ content: t(locale, "utilities.prefix.config.error_permission") });
         }
         
         const settings = (await getSettings.get(ctx.guild.id)) ?? {};
-        const embed = configEmbed(ctx.guild, settings);
+        const embed = configEmbed(ctx.guild, settings, locale);
         return ctx.reply({ embeds: [embed] });
       }
     }

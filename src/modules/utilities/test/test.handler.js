@@ -7,6 +7,7 @@ import { createModlogEmbed, createCaseEmbed, createHistoryEmbed, createSuccessEm
 import { createUserinfoOverview, createUserinfoSanctions, createUserinfoVoice, createUserinfoMessages, createUserinfoPermissions, createUserinfoStatistics } from "../../info/ui/embeds.js";
 import { createBlacklistEmbed, createBlacklistHistoryEmbed } from "../../blacklist/ui/embeds.js";
 import { getEmbedByCategory } from "../help/help.embed.js";
+import { getLocaleForGuild, t } from "../../../core/i18n/index.js";
 
 const TEST_GUILD_ID = "1053040188445704253";
 
@@ -190,20 +191,23 @@ function generateMockPolicies(member) {
 export async function handleTestCommand(itx, client) {
   try {
     if (!itx.inGuild()) {
-      return itx.reply({ content: "❌ Este comando solo funciona en servidores.", flags: MessageFlags.Ephemeral });
+      const locale = "es-ES";
+      return itx.reply({ content: `❌ ${t(locale, "common.test.guild_only")}`, flags: MessageFlags.Ephemeral });
     }
 
+    const locale = await getLocaleForGuild(itx.guild);
+    
     if (!itx.guild || !itx.guild.id) {
-      return itx.reply({ content: "❌ No se pudo obtener información del servidor.", ephemeral: true });
+      return itx.reply({ content: `❌ ${t(locale, "common.test.server_info_error")}`, flags: MessageFlags.Ephemeral });
     }
 
     if (!isTestGuild(itx.guild.id)) {
-      return itx.reply({ content: "❌ Este comando solo está disponible en el servidor de pruebas.", flags: MessageFlags.Ephemeral });
+      return itx.reply({ content: `❌ ${t(locale, "common.test.test_guild_only")}`, flags: MessageFlags.Ephemeral });
     }
 
     const selectMenu = createTestSelectMenu();
     return itx.reply({ 
-      content: "**🧪 Test Embed Selector**\nSelecciona un embed del menú para testearlo:",
+      content: `**${t(locale, "common.test.title")}**\n${t(locale, "common.test.description")}`,
       components: [selectMenu],
       flags: MessageFlags.Ephemeral
     });
@@ -237,7 +241,7 @@ export async function handleTestSelect(itx, client) {
 
     switch (embedType) {
       case "welcome":
-        embed = welcomeEmbed(member, { autorolesChannelId: itx.guild.channels.cache.find(c => c.isTextBased())?.id });
+        embed = await welcomeEmbed(member, { autorolesChannelId: itx.guild.channels.cache.find(c => c.isTextBased())?.id }, locale);
         break;
 
       case "joinlog":
@@ -267,7 +271,7 @@ export async function handleTestSelect(itx, client) {
             user_id: member.id
           });
         } else {
-          return itx.update({ content: "❌ No hay canales de voz disponibles para testear este embed.", components: [] });
+          return itx.update({ content: `❌ ${t(locale, "common.test.no_voice_channels")}`, components: [] });
         }
         break;
 
@@ -344,35 +348,35 @@ export async function handleTestSelect(itx, client) {
         break;
 
       case "help_intro":
-        embed = getEmbedByCategory("intro", client);
+        embed = getEmbedByCategory("intro", client, locale);
         break;
 
       case "help_config":
-        embed = getEmbedByCategory("config", client);
+        embed = getEmbedByCategory("config", client, locale);
         break;
 
       case "help_moderation":
-        embed = getEmbedByCategory("moderation", client);
+        embed = getEmbedByCategory("moderation", client, locale);
         break;
 
       case "help_cases":
-        embed = getEmbedByCategory("cases", client);
+        embed = getEmbedByCategory("cases", client, locale);
         break;
 
       case "help_blacklist":
-        embed = getEmbedByCategory("blacklist", client);
+        embed = getEmbedByCategory("blacklist", client, locale);
         break;
 
       case "help_info":
-        embed = getEmbedByCategory("info", client);
+        embed = getEmbedByCategory("info", client, locale);
         break;
 
       case "help_voice":
-        embed = getEmbedByCategory("voice", client);
+        embed = getEmbedByCategory("voice", client, locale);
         break;
 
       case "help_utilities":
-        embed = getEmbedByCategory("utilities", client);
+        embed = getEmbedByCategory("utilities", client, locale);
         break;
 
       default:

@@ -1,11 +1,13 @@
 import { getEmbedByCategory } from "./help.embed.js";
 import { createHelpSelectMenu } from "./help.menu.js";
 import { createCloseButton } from "./help.buttons.js";
+import { getLocaleForGuild, t } from "../../../core/i18n/index.js";
 
 export async function handleHelpCommand(itx, client) {
-  const embed = getEmbedByCategory("intro", client);
-  const selectMenu = createHelpSelectMenu("intro");
-  const closeButton = createCloseButton();
+  const locale = await getLocaleForGuild(itx.guild);
+  const embed = getEmbedByCategory("intro", client, locale);
+  const selectMenu = createHelpSelectMenu("intro", locale);
+  const closeButton = createCloseButton(locale);
 
   return itx.reply({
     embeds: [embed],
@@ -15,10 +17,11 @@ export async function handleHelpCommand(itx, client) {
 }
 
 export async function handleHelpSelect(itx, client) {
+  const locale = await getLocaleForGuild(itx.guild);
   const selectedCategory = itx.values[0];
-  const embed = getEmbedByCategory(selectedCategory, client);
-  const selectMenu = createHelpSelectMenu(selectedCategory);
-  const closeButton = createCloseButton();
+  const embed = getEmbedByCategory(selectedCategory, client, locale);
+  const selectMenu = createHelpSelectMenu(selectedCategory, locale);
+  const closeButton = createCloseButton(locale);
 
   return itx.update({
     embeds: [embed],
@@ -27,19 +30,20 @@ export async function handleHelpSelect(itx, client) {
 }
 
 export async function handleHelpClose(itx) {
+  const locale = await getLocaleForGuild(itx.guild);
   const message = itx.message;
   const commandUserId = message.interaction?.user?.id || message.author?.id;
   
   if (!commandUserId) {
     return itx.reply({
-      content: "❌ No se pudo verificar el propietario del mensaje.",
+      content: `❌ ${t(locale, "utilities.help.errors.close_verify")}`,
       ephemeral: true
     });
   }
 
   if (itx.user.id !== commandUserId) {
     return itx.reply({
-      content: "❌ Solo el usuario que ejecutó el comando puede cerrar esta ayuda.",
+      content: `❌ ${t(locale, "utilities.help.errors.close_permission")}`,
       ephemeral: true
     });
   }
@@ -48,9 +52,8 @@ export async function handleHelpClose(itx) {
     await message.delete();
   } catch (error) {
     return itx.reply({
-      content: "❌ No pude eliminar el mensaje. Puede que ya haya sido eliminado.",
+      content: `❌ ${t(locale, "utilities.help.errors.close_delete_error")}`,
       ephemeral: true
     });
   }
 }
-

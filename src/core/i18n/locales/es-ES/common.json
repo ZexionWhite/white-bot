@@ -9,11 +9,35 @@
     "action_expired": "Esta acción ha expirado o no existe",
     "not_author": "No iniciaste esta acción",
     "no_reason": "Sin razón",
-    "unknown_error": "Ocurrió un error desconocido"
+    "unknown_error": "Ocurrió un error desconocido",
+    "interaction_error": "Ocurrió un error al procesar esta interacción.",
+    "guild_only": "Este comando solo funciona en servidores.",
+    "invalid_option": "Opción inválida.",
+    "case_not_found": "Case #{caseId} no encontrado",
+    "user_not_banned": "El usuario no está baneado.",
+    "command_not_implemented": "Comando no implementado aún.",
+    "not_text_channel": "Este comando solo funciona en canales de texto.",
+    "no_permissions_command": "No tienes permisos para usar este comando.",
+    "invalid_user_input": "Debes mencionar a un usuario o proporcionar su ID",
+    "invalid_case_id": "Debes proporcionar el ID del caso",
+    "invalid_case_id_number": "El ID del caso debe ser un número",
+    "clear_amount_required": "Debes proporcionar la cantidad de mensajes (1-100)",
+    "clear_amount_invalid": "La cantidad debe ser un número entre 1 y 100"
   },
   "success": {
     "operation_complete": "Operación completada",
-    "settings_updated": "Configuración actualizada"
+    "settings_updated": "Configuración actualizada",
+    "unbanned": "Usuario desbaneado. Case #{caseId}",
+    "clear_success": "{count} mensaje{plural} eliminado{plural}. Case #{caseId}",
+    "clear_success_singular": "{count} mensaje eliminado. Case #{caseId}",
+    "clear_success_plural": "{count} mensajes eliminados. Case #{caseId}"
+  },
+  "labels": {
+    "unknown": "Desconocido",
+    "unknown_short": "(unknown)",
+    "more": "más",
+    "welcome": "¡Bienvenido/a",
+    "welcome_title": "¡Bienvenido/a a {guildName}!"
   },
   "footer": {
     "case": "Caso #{caseId}",
@@ -35,5 +59,65 @@
   "time": {
     "updated_at": "Actualizado el {when}",
     "created_at": "Creado el {when}"
+  },
+  "prefix_commands": {
+    "moderation": {
+      "user_required": "Debes mencionar a un usuario o proporcionar su ID.",
+      "reason_required": "Debes proporcionar una razón.",
+      "duration_required": "Debes proporcionar una duración.",
+      "usage": "Uso: `{prefix}{command} <@usuario> [duración] <razón>`",
+      "usage_with_duration": "Uso: `{prefix}{command} <@usuario> <duración> <razón>`",
+      "user_not_found_server": "Usuario no encontrado en el servidor.",
+      "no_permissions": "No tienes permisos para usar este comando.",
+      "cannot_moderate_user": "No puedes moderar a este usuario.",
+      "mute_role_not_set": "No hay rol de mute configurado. Usa /createmuterole o /setmuterole",
+      "mute_role_not_found": "El rol de mute configurado no existe",
+      "timeout_duration_required": "Timeout requiere una duración.",
+      "tempban_duration_required": "Tempban requiere una duración."
+    },
+    "info": {
+      "user_not_found": "Usuario no encontrado.",
+      "no_permissions": "No tienes permisos para usar este comando.",
+      "user_not_found_server": "Usuario no encontrado en el servidor."
+    }
+  },
+  "autoroles": {
+    "no_permissions": "Sin permisos.",
+    "channels_not_configured": "Primero configurá canales con /set welcome y /set join-log.",
+    "no_color_roles": "No hay roles de color. Utiliza /setupcolors.",
+    "invalid_option": "Opción inválida.",
+    "booster_only": "Este color es solo para boosters.",
+    "color_removed": "Color quitado ✅",
+    "color_applied": "Color aplicado ✅",
+    "role_change_failed": "No pude cambiar el rol. Revisá permisos/jerarquía del bot.",
+    "menu_post_failed": "No pude postear/editar el menú. Verificá permisos y canal.",
+    "menu_posted": "Menú de autoroles publicado/actualizado.",
+    "title": "Autoroles de color",
+    "description": "• Selecciona el color que más se adapte a ti.\n• Las opciones que tengan un {emoji} son **solo para boosters**.",
+    "footer_options": "{count} opciones disponibles",
+    "placeholder": "Elegí tu color"
+  },
+  "settings": {
+    "prefix": {
+      "no_permissions": "Sin permisos.",
+      "invalid_length": "El prefijo debe tener entre 1 y 10 caracteres.",
+      "save_error": "Error al guardar la configuración.",
+      "success": "Prefijo configurado a `{prefix}`\n\nAhora puedes usar comandos como: `{prefix}help`"
+    }
+  },
+  "test": {
+    "guild_only": "Este comando solo funciona en servidores.",
+    "server_info_error": "No se pudo obtener información del servidor.",
+    "test_guild_only": "Este comando solo está disponible en el servidor de pruebas.",
+    "member_info_error": "No se pudo obtener información del miembro.",
+    "no_embed_selected": "No se seleccionó ningún embed.",
+    "embed_type_unknown": "Tipo de embed no reconocido.",
+    "embed_generation_failed": "No se pudo generar el embed.",
+    "embed_generation_error": "Error al generar el embed: {error}",
+    "critical_error": "Error crítico: {error}",
+    "title": "🧪 Test Embed Selector",
+    "description": "Selecciona un embed del menú para testearlo:",
+    "testing": "🧪 Testing: {type}",
+    "no_voice_channels": "No hay canales de voz disponibles para testear este embed."
   }
 }

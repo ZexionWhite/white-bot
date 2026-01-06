@@ -1,19 +1,76 @@
 {
   "events": {
     "join": {
-      "title": "User Joined Voice Channel",
-      "description": "{user} joined {channel}",
-      "footer": "Voice Activity"
+      "title": "🔊 User Joined Voice",
+      "description": "**{username}** ({userId}) joined a voice channel.",
+      "field_channel": "Channel",
+      "footer": "Voice state update • {when}"
     },
     "leave": {
-      "title": "User Left Voice Channel",
-      "description": "{user} left {channel}",
-      "footer": "Voice Activity"
+      "title": "🔇 User Left Voice",
+      "description": "**{username}** ({userId}) left the voice channel.",
+      "field_previous_channel": "Previous channel",
+      "field_time_in_channel": "Time in channel",
+      "footer": "Voice state update • {when}"
     },
     "move": {
-      "title": "User Moved Voice Channel",
-      "description": "{user} moved from {oldChannel} to {newChannel}",
-      "footer": "Voice Activity"
+      "title": "🔄 User Moved Channel",
+      "description": "**{username}** ({userId}) moved voice channels.",
+      "field_from": "From",
+      "field_to": "To",
+      "field_time_in_previous_channel": "Time in previous channel",
+      "footer": "Voice state update • {when}"
     }
+  },
+  "mod": {
+    "embed": {
+      "empty_title": "🔇 Voice Channel",
+      "empty_description": "No users in this voice channel.",
+      "header_in_channel": "<@{userId}> is in"
+    },
+    "menu": {
+      "placeholder": "View available actions",
+      "join_channel": "Move me to channel",
+      "join_description": "Moves you to this voice channel",
+      "bring_all": "Bring all to my channel",
+      "bring_all_description": "Moves all non-mod users to your channel",
+      "mute_all": "Mute all",
+      "mute_all_description": "Mutes all non-moderator users",
+      "unmute_all": "Unmute all",
+      "unmute_all_description": "Unmutes all users",
+      "refresh": "Refresh",
+      "refresh_description": "Updates the user list",
+      "bring_user": "Bring {username} to my channel",
+      "bring_user_description": "Move {username} to your channel",
+      "mute_user": "Mute {username}",
+      "unmute_user": "Unmute {username}",
+      "mute_user_description": "Mute {username}",
+      "unmute_user_description": "Unmute {username}"
+    },
+    "errors": {
+      "guild_only": "This command only works in servers.",
+      "member_not_found": "Could not get member information.",
+      "permission_denied": "You don't have permission to use this action.",
+      "channel_not_found": "Channel not found or invalid.",
+      "move_failed": "Could not move you. Are you in a voice channel?",
+      "user_not_found": "User not found.",
+      "not_in_voice": "You are not in a voice channel.",
+      "target_not_in_voice": "User is not in a voice channel.",
+      "move_user_failed": "Could not move user. Check permissions and hierarchy.",
+      "no_users": "No users in that channel.",
+      "no_non_mods": "No non-moderator users in that channel.",
+      "move_some_failed": "Could not move some users. Check permissions.",
+      "mute_state_failed": "Could not change mute state. Check permissions and hierarchy.",
+      "all_already_muted": "All non-moderator users are already muted.",
+      "mute_some_failed": "Could not mute some users. Check permissions.",
+      "no_muted": "No muted users in that channel.",
+      "unmute_some_failed": "Could not unmute some users. Check permissions.",
+      "command_guild_only": "You didn't specify a channel and you're not in any voice channel.",
+      "not_voice_channel": "The specified channel is not a voice channel.",
+      "no_users_in_channel": "No users in that voice channel.",
+      "user_not_found_guild": "Could not find that user in the server.",
+      "user_not_in_voice": "{tag} is not in any voice channel."
+    },
+    "permission_denied_main": "You don't have permission. Requires `MuteMembers` or `MoveMembers`."
   }
 }

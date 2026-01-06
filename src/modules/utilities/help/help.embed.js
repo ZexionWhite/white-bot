@@ -1,275 +1,266 @@
 import { EmbedBuilder } from "discord.js";
 import { EMOJIS } from "../../../config/emojis.js";
+import { t, DEFAULT_LOCALE } from "../../../core/i18n/index.js";
 
-export function getIntroEmbed(client) {
+export function getIntroEmbed(client, locale = DEFAULT_LOCALE) {
   return new EmbedBuilder()
-    .setTitle("Capybot – Centro de Ayuda")
-    .setDescription(
-      "**Capybot** es un bot de moderación completo diseñado para gestionar tu servidor de Discord de manera eficiente.\n\n" +
-      "**Funcionalidades principales:**\n" +
-      "• Sistema completo de moderación y sanciones\n" +
-      "• Logs automáticos mediante webhooks (sin rate limits)\n" +
-      "• Herramientas de gestión de usuarios y canales\n" +
-      "• Sistema de blacklist y casos\n" +
-      "• Moderación avanzada de canales de voz\n" +
-      "• Comandos slash (`/comando`) y prefix (`capy!comando`)\n\n"
-    )
+    .setTitle(t(locale, "utilities.help.intro.title"))
+    .setDescription(t(locale, "utilities.help.intro.description"))
     .setThumbnail(client.user.displayAvatarURL())
     .setColor(0x393a41)
-    .setFooter({ text: "Selecciona una categoría del menú para ver los comandos disponibles" })
+    .setFooter({ text: t(locale, "utilities.help.intro.footer") })
     .setTimestamp();
 }
 
-export function getConfigEmbed() {
+export function getConfigEmbed(locale = DEFAULT_LOCALE) {
   return new EmbedBuilder()
-    .setTitle(`${EMOJIS.UTILS.CONFIG} Configuración del Servidor`)
-    .setDescription("Comandos para configurar los diferentes aspectos del bot en tu servidor.")
+    .setTitle(`${EMOJIS.UTILS.CONFIG} ${t(locale, "utilities.help.config.title")}`)
+    .setDescription(t(locale, "utilities.help.config.description"))
     .setColor(0x393a41)
     .addFields(
       {
-        name: "Canal de Bienvenida",
-        value: "`/set welcome [canal] [cooldown]`\nConfigura el canal donde el bot enviará los mensajes de bienvenida. El cooldown evita spam cuando entran muchos usuarios juntos (por defecto: 60 segundos).",
+        name: t(locale, "utilities.help.config.fields.welcome_channel.name"),
+        value: t(locale, "utilities.help.config.fields.welcome_channel.value"),
         inline: false
       },
       {
-        name: "Logs del Servidor",
+        name: t(locale, "utilities.help.config.fields.server_logs.name"),
         value: [
-          "`/set join-log [canal]` – Registra entradas y salidas de miembros",
-          "`/set message-log [canal]` – Logs de mensajes eliminados o editados",
-          "`/set avatar-log [canal]` – Registra cambios de avatar",
-          "`/set nickname-log [canal]` – Registra cambios de apodo",
-          "`/set voice-log [canal]` – Registra actividad en canales de voz"
+          t(locale, "utilities.help.config.fields.server_logs.value_join"),
+          t(locale, "utilities.help.config.fields.server_logs.value_message"),
+          t(locale, "utilities.help.config.fields.server_logs.value_avatar"),
+          t(locale, "utilities.help.config.fields.server_logs.value_nickname"),
+          t(locale, "utilities.help.config.fields.server_logs.value_voice")
         ].join("\n"),
         inline: false
       },
       {
-        name: "Boosters y Anuncios",
+        name: t(locale, "utilities.help.config.fields.boosters.name"),
         value: [
-          "`/set boost-channel [canal]` – Canal para anunciar boosts",
-          "`/set info-channel [canal]` – Canal de información y perks",
-          "`/set booster-role [rol]` – Define el rol de boosters"
+          t(locale, "utilities.help.config.fields.boosters.value_boost"),
+          t(locale, "utilities.help.config.fields.boosters.value_info"),
+          t(locale, "utilities.help.config.fields.boosters.value_role")
         ].join("\n"),
         inline: false
       },
       {
-        name: "Moderación",
+        name: t(locale, "utilities.help.config.fields.moderation.name"),
         value: [
-          "`/setmodlog [canal]` – Canal para registrar sanciones",
-          "`/setblacklistchannel [canal]` – Canal para blacklist",
-          "`/createmuterole` – Crea automáticamente el rol Muted",
-          "`/setmuterole [rol]` – Selecciona un rol existente para mute"
+          t(locale, "utilities.help.config.fields.moderation.value_modlog"),
+          t(locale, "utilities.help.config.fields.moderation.value_blacklist"),
+          t(locale, "utilities.help.config.fields.moderation.value_createmute"),
+          t(locale, "utilities.help.config.fields.moderation.value_setmute")
         ].join("\n"),
         inline: false
       }
     )
-    .setFooter({ text: "Todos estos comandos requieren el permiso 'Gestionar Servidor'" })
+    .setFooter({ text: t(locale, "utilities.help.config.footer") })
     .setTimestamp();
 }
 
-export function getModerationEmbed() {
+export function getModerationEmbed(locale = DEFAULT_LOCALE) {
   return new EmbedBuilder()
-    .setTitle(`${EMOJIS.UTILS.REPORT} Sanciones y Moderación`)
-    .setDescription("Comandos para sancionar y moderar usuarios en el servidor.")
+    .setTitle(`${EMOJIS.UTILS.REPORT} ${t(locale, "utilities.help.moderation.title")}`)
+    .setDescription(t(locale, "utilities.help.moderation.description"))
     .setColor(0x393a41)
     .addFields(
       {
-        name: "Advertencias y Silencios",
+        name: t(locale, "utilities.help.moderation.fields.warnings.name"),
         value: [
-          "`/warn [usuario]` – Envía una advertencia formal (se solicitará la razón mediante modal)",
-          "`/mute [usuario] [duración]` – Silencia con rol de mute (se solicitará la razón mediante modal)",
-          "`/unmute [usuario]` – Remueve el silencio (se solicitará la razón mediante modal)"
+          t(locale, "utilities.help.moderation.fields.warnings.value_warn"),
+          t(locale, "utilities.help.moderation.fields.warnings.value_mute"),
+          t(locale, "utilities.help.moderation.fields.warnings.value_unmute")
         ].join("\n"),
         inline: false
       },
       {
-        name: "Timeouts",
+        name: t(locale, "utilities.help.moderation.fields.timeouts.name"),
         value: [
-          "`/timeout [usuario] [duración]` – Aplica timeout nativo de Discord (se solicitará la razón mediante modal)",
-          "`/untimeout [usuario]` – Remueve un timeout activo (se solicitará la razón mediante modal)"
+          t(locale, "utilities.help.moderation.fields.timeouts.value_timeout"),
+          t(locale, "utilities.help.moderation.fields.timeouts.value_untimeout")
         ].join("\n"),
         inline: false
       },
       {
-        name: "Expulsiones y Baneos",
+        name: t(locale, "utilities.help.moderation.fields.bans.name"),
         value: [
-          "`/kick [usuario]` – Expulsa sin banear (se solicitará la razón mediante modal)",
-          "`/ban [usuario] [días]` – Banea permanentemente (se solicitará la razón mediante modal)",
-          "`/tempban [usuario] [duración]` – Banea temporalmente (se solicitará la razón mediante modal)",
-          "`/softban [usuario] [días]` – Ban + unban para limpiar mensajes (se solicitará la razón mediante modal)",
-          "`/unban [usuario]` – Elimina un ban activo (se solicitará la razón mediante modal)"
+          t(locale, "utilities.help.moderation.fields.bans.value_kick"),
+          t(locale, "utilities.help.moderation.fields.bans.value_ban"),
+          t(locale, "utilities.help.moderation.fields.bans.value_tempban"),
+          t(locale, "utilities.help.moderation.fields.bans.value_softban"),
+          t(locale, "utilities.help.moderation.fields.bans.value_unban")
         ].join("\n"),
         inline: false
       }
     )
-    .setFooter({ text: "Requieren permisos de moderación según la acción" })
+    .setFooter({ text: t(locale, "utilities.help.moderation.footer") })
     .setTimestamp();
 }
 
-export function getCasesEmbed() {
+export function getCasesEmbed(locale = DEFAULT_LOCALE) {
   return new EmbedBuilder()
-    .setTitle(`${EMOJIS.UTILS.UTILITIES} Casos y Herramientas`)
-    .setDescription("Herramientas para gestionar casos de moderación y canales.")
+    .setTitle(`${EMOJIS.UTILS.UTILITIES} ${t(locale, "utilities.help.cases.title")}`)
+    .setDescription(t(locale, "utilities.help.cases.description"))
     .setColor(0x393a41)
     .addFields(
       {
-        name: "Gestión de Casos",
+        name: t(locale, "utilities.help.cases.fields.case_management.name"),
         value: [
-          "`/history [usuario] [tipo] [límite]` – Historial completo de sanciones",
-          "`/case [id]` – Detalle de un case específico",
-          "`/editcase [id]` – Edita el motivo de un case (se solicitará la nueva razón mediante modal)",
-          "`/remove [id] [razón]` – Elimina o revierte una sanción"
+          t(locale, "utilities.help.cases.fields.case_management.value_history"),
+          t(locale, "utilities.help.cases.fields.case_management.value_case"),
+          t(locale, "utilities.help.cases.fields.case_management.value_editcase"),
+          t(locale, "utilities.help.cases.fields.case_management.value_remove")
         ].join("\n"),
         inline: false
       },
       {
-        name: "Gestión de Canales",
+        name: t(locale, "utilities.help.cases.fields.channel_management.name"),
         value: [
-          "`/clear [cantidad] [usuario]` – Elimina mensajes recientes",
-          "`/lock [canal] [razón]` – Bloquea un canal",
-          "`/unlock [canal] [razón]` – Desbloquea un canal",
-          "`/slowmode [segundos] [canal]` – Configura modo lento"
+          t(locale, "utilities.help.cases.fields.channel_management.value_clear"),
+          t(locale, "utilities.help.cases.fields.channel_management.value_lock"),
+          t(locale, "utilities.help.cases.fields.channel_management.value_unlock"),
+          t(locale, "utilities.help.cases.fields.channel_management.value_slowmode")
         ].join("\n"),
         inline: false
       }
     )
-    .setFooter({ text: "Requieren permisos de moderación" })
+    .setFooter({ text: t(locale, "utilities.help.cases.footer") })
     .setTimestamp();
 }
 
-export function getBlacklistEmbed() {
+export function getBlacklistEmbed(locale = DEFAULT_LOCALE) {
   return new EmbedBuilder()
-    .setTitle(`${EMOJIS.UTILS.QUARANTINE} Sistema de Blacklist`)
-    .setDescription("Gestiona la blacklist del servidor para registrar usuarios problemáticos.")
+    .setTitle(`${EMOJIS.UTILS.QUARANTINE} ${t(locale, "utilities.help.blacklist.title")}`)
+    .setDescription(t(locale, "utilities.help.blacklist.description"))
     .setColor(0x393a41)
     .addFields(
       {
-        name: "Gestión de Blacklist",
+        name: t(locale, "utilities.help.blacklist.fields.management.name"),
         value: [
-          "`/blacklist add [usuario] [severidad]` – Agrega un usuario con registro persistente (se solicitará razón y evidencia mediante modal)",
-          "`/blacklist history [usuario]` – Muestra el historial completo",
-          "`/blacklist edit [caseid] [nueva_severidad]` – Edita una entrada (se solicitará nueva razón y evidencia mediante modal)",
-          "`/blacklist remove [caseid] [razón]` – Elimina una entrada dejando registro"
+          t(locale, "utilities.help.blacklist.fields.management.value_add"),
+          t(locale, "utilities.help.blacklist.fields.management.value_history"),
+          t(locale, "utilities.help.blacklist.fields.management.value_edit"),
+          t(locale, "utilities.help.blacklist.fields.management.value_remove")
         ].join("\n"),
         inline: false
       },
       {
-        name: "Severidades",
-        value: "**LOW** – Baja | **MEDIUM** – Media | **HIGH** – Alta | **CRITICAL** – Crítica",
+        name: t(locale, "utilities.help.blacklist.fields.severities.name"),
+        value: t(locale, "utilities.help.blacklist.fields.severities.value"),
         inline: false
       }
     )
-    .setFooter({ text: "Requiere permisos de moderación" })
+    .setFooter({ text: t(locale, "utilities.help.blacklist.footer") })
     .setTimestamp();
 }
 
-export function getInfoEmbed() {
+export function getInfoEmbed(locale = DEFAULT_LOCALE) {
   return new EmbedBuilder()
-    .setTitle(`${EMOJIS.UTILS.SEARCH} Información de Usuarios`)
-    .setDescription("Comandos para obtener información detallada sobre usuarios del servidor.")
+    .setTitle(`${EMOJIS.UTILS.SEARCH} ${t(locale, "utilities.help.info.title")}`)
+    .setDescription(t(locale, "utilities.help.info.description"))
     .setColor(0x393a41)
     .addFields(
       {
-        name: "Advanced Information",
-        value: "`/user [user]`\nShows complete user information:\n• Overview with roles and permissions\n• Sanctions history\n• Recent voice activity\n• Recent messages\n• Permissions and overrides\n• Trust score (0-100)\n• Statistics (voice time, messages)",
+        name: t(locale, "utilities.help.info.fields.advanced.name"),
+        value: t(locale, "utilities.help.info.fields.advanced.value"),
         inline: false
       }
     )
-    .setFooter({ text: "Requiere permisos de moderación" })
+    .setFooter({ text: t(locale, "utilities.help.info.footer") })
     .setTimestamp();
 }
 
-export function getVoiceEmbed() {
+export function getVoiceEmbed(locale = DEFAULT_LOCALE) {
   return new EmbedBuilder()
-    .setTitle(`${EMOJIS.UTILS.VOICE} Moderación de Voz`)
-    .setDescription("Herramientas especializadas para moderar canales de voz.")
+    .setTitle(`${EMOJIS.UTILS.VOICE} ${t(locale, "utilities.help.voice.title")}`)
+    .setDescription(t(locale, "utilities.help.voice.description"))
     .setColor(0x393a41)
     .addFields(
       {
-        name: "Moderación por Canal",
-        value: "`/voice-mod channel [canal]`\nMuestra un panel interactivo con todos los usuarios en el canal:\n• Ver estado de mute/deafen\n• Mutear/desmutear usuarios\n• Mover usuarios entre canales\n• Acciones masivas",
+        name: t(locale, "utilities.help.voice.fields.channel.name"),
+        value: t(locale, "utilities.help.voice.fields.channel.value"),
         inline: false
       },
       {
-        name: "Moderación por Usuario",
-        value: "`/voice-mod user [usuario]`\nPanel interactivo para un usuario específico:\n• Ver su estado actual\n• Mutear/desmutear\n• Mover a tu canal\n• Todas las acciones disponibles",
+        name: t(locale, "utilities.help.voice.fields.user.name"),
+        value: t(locale, "utilities.help.voice.fields.user.value"),
         inline: false
       }
     )
-    .setFooter({ text: "Requiere permisos MuteMembers o MoveMembers" })
+    .setFooter({ text: t(locale, "utilities.help.voice.footer") })
     .setTimestamp();
 }
 
-export function getUtilitiesEmbed() {
+export function getUtilitiesEmbed(locale = DEFAULT_LOCALE) {
   return new EmbedBuilder()
-    .setTitle(`${EMOJIS.UTILS.LIST} Utilidades y Otros`)
-    .setDescription("Comandos útiles y herramientas adicionales.")
+    .setTitle(`${EMOJIS.UTILS.LIST} ${t(locale, "utilities.help.utilities.title")}`)
+    .setDescription(t(locale, "utilities.help.utilities.description"))
     .setColor(0x393a41)
     .addFields(
       {
-        name: "Previsualización",
+        name: t(locale, "utilities.help.utilities.fields.preview.name"),
         value: [
-          "`/preview boost [usuario]` – Previsualiza el mensaje de boost",
-          "`/preview welcome [usuario]` – Previsualiza el mensaje de bienvenida"
+          t(locale, "utilities.help.utilities.fields.preview.value_boost"),
+          t(locale, "utilities.help.utilities.fields.preview.value_welcome")
         ].join("\n"),
         inline: false
       },
       {
-        name: "Autoroles de Color",
+        name: t(locale, "utilities.help.utilities.fields.autoroles.name"),
         value: [
-          "`/setupcolors` – Crea automáticamente los roles de colores",
-          "`/color-menu` – Publica el menú interactivo de selección"
+          t(locale, "utilities.help.utilities.fields.autoroles.value_setup"),
+          t(locale, "utilities.help.utilities.fields.autoroles.value_menu")
         ].join("\n"),
         inline: false
       },
       {
-        name: "Información del Bot",
+        name: t(locale, "utilities.help.utilities.fields.bot_info.name"),
         value: [
-          "`/ping` / `capy!ping` – Muestra latencia y estado del bot",
-          "`/help` / `capy!help` – Muestra este centro de ayuda",
-          "`/config` / `capy!config` – Muestra la configuración actual del servidor"
+          t(locale, "utilities.help.utilities.fields.bot_info.value_ping"),
+          t(locale, "utilities.help.utilities.fields.bot_info.value_help"),
+          t(locale, "utilities.help.utilities.fields.bot_info.value_config")
         ].join("\n"),
         inline: false
       },
       {
-        name: "Comandos Prefix",
-        value: "El bot también soporta comandos con prefijo `capy!`. Usa `capy!help` para ver todos los comandos prefix disponibles. Los comandos más comunes incluyen:\n• Moderación: `capy!warn`, `capy!ban`, `capy!kick`, `capy!mute`, `capy!timeout`, `capy!tempban`, `capy!history`, `capy!case`, `capy!clear`, `capy!unban`\n• Utilidades: `capy!ping`, `capy!help`, `capy!config`\n• Información: `capy!user`",
+        name: t(locale, "utilities.help.utilities.fields.prefix.name"),
+        value: t(locale, "utilities.help.utilities.fields.prefix.value"),
         inline: false
       },
       {
-        name: "Permisos Avanzados",
+        name: t(locale, "utilities.help.utilities.fields.permissions.name"),
         value: [
-          "`/modconfig view [type] [user/role]` – Ver políticas de permisos actuales",
-          "`/modconfig module [módulo] [effect] [user/role]` – Configurar permisos para un módulo completo",
-          "`/modconfig command [comando] [effect] [user/role]` – Configurar permisos para un comando específico",
-          "`/modconfig reset [confirm]` – Resetear todas las políticas de permisos"
+          t(locale, "utilities.help.utilities.fields.permissions.value_view"),
+          t(locale, "utilities.help.utilities.fields.permissions.value_module"),
+          t(locale, "utilities.help.utilities.fields.permissions.value_command"),
+          t(locale, "utilities.help.utilities.fields.permissions.value_reset")
         ].join("\n"),
         inline: false
       }
     )
-    .setFooter({ text: "Algunos comandos requieren permisos de administrador" })
+    .setFooter({ text: t(locale, "utilities.help.utilities.footer") })
     .setTimestamp();
 }
 
-export function getEmbedByCategory(category, client) {
+export function getEmbedByCategory(category, client, locale = DEFAULT_LOCALE) {
   switch (category) {
     case "intro":
-      return getIntroEmbed(client);
+      return getIntroEmbed(client, locale);
     case "config":
-      return getConfigEmbed();
+      return getConfigEmbed(locale);
     case "moderation":
-      return getModerationEmbed();
+      return getModerationEmbed(locale);
     case "cases":
-      return getCasesEmbed();
+      return getCasesEmbed(locale);
     case "blacklist":
-      return getBlacklistEmbed();
+      return getBlacklistEmbed(locale);
     case "info":
-      return getInfoEmbed();
+      return getInfoEmbed(locale);
     case "voice":
-      return getVoiceEmbed();
+      return getVoiceEmbed(locale);
     case "utilities":
-      return getUtilitiesEmbed();
+      return getUtilitiesEmbed(locale);
     default:
-      return getIntroEmbed(client);
+      return getIntroEmbed(client, locale);
   }
 }
-

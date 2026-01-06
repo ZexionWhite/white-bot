@@ -26,9 +26,9 @@ export default async function messageDelete(client, message) {
   if (!logCh?.isTextBased()) return;
 
   const locale = await getLocaleForGuild(message.guild);
-  const authorTag = message.author?.tag ?? message.member?.user?.tag ?? "Desconocido";
-  const authorId  = message.author?.id  ?? message.member?.id       ?? "Desconocido";
-  const channelMention = message.channel?.id ? `<#${message.channel.id}>` : "(unknown)";
+  const authorTag = message.author?.tag ?? message.member?.user?.tag ?? t(locale, "common.labels.unknown");
+  const authorId  = message.author?.id  ?? message.member?.id       ?? t(locale, "common.labels.unknown");
+  const channelMention = message.channel?.id ? `<#${message.channel.id}>` : t(locale, "common.labels.unknown_short");
 
   let deleter = null;
   try {
@@ -57,7 +57,7 @@ export default async function messageDelete(client, message) {
     ? attachments
         .slice(0, 5)
         .map((a, i) => `${i + 1}. ${a.url}`)
-        .join("\n") + (attachments.length > 5 ? `\n+${attachments.length - 5} más` : "")
+        .join("\n") + (attachments.length > 5 ? `\n+${attachments.length - 5} ${t(locale, "logging.welcome.more_attachments")}` : "")
     : "—";
 
   const userDisplay = `${authorTag} (\`${authorId}\`)`;

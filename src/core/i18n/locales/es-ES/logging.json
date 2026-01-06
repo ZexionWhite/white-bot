@@ -79,5 +79,9 @@
       "field_time_in_previous_channel": "Tiempo en canal anterior",
       "footer": "Voice state update • {when}"
     }
+  },
+  "welcome": {
+    "message": "¡Bienvenido/a",
+    "more_attachments": "más"
   }
 }

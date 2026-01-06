@@ -9,7 +9,7 @@ import * as CasesService from "../services/cases.service.js";
 import * as PermService from "../services/permissions.service.js";
 import { createHistoryEmbed, createCaseEmbed, createErrorEmbed, createSuccessEmbed } from "../ui/embeds.js";
 import { createPaginationComponents } from "../ui/components.js";
-import { getLocaleForGuild } from "../../../core/i18n/index.js";
+import { getLocaleForGuild, getLocaleForGuildId, t } from "../../../core/i18n/index.js";
 
 const CASES_PER_PAGE = 10;
 
@@ -109,16 +109,16 @@ export async function registerModerationExtraPrefixCommands() {
       permissions: PermissionFlagsBits.ModerateMembers,
       argsSchema: caseIdSchema,
       execute: async (ctx) => {
+        const locale = await getLocaleForGuildId(ctx.guild.id);
         const { caseId } = ctx.args;
         
         if (!await PermService.canExecuteCommand(ctx.member, "case")) {
-          return ctx.reply({ content: "❌ No tienes permisos para usar este comando." });
+          return ctx.reply({ content: `❌ ${t(locale, "common.prefix_commands.moderation.no_permissions")}` });
         }
         
         const case_ = await CasesService.getCase(ctx.guild.id, caseId);
         if (!case_) {
-          const locale = await getLocaleForGuild(ctx.guild);
-          return ctx.reply({ embeds: [createErrorEmbed(`Case #${caseId} no encontrado`, locale)] });
+          return ctx.reply({ embeds: [createErrorEmbed(t(locale, "common.errors.case_not_found", { caseId }), locale)] });
         }
         
         const locale = await getLocaleForGuild(ctx.guild);
@@ -173,7 +173,7 @@ export async function registerModerationExtraPrefixCommands() {
         const target = await ctx.raw.client.users.fetch(userId).catch(() => ({ id: userId }));
         await ModlogService.sendToModlog(ctx.guild, case_, target, ctx.member.user, null);
         
-        return ctx.reply({ content: `✅ Usuario desbaneado. Case #${case_.id}` });
+        return ctx.reply({ content: `✅ ${t(locale, "common.success.unbanned", { caseId: case_.id })}` });
       }
     },
     {
@@ -242,9 +242,10 @@ export async function registerModerationExtraPrefixCommands() {
             { deletedCount: deleted, channelId: ctx.channel.id, channelName: ctx.channel.name }
           );
           
-          return ctx.reply({ content: `✅ ${deleted} mensaje${deleted !== 1 ? "s" : ""} eliminado${deleted !== 1 ? "s" : ""}. Case #${case_.id}` });
+          const plural = deleted !== 1 ? "s" : "";
+          return ctx.reply({ content: `✅ ${t(locale, "common.success.clear_success", { count: deleted, plural, caseId: case_.id })}` });
         } catch (error) {
-          return ctx.reply({ content: `❌ Error al limpiar mensajes: ${error.message}` });
+          return ctx.reply({ content: `❌ ${t(locale, "common.errors.clear_error", { error: error.message })}` });
         }
       }
     }

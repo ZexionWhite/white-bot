@@ -1,6 +1,7 @@
 import * as setupColors from "./commands/setup-colors.js";
 import * as colorMenu from "./commands/color-menu.js";
 import * as configColors from "./commands/config-colors.js";
+import { getLocaleForGuild, t } from "../../core/i18n/index.js";
 
 export const autorolesHandlers = {
   setupcolors: setupColors.handle,
@@ -17,9 +18,10 @@ export async function handleColorSelect(itx, customId) {
   const cfg = await getSettings.get(itx.guild.id);
   const all = await getColorRoles.all(itx.guild.id);
 
+  const locale = await getLocaleForGuild(itx.guild);
   const selectedId = itx.values[0];
   const chosen = all.find(r => r.role_id === selectedId);
-  if (!chosen) return itx.editReply({ content: "Opción inválida." });
+  if (!chosen) return itx.editReply({ content: `❌ ${t(locale, "common.autoroles.invalid_option")}` });
 
   const member = await itx.guild.members.fetch(itx.user.id);
 
@@ -44,9 +46,9 @@ export async function handleColorSelect(itx, customId) {
           })()
     );
 
-    return itx.editReply({ content: togglingOff ? "Color quitado ✅" : "Color aplicado ✅" });
+    return itx.editReply({ content: togglingOff ? `✅ ${t(locale, "common.autoroles.color_removed")}` : `✅ ${t(locale, "common.autoroles.color_applied")}` });
   } catch {
-    return itx.editReply({ content: "No pude cambiar el rol. Revisá permisos/jerarquía del bot." });
+    return itx.editReply({ content: `❌ ${t(locale, "common.autoroles.role_change_failed")}` });
   }
 }
 

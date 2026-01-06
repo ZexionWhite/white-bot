@@ -1,0 +1,76 @@
+{
+  "events": {
+    "join": {
+      "title": "🔊 Usuario se unió a voz",
+      "description": "**{username}** ({userId}) se unió a un canal de voz.",
+      "field_channel": "Canal",
+      "footer": "Voice state update • {when}"
+    },
+    "leave": {
+      "title": "🔇 Usuario salió de voz",
+      "description": "**{username}** ({userId}) salió del canal de voz.",
+      "field_previous_channel": "Canal anterior",
+      "field_time_in_channel": "Tiempo en canal",
+      "footer": "Voice state update • {when}"
+    },
+    "move": {
+      "title": "🔄 Usuario se movió de canal",
+      "description": "**{username}** ({userId}) cambió de canal de voz.",
+      "field_from": "Desde",
+      "field_to": "Hacia",
+      "field_time_in_previous_channel": "Tiempo en canal anterior",
+      "footer": "Voice state update • {when}"
+    }
+  },
+  "mod": {
+    "embed": {
+      "empty_title": "🔇 Canal de voz",
+      "empty_description": "No hay usuarios en este canal de voz.",
+      "header_in_channel": "<@{userId}> está en"
+    },
+    "menu": {
+      "placeholder": "Ver acciones disponibles",
+      "join_channel": "Moverme al canal",
+      "join_description": "Te mueve a este canal de voz",
+      "bring_all": "Traer todos a mi canal",
+      "bring_all_description": "Mueve todos los usuarios no-mods a tu canal",
+      "mute_all": "Mutear a todos",
+      "mute_all_description": "Mutea a todos los usuarios no-moderadores",
+      "unmute_all": "Desmutear a todos",
+      "unmute_all_description": "Desmutea a todos los usuarios",
+      "refresh": "Recargar",
+      "refresh_description": "Actualiza la lista de usuarios",
+      "bring_user": "Traer {username} a mi canal",
+      "bring_user_description": "Mover {username} a tu canal",
+      "mute_user": "Mutear {username}",
+      "unmute_user": "Desmutear {username}",
+      "mute_user_description": "Mutear a {username}",
+      "unmute_user_description": "Desmutear a {username}"
+    },
+    "errors": {
+      "guild_only": "Este comando solo funciona en servidores.",
+      "member_not_found": "No se pudo obtener información del miembro.",
+      "permission_denied": "No tienes permisos para usar esta acción.",
+      "channel_not_found": "Canal no encontrado o inválido.",
+      "move_failed": "No pude moverte. ¿Estás en un canal de voz?",
+      "user_not_found": "Usuario no encontrado.",
+      "not_in_voice": "No estás en un canal de voz.",
+      "target_not_in_voice": "El usuario no está en un canal de voz.",
+      "move_user_failed": "No pude mover al usuario. Verifica permisos y jerarquía.",
+      "no_users": "No hay usuarios en ese canal.",
+      "no_non_mods": "No hay usuarios no-moderadores en ese canal.",
+      "move_some_failed": "No pude mover algunos usuarios. Verifica permisos.",
+      "mute_state_failed": "No pude cambiar el estado de mute. Verifica permisos y jerarquía.",
+      "all_already_muted": "Todos los usuarios no-moderadores ya están muteados.",
+      "mute_some_failed": "No pude mutear algunos usuarios. Verifica permisos.",
+      "no_muted": "No hay usuarios muteados en ese canal.",
+      "unmute_some_failed": "No pude desmutear algunos usuarios. Verifica permisos.",
+      "command_guild_only": "No especificaste un canal y no estás en ningún canal de voz.",
+      "not_voice_channel": "El canal especificado no es un canal de voz.",
+      "no_users_in_channel": "No hay usuarios en ese canal de voz.",
+      "user_not_found_guild": "No encontré ese usuario en el servidor.",
+      "user_not_in_voice": "{tag} no está en ningún canal de voz."
+    },
+    "permission_denied_main": "No tienes permisos. Se requiere `MuteMembers` o `MoveMembers`."
+  }
+}

@@ -3,7 +3,7 @@ import { getSettings } from "../db.js";
 import { getCooldown, setCooldown } from "../core/redis/index.js";
 import { log } from "../core/logger/index.js";
 import { sendLog } from "../core/webhooks/index.js";
-import { getLocaleForGuild } from "../core/i18n/index.js";
+import { getLocaleForGuild, t } from "../core/i18n/index.js";
 
 export default async function guildMemberAdd(client, member) {
   try {
@@ -24,8 +24,9 @@ export default async function guildMemberAdd(client, member) {
         return null;
       });
       if (ch?.isTextBased()) {
-        const content = `¡Bienvenido/a <@${member.id}>!`;
-        await ch.send({ content, embeds: [welcomeEmbed(member)] }).catch((err) => {
+        const locale = await getLocaleForGuild(member.guild);
+        const content = `${t(locale, "common.labels.welcome")} <@${member.id}>!`;
+        await ch.send({ content, embeds: [await welcomeEmbed(member, {}, locale)] }).catch((err) => {
           log.error("guildMemberAdd", `Error al enviar mensaje de bienvenida en ${member.guild.name}:`, err.message);
         });
         try { 

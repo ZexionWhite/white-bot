@@ -44,13 +44,13 @@ export default async function messageUpdate(client, oldMessage, newMessage) {
   const locale = await getLocaleForGuild(newMessage.guild);
   const authorTag = newMessage.author?.tag
     ?? newMessage.member?.user?.tag
-    ?? (newMessage.author?.id ? `<@${newMessage.author.id}>` : "Desconocido");
-  const authorId = newMessage.author?.id ?? newMessage.member?.id ?? "Desconocido";
+    ?? (newMessage.author?.id ? `<@${newMessage.author.id}>` : t(locale, "common.labels.unknown"));
+  const authorId = newMessage.author?.id ?? newMessage.member?.id ?? t(locale, "common.labels.unknown");
 
-  const channelMention = newMessage.channelId ? `<#${newMessage.channelId}>` : "(unknown)";
+  const channelMention = newMessage.channelId ? `<#${newMessage.channelId}>` : t(locale, "common.labels.unknown_short");
 
   const attachmentsText = newAtt.length
-    ? newAtt.slice(0, 5).map((u, i) => `${i + 1}. ${u}`).join("\n") + (newAtt.length > 5 ? `\n+${newAtt.length - 5} más` : "")
+    ? newAtt.slice(0, 5).map((u, i) => `${i + 1}. ${u}`).join("\n") + (newAtt.length > 5 ? `\n+${newAtt.length - 5} ${t(locale, "logging.welcome.more_attachments")}` : "")
     : "—";
 
   const guildIcon = newMessage.guild.iconURL({ size: 64, extension: "png" }) ?? undefined;

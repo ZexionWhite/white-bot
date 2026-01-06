@@ -5,6 +5,7 @@ import { permissionsSlashCommands } from "./permissions/slash.js";
 import { autorolesSlashCommands } from "./autoroles/slash.js";
 import { settingsSlashCommands } from "./settings/slash.js";
 import { utilitiesSlashCommands } from "./utilities/slash.js";
+import { musicSlashCommands } from "./music/slash.js";
 import { moderationHandlers } from "./moderation/router.js";
 import { blacklistHandlers } from "./blacklist/router.js";
 import { infoHandlers, infoComponentHandlers } from "./info/router.js";
@@ -12,6 +13,7 @@ import { permissionsHandlers, permissionsAutocompleteHandlers } from "./permissi
 import { autorolesHandlers, autorolesComponentHandlers } from "./autoroles/router.js";
 import { settingsHandlers } from "./settings/router.js";
 import { utilitiesHandlers, utilitiesComponentHandlers } from "./utilities/router.js";
+import { musicHandlers } from "./music/router.js";
 import * as userinfo from "./info/commands/userinfo.js";
 
 export const allSlashCommands = [
@@ -21,7 +23,8 @@ export const allSlashCommands = [
   ...permissionsSlashCommands,
   ...autorolesSlashCommands,
   ...settingsSlashCommands,
-  ...utilitiesSlashCommands
+  ...utilitiesSlashCommands,
+  ...musicSlashCommands
 ];
 
 export const commandHandlers = {
@@ -31,7 +34,8 @@ export const commandHandlers = {
   ...permissionsHandlers,
   ...autorolesHandlers,
   ...settingsHandlers,
-  ...utilitiesHandlers
+  ...utilitiesHandlers,
+  ...musicHandlers
 };
 
 export const autocompleteHandlers = {

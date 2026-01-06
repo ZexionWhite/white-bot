@@ -1,0 +1,134 @@
+{
+  "errors": {
+    "not_in_voice": "Debes estar en un canal de voz para usar este comando",
+    "bot_no_connect": "No puedo conectarme a tu canal de voz. Verifica mis permisos.",
+    "bot_no_speak": "No tengo permisos para hablar en el canal de voz.",
+    "no_tracks_found": "No se encontraron resultados para: {query}",
+    "play_failed": "Error al reproducir: {error}",
+    "not_playing": "No hay nada reproduciéndose actualmente",
+    "queue_empty": "La cola está vacía",
+    "invalid_loop_mode": "Modo de loop inválido. Usa: off, track o queue",
+    "invalid_autoplay": "Valor inválido. Usa: on u off",
+    "no_dj_permission": "Solo los DJ o administradores pueden usar este comando",
+    "dj_setrole_permission": "Necesitas el permiso 'Gestionar Servidor' para configurar el rol DJ",
+    "dj_role_not_found": "Rol no encontrado",
+    "skip_amount_invalid": "La cantidad debe ser un número positivo",
+    "page_invalid": "Número de página inválido"
+  },
+  "success": {
+    "play_single": "Añadido a la cola: **{title}**",
+    "play_multiple": "Añadido a la cola: **{title}** (seleccionado de {count} resultados)",
+    "queue_cleared": "Cola limpiada",
+    "loop_set": "Loop configurado a: **{mode}**",
+    "autoplay_enabled": "Autoplay activado",
+    "autoplay_disabled": "Autoplay desactivado",
+    "shuffled": "Cola mezclada",
+    "paused": "Reproducción pausada",
+    "resumed": "Reproducción reanudada",
+    "stopped": "Reproducción detenida",
+    "skipped": "Saltado {count} {track}",
+    "dj_role_set": "Rol DJ configurado a: {role}",
+    "dj_role_cleared": "Rol DJ eliminado"
+  },
+  "commands": {
+    "play": {
+      "name": "play",
+      "description": "Reproduce música desde una URL o búsqueda",
+      "query": "query",
+      "query_description": "URL de YouTube/Spotify o término de búsqueda"
+    },
+    "queue": {
+      "name": "queue",
+      "description": "Muestra la cola de reproducción",
+      "page": "page",
+      "page_description": "Número de página (opcional)"
+    },
+    "nowplaying": {
+      "name": "nowplaying",
+      "description": "Muestra la canción que se está reproduciendo"
+    },
+    "skip": {
+      "name": "skip",
+      "description": "Salta la canción actual o múltiples canciones",
+      "amount": "amount",
+      "amount_description": "Cantidad de canciones a saltar (opcional, por defecto 1)"
+    },
+    "stop": {
+      "name": "stop",
+      "description": "Detiene la reproducción y limpia la cola"
+    },
+    "pause": {
+      "name": "pause",
+      "description": "Pausa la reproducción"
+    },
+    "resume": {
+      "name": "resume",
+      "description": "Reanuda la reproducción"
+    },
+    "clear": {
+      "name": "clear",
+      "description": "Limpia la cola de reproducción"
+    },
+    "loop": {
+      "name": "loop",
+      "description": "Configura el modo de loop",
+      "mode": "mode",
+      "mode_description": "Modo: off, track o queue"
+    },
+    "shuffle": {
+      "name": "shuffle",
+      "description": "Mezcla la cola de reproducción"
+    },
+    "autoplay": {
+      "name": "autoplay",
+      "description": "Activa o desactiva el autoplay",
+      "state": "state",
+      "state_description": "on u off"
+    },
+    "dj": {
+      "name": "dj",
+      "description": "Gestiona el rol DJ",
+      "setrole": "setrole",
+      "setrole_description": "Configura el rol DJ",
+      "clearrole": "clearrole",
+      "clearrole_description": "Elimina el rol DJ",
+      "view": "view",
+      "view_description": "Muestra el rol DJ actual",
+      "role": "role",
+      "role_description": "Rol a configurar como DJ"
+    }
+  },
+  "embeds": {
+    "nowplaying": {
+      "title": "🎵 Reproduciendo ahora",
+      "author": "Artista",
+      "duration": "Duración",
+      "requester": "Solicitado por",
+      "position": "Posición",
+      "loop_mode": "Modo loop",
+      "autoplay": "Autoplay",
+      "loop_off": "Desactivado",
+      "loop_track": "Canción",
+      "loop_queue": "Cola",
+      "autoplay_on": "Activado",
+      "autoplay_off": "Desactivado"
+    },
+    "queue": {
+      "title": "📋 Cola de reproducción",
+      "now_playing": "Reproduciendo ahora",
+      "up_next": "Siguiente",
+      "empty": "La cola está vacía",
+      "page": "Página {current} de {total}",
+      "total_tracks": "Total: {count} canciones",
+      "duration": "Duración total: {duration}"
+    }
+  },
+  "autoplay": {
+    "searching": "Buscando canciones similares...",
+    "added": "Añadidas {count} canciones similares"
+  },
+  "dj": {
+    "no_role": "No hay rol DJ configurado",
+    "current_role": "Rol DJ actual: {role}"
+  }
+}

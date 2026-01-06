@@ -1,0 +1,134 @@
+{
+  "errors": {
+    "not_in_voice": "You must be in a voice channel to use this command",
+    "bot_no_connect": "I cannot connect to your voice channel. Check my permissions.",
+    "bot_no_speak": "I don't have permission to speak in the voice channel.",
+    "no_tracks_found": "No results found for: {query}",
+    "play_failed": "Failed to play: {error}",
+    "not_playing": "Nothing is currently playing",
+    "queue_empty": "The queue is empty",
+    "invalid_loop_mode": "Invalid loop mode. Use: off, track or queue",
+    "invalid_autoplay": "Invalid value. Use: on or off",
+    "no_dj_permission": "Only DJs or administrators can use this command",
+    "dj_setrole_permission": "You need the 'Manage Server' permission to set the DJ role",
+    "dj_role_not_found": "Role not found",
+    "skip_amount_invalid": "Amount must be a positive number",
+    "page_invalid": "Invalid page number"
+  },
+  "success": {
+    "play_single": "Added to queue: **{title}**",
+    "play_multiple": "Added to queue: **{title}** (selected from {count} results)",
+    "queue_cleared": "Queue cleared",
+    "loop_set": "Loop set to: **{mode}**",
+    "autoplay_enabled": "Autoplay enabled",
+    "autoplay_disabled": "Autoplay disabled",
+    "shuffled": "Queue shuffled",
+    "paused": "Playback paused",
+    "resumed": "Playback resumed",
+    "stopped": "Playback stopped",
+    "skipped": "Skipped {count} {track}",
+    "dj_role_set": "DJ role set to: {role}",
+    "dj_role_cleared": "DJ role cleared"
+  },
+  "commands": {
+    "play": {
+      "name": "play",
+      "description": "Play music from a URL or search",
+      "query": "query",
+      "query_description": "YouTube/Spotify URL or search term"
+    },
+    "queue": {
+      "name": "queue",
+      "description": "Show the playback queue",
+      "page": "page",
+      "page_description": "Page number (optional)"
+    },
+    "nowplaying": {
+      "name": "nowplaying",
+      "description": "Show the currently playing song"
+    },
+    "skip": {
+      "name": "skip",
+      "description": "Skip the current song or multiple songs",
+      "amount": "amount",
+      "amount_description": "Number of songs to skip (optional, default 1)"
+    },
+    "stop": {
+      "name": "stop",
+      "description": "Stop playback and clear the queue"
+    },
+    "pause": {
+      "name": "pause",
+      "description": "Pause playback"
+    },
+    "resume": {
+      "name": "resume",
+      "description": "Resume playback"
+    },
+    "clear": {
+      "name": "clear",
+      "description": "Clear the playback queue"
+    },
+    "loop": {
+      "name": "loop",
+      "description": "Set the loop mode",
+      "mode": "mode",
+      "mode_description": "Mode: off, track or queue"
+    },
+    "shuffle": {
+      "name": "shuffle",
+      "description": "Shuffle the playback queue"
+    },
+    "autoplay": {
+      "name": "autoplay",
+      "description": "Enable or disable autoplay",
+      "state": "state",
+      "state_description": "on or off"
+    },
+    "dj": {
+      "name": "dj",
+      "description": "Manage the DJ role",
+      "setrole": "setrole",
+      "setrole_description": "Set the DJ role",
+      "clearrole": "clearrole",
+      "clearrole_description": "Clear the DJ role",
+      "view": "view",
+      "view_description": "Show the current DJ role",
+      "role": "role",
+      "role_description": "Role to set as DJ"
+    }
+  },
+  "embeds": {
+    "nowplaying": {
+      "title": "🎵 Now Playing",
+      "author": "Artist",
+      "duration": "Duration",
+      "requester": "Requested by",
+      "position": "Position",
+      "loop_mode": "Loop mode",
+      "autoplay": "Autoplay",
+      "loop_off": "Off",
+      "loop_track": "Track",
+      "loop_queue": "Queue",
+      "autoplay_on": "On",
+      "autoplay_off": "Off"
+    },
+    "queue": {
+      "title": "📋 Playback Queue",
+      "now_playing": "Now Playing",
+      "up_next": "Up Next",
+      "empty": "The queue is empty",
+      "page": "Page {current} of {total}",
+      "total_tracks": "Total: {count} tracks",
+      "duration": "Total duration: {duration}"
+    }
+  },
+  "autoplay": {
+    "searching": "Searching for similar songs...",
+    "added": "Added {count} similar songs"
+  },
+  "dj": {
+    "no_role": "No DJ role configured",
+    "current_role": "Current DJ role: {role}"
+  }
+}

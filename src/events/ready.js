@@ -4,6 +4,7 @@ import { startTempbanScheduler } from "../modules/moderation/schedulers/tempban.
 import { startActivityRotator } from "../utils/activityRotator.js";
 import { runAllMigrations } from "../core/db/migrations.js";
 import { log } from "../core/logger/index.js";
+import { initializeLavalink } from "../modules/music/services/lavalink.service.js";
 
 let avatarInterval = null;
 
@@ -38,4 +39,12 @@ export default async function ready(client) {
   avatarInterval = startAvatarScheduler(client);
   startTempbanScheduler(client);
   startActivityRotator(client);
+
+  // Inicializar Lavalink
+  try {
+    initializeLavalink(client);
+    log.info("Ready", "Lavalink inicializado correctamente");
+  } catch (error) {
+    log.error("Ready", `Error inicializando Lavalink: ${error.message}`);
+  }
 }

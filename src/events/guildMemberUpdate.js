@@ -6,6 +6,7 @@ import { composeBeforeAfter } from "../utils/beforeAfter.js";
 import { EMOJIS } from "../config/emojis.js";
 import { log } from "../core/logger/index.js";
 import { sendLog } from "../core/webhooks/index.js";
+import { t, getLocaleForGuild } from "../core/i18n/index.js";
 
 export default async function guildMemberUpdate(client, oldM, newM) {
   const cfg = (await getSettings.get(newM.guild.id)) ?? {};
@@ -28,7 +29,8 @@ export default async function guildMemberUpdate(client, oldM, newM) {
         const boosterRoleId = cfg?.booster_role_id ?? autoBoosterRoleId;
         const infoChannelId = cfg?.info_channel_id ?? null;
 
-        const embed = boosterEmbed(newM, { boosterRoleId, infoChannelId });
+        const locale = await getLocaleForGuild(newM.guild);
+        const embed = await boosterEmbed(newM, { boosterRoleId, infoChannelId }, locale);
         await ch.send({ embeds: [embed] }).catch((err) => {
           log.error("guildMemberUpdate", `Error al enviar anuncio de boost en ${newM.guild.name}:`, err.message);
         });
@@ -57,26 +59,28 @@ export default async function guildMemberUpdate(client, oldM, newM) {
             return null;
           });
 
+          const locale = await getLocaleForGuild(newM.guild);
           const when = new Intl.DateTimeFormat("es-AR", {
             dateStyle: "short",
             timeStyle: "short",
             timeZone: TZ
           }).format(new Date());
 
+          const userDisplay = `${newM.user?.tag ?? "(unknown)"} (\`${newM.id}\`)`;
+          const linksField = [
+            oldServerUrl ? t(locale, "logging.events.server_avatar_updated.link_before", { url: oldServerUrl }) : t(locale, "logging.events.server_avatar_updated.link_before_empty"),
+            newServerUrl ? t(locale, "logging.events.server_avatar_updated.link_after", { url: newServerUrl }) : t(locale, "logging.events.server_avatar_updated.link_after_empty")
+          ].join("\n");
+
           const embed = new EmbedBuilder()
-            .setTitle(`${EMOJIS.LOGS.USER_PICTURE} Avatar updated`)
-            .setDescription(`**User:** ${newM.user?.tag ?? "(unknown)"} (\`${newM.id}\`)`)
+            .setTitle(`${EMOJIS.LOGS.USER_PICTURE} ${t(locale, "logging.events.server_avatar_updated.title")}`)
+            .setDescription(t(locale, "logging.events.server_avatar_updated.description_user", { user: userDisplay }))
             .setColor(0x393a41)
             .setFooter({
-              text: `Actualizado el ${when}`,
+              text: t(locale, "logging.events.server_avatar_updated.footer_updated", { when }),
               iconURL: newM.guild.iconURL({ size: 64, extension: "png" }) ?? undefined
-            });
-
-          const linksField = [
-            oldServerUrl ? `**Before:** [open](${oldServerUrl})` : "**Before:** —",
-            newServerUrl ? `**After:**  [open](${newServerUrl})`  : "**After:** —"
-          ].join("\n");
-          embed.addFields({ name: "Links", value: linksField });
+            })
+            .addFields({ name: t(locale, "logging.events.server_avatar_updated.field_links"), value: linksField });
 
           if (composed) {
             const file = new AttachmentBuilder(composed, { name: "server-avatar-before-after.png" });
@@ -128,28 +132,30 @@ export default async function guildMemberUpdate(client, oldM, newM) {
             log.warn("guildMemberUpdate", `Error al obtener audit log para nickname:`, err.message);
           }
 
+          const locale = await getLocaleForGuild(newM.guild);
           const when = new Intl.DateTimeFormat("es-AR", {
             dateStyle: "short",
             timeStyle: "short",
             timeZone: TZ
           }).format(new Date());
 
+          const userDisplay = `${newM.user?.tag ?? "(unknown)"} (\`${newM.id}\`)`;
           const embed = new EmbedBuilder()
-            .setTitle(`${EMOJIS.LOGS.NICKNAME_CHANGE} Nickname updated`)
+            .setTitle(`${EMOJIS.LOGS.NICKNAME_CHANGE} ${t(locale, "logging.events.nickname_updated.title")}`)
             .setDescription(
               [
-                `**User:** ${newM.user?.tag ?? "(unknown)"} (\`${newM.id}\`)`,
-                `**Changed by:** ${executorText}`
+                t(locale, "logging.events.nickname_updated.description_user", { user: userDisplay }),
+                t(locale, "logging.events.nickname_updated.description_changed_by", { executor: executorText })
               ].join("\n")
             )
             .addFields(
-              { name: "Before", value: oldNick ? `\`${oldNick}\`` : "—", inline: true },
-              { name: "After",  value: newNick ? `\`${newNick}\`` : "—", inline: true }
+              { name: t(locale, "logging.events.nickname_updated.field_before"), value: oldNick ? `\`${oldNick}\`` : "—", inline: true },
+              { name: t(locale, "logging.events.nickname_updated.field_after"),  value: newNick ? `\`${newNick}\`` : "—", inline: true }
             )
             .setColor(0x393a41)
             .setTimestamp()
             .setFooter({
-              text: `Nick update`,
+              text: t(locale, "logging.events.nickname_updated.footer_nick_update"),
               iconURL: newM.guild.iconURL({ size: 64, extension: "png" }) ?? undefined
             });
 

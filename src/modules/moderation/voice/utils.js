@@ -1,5 +1,6 @@
 import { voiceModEmbed, createVoiceModComponents } from "./embeds.js";
 import { log } from "../../../core/logger/index.js";
+import { getLocaleForGuild } from "../../../core/i18n/index.js";
 
 export async function updateVoiceModEmbed(client, channelId, guildId) {
   const key = `${guildId}_${channelId}`;
@@ -49,8 +50,9 @@ export async function updateVoiceModEmbed(client, channelId, guildId) {
       targetMember = await guild.members.fetch(ref.targetMemberId).catch(() => null);
     }
     
-    const embed = voiceModEmbed(channel, members, moderator, client);
-    const components = createVoiceModComponents(channel, members, moderator, targetMember, client);
+    const locale = await getLocaleForGuild(guild);
+    const embed = voiceModEmbed(channel, members, moderator, client, locale);
+    const components = createVoiceModComponents(channel, members, moderator, targetMember, client, locale);
 
     await message.edit({ embeds: [embed], components });
   } catch (error) {
@@ -58,4 +60,3 @@ export async function updateVoiceModEmbed(client, channelId, guildId) {
     client.voiceModMessages.delete(key);
   }
 }
-

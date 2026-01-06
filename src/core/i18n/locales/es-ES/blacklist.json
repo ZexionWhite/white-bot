@@ -1,0 +1,33 @@
+{
+  "embeds": {
+    "entry": {
+      "title": "Entrada de Blacklist",
+      "description_member": "**Miembro:** {member}",
+      "description_action": "**Acción:** Blacklist - {severity}",
+      "description_reason": "**Razón:** {reason}",
+      "footer_entry": "Entry #{id}",
+      "field_updated": "Actualizado",
+      "field_updated_by": "Actualizado por",
+      "field_deleted": "Eliminado",
+      "field_deleted_by": "Eliminado por",
+      "field_deletion_reason": "Razón de eliminación",
+      "no_reason": "Sin razón"
+    },
+    "history": {
+      "title": "Historial de Blacklist",
+      "description_no_entries": "No hay entradas de blacklist registradas",
+      "field_entry_format": "Entry #{id} - {severity}",
+      "footer_counts": "Low: {low} | Medium: {medium} | High: {high} | Critical: {critical}",
+      "footer_page": "Página {page}/{totalPages}"
+    },
+    "success": {
+      "created": "Entrada de blacklist creada",
+      "field_member": "**Miembro:** {member}",
+      "field_action": "**Acción:** {action}"
+    }
+  },
+  "errors": {
+    "not_found": "Entry #{caseId} no encontrado",
+    "invalid_severity": "Nivel de severidad inválido"
+  }
+}

@@ -5,6 +5,7 @@ import { voiceStateEmbed } from "../modules/settings/ui/voice.js";
 import * as VoiceRepo from "../modules/moderation/db/voice.repo.js";
 import { log } from "../core/logger/index.js";
 import { sendLog } from "../core/webhooks/index.js";
+import { getLocaleForGuild } from "../core/i18n/index.js";
 
 export default async function voiceStateUpdate(client, oldState, newState) {
   try {
@@ -141,7 +142,8 @@ export default async function voiceStateUpdate(client, oldState, newState) {
     });
     if (!logCh?.isTextBased()) return;
 
-    const embed = voiceStateEmbed(oldState, newState, sessionForEmbed);
+    const locale = await getLocaleForGuild(guild);
+    const embed = await voiceStateEmbed(oldState, newState, sessionForEmbed, locale);
     if (!embed) return;
 
     await sendLog(logCh, { embeds: [embed] }, "voice").catch((err) => {

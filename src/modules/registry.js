@@ -75,7 +75,9 @@ export const componentHandlers = {
     const totalPages = Math.max(1, Math.ceil(totalCases / 10));
     const target = await itx.client.users.fetch(userId).catch(() => ({ id: userId }));
     const { createHistoryEmbed } = await import("./moderation/ui/embeds.js");
-    const embed = createHistoryEmbed(cases, target, newPage, totalPages, type === "all" ? null : type, counts);
+    const { getLocaleForGuildId } = await import("../core/i18n/index.js");
+    const locale = await getLocaleForGuildId(itx.guild.id);
+    const embed = createHistoryEmbed(cases, target, newPage, totalPages, type === "all" ? null : type, counts, locale);
     const { createPaginationComponents } = await import("./moderation/ui/components.js");
     const components = createPaginationComponents(newPage, totalPages, `history:${userId}:${type}`);
     return itx.update({ embeds: [embed], components });
@@ -112,7 +114,9 @@ export const componentHandlers = {
     
     const target = await itx.client.users.fetch(userId).catch(() => ({ id: userId }));
     const { createBlacklistHistoryEmbed } = await import("./blacklist/ui/embeds.js");
-    const embed = createBlacklistHistoryEmbed(entries, target, newPage, totalPages, counts);
+    const { getLocaleForGuildId } = await import("../core/i18n/index.js");
+    const locale = await getLocaleForGuildId(itx.guild.id);
+    const embed = createBlacklistHistoryEmbed(entries, target, newPage, totalPages, counts, locale);
     const { createPaginationComponents } = await import("./moderation/ui/components.js");
     const components = createPaginationComponents(newPage, totalPages, `blacklisthistory:${userId}:all`);
     return itx.update({ embeds: [embed], components });

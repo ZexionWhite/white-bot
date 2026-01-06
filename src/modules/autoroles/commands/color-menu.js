@@ -1,6 +1,7 @@
-import { ActionRowBuilder, StringSelectMenuBuilder, PermissionFlagsBits, EmbedBuilder } from "discord.js";
+import { ActionRowBuilder, StringSelectMenuBuilder, PermissionFlagsBits, EmbedBuilder, MessageFlags } from "discord.js";
 import { getColorRoles, getSettings, upsertSettings } from "../../../db.js";
 import { EMOJIS } from "../../../config/emojis.js";
+import { getLocaleForGuild, t } from "../../../core/i18n/index.js";
 
 function parseEmojiMarkdown(markdown) {
   if (!markdown || typeof markdown !== "string") return null;
@@ -12,17 +13,19 @@ function parseEmojiMarkdown(markdown) {
 }
 
 export async function handle(itx) {
+  const locale = await getLocaleForGuild(itx.guild);
+  
   if (!itx.memberPermissions.has(PermissionFlagsBits.ManageRoles))
-    return itx.reply({ content: "Sin permisos.", ephemeral: true });
+    return itx.reply({ content: `❌ ${t(locale, "common.autoroles.no_permissions")}`, flags: MessageFlags.Ephemeral });
 
   const cfg = await getSettings.get(itx.guild.id);
   if (!cfg?.welcome_channel_id) {
-    return itx.reply({ content: "Primero configurá canales con /set welcome y /set join-log.", ephemeral: true });
+    return itx.reply({ content: `❌ ${t(locale, "common.autoroles.channels_not_configured")}`, flags: MessageFlags.Ephemeral });
   }
 
   const colors = await getColorRoles.all(itx.guild.id);
   if (!colors.length) {
-    return itx.reply({ content: "No hay roles de color. Utiliza /setupcolors.", ephemeral: true });
+    return itx.reply({ content: `❌ ${t(locale, "common.autoroles.no_color_roles")}`, flags: MessageFlags.Ephemeral });
   }
   
   const boosterEmoji = parseEmojiMarkdown(EMOJIS.BOOST.BOOSTER);
@@ -83,8 +86,8 @@ export async function handle(itx) {
       await upsertSettings.run(updated);
     }
   } catch {
-    return itx.reply({ content: "No pude postear/editar el menú. Verificá permisos y canal.", ephemeral: true });
+    return itx.reply({ content: `❌ ${t(locale, "common.autoroles.menu_post_failed")}`, flags: MessageFlags.Ephemeral });
   }
 
-  return itx.reply({ content: "Menú de autoroles publicado/actualizado.", ephemeral: true });
+  return itx.reply({ content: `✅ ${t(locale, "common.autoroles.menu_posted")}`, flags: MessageFlags.Ephemeral });
 }

@@ -5,6 +5,7 @@ import { composeBeforeAfter } from "../utils/beforeAfter.js";
 import { EMOJIS } from "../config/emojis.js";
 import { log } from "../core/logger/index.js";
 import { sendLog } from "../core/webhooks/index.js";
+import { t, getLocaleForGuild } from "../core/i18n/index.js";
 
 function fmtNow() {
   return new Intl.DateTimeFormat("es-AR", {
@@ -37,26 +38,28 @@ export default async function userUpdate(client, oldUser, newUser) {
     });
     if (!logCh?.isTextBased()) continue;
 
+    const locale = await getLocaleForGuild(guild);
     const composed = await composeBeforeAfter(oldUrl, newUrl).catch((err) => {
       log.warn("userUpdate", `Error al componer imagen before/after para ${newUser.tag}:`, err.message);
       return null;
     });
     const when = fmtNow();
 
+    const userDisplay = `${newUser.tag} (\`${newUser.id}\`)`;
+    const linksField = [
+      oldUrl ? t(locale, "logging.events.avatar_updated.link_before", { url: oldUrl }) : t(locale, "logging.events.avatar_updated.link_before_empty"),
+      newUrl ? t(locale, "logging.events.avatar_updated.link_after", { url: newUrl }) : t(locale, "logging.events.avatar_updated.link_after_empty")
+    ].join("\n");
+
     const embed = new EmbedBuilder()
-      .setTitle(`${EMOJIS.LOGS.USER_PICTURE} Avatar updated`)
-      .setDescription(`**User:** ${newUser.tag} (\`${newUser.id}\`)`)
+      .setTitle(`${EMOJIS.LOGS.USER_PICTURE} ${t(locale, "logging.events.avatar_updated.title")}`)
+      .setDescription(t(locale, "logging.events.avatar_updated.description_user", { user: userDisplay }))
       .setColor(0x393a41)
       .setFooter({
-        text: `Actualizado el ${when}`,
+        text: t(locale, "logging.events.avatar_updated.footer_updated", { when }),
         iconURL: guild.iconURL({ size: 64, extension: "png" }) ?? undefined
-      });
-
-    const linksField = [
-      oldUrl ? `**Before:** [open](${oldUrl})` : "**Before:** —",
-      newUrl ? `**After:**  [open](${newUrl})` : "**After:** —"
-    ].join("\n");
-    embed.addFields({ name: "Links", value: linksField });
+      })
+      .addFields({ name: t(locale, "logging.events.avatar_updated.field_links"), value: linksField });
 
     if (composed) {
       const file = new AttachmentBuilder(composed, { name: "avatar-before-after.png" });

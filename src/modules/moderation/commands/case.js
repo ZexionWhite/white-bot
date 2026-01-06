@@ -2,8 +2,11 @@ import * as CasesService from "../services/cases.service.js";
 import * as PermService from "../services/permissions.service.js";
 import { createCaseEmbed, createErrorEmbed } from "../ui/embeds.js";
 import { log } from "../../../core/logger/index.js";
+import { getLocaleForGuild } from "../../../core/i18n/index.js";
 
 export async function handle(itx) {
+  const locale = itx.guild ? await getLocaleForGuild(itx.guild) : "es-ES";
+  
   try {
     if (!itx.inGuild()) {
       return itx.reply({ content: "Este comando solo funciona en servidores.", ephemeral: true });
@@ -12,12 +15,12 @@ export async function handle(itx) {
     const caseId = itx.options.getInteger("id", true);
 
     if (!await PermService.canExecuteCommand(itx.member, "case")) {
-      return itx.reply({ embeds: [createErrorEmbed("No tienes permisos para usar este comando")], ephemeral: true });
+      return itx.reply({ embeds: [createErrorEmbed("No tienes permisos para usar este comando", locale)], ephemeral: true });
     }
 
     const case_ = await CasesService.getCase(itx.guild.id, caseId);
     if (!case_) {
-      return itx.reply({ embeds: [createErrorEmbed(`Case #${caseId} no encontrado`)], ephemeral: true });
+      return itx.reply({ embeds: [createErrorEmbed(`Case #${caseId} no encontrado`, locale)], ephemeral: true });
     }
 
     let target, moderator;
@@ -35,13 +38,13 @@ export async function handle(itx) {
       moderator = { id: case_.moderator_id, tag: "Moderador desconocido", username: "Moderador desconocido" };
     }
 
-    const embed = createCaseEmbed(case_, target, moderator);
+    const embed = createCaseEmbed(case_, target, moderator, locale);
 
     // Verificar que el embed no exceda los límites de Discord
     if (embed.data.description && embed.data.description.length > 4096) {
       log.error("case", `Embed description demasiado larga (${embed.data.description.length} chars) para case #${caseId}`);
       return itx.reply({ 
-        embeds: [createErrorEmbed(`El case #${caseId} tiene demasiada información para mostrarse. Por favor, revisa los datos directamente en la base de datos.`)], 
+        embeds: [createErrorEmbed(`El case #${caseId} tiene demasiada información para mostrarse. Por favor, revisa los datos directamente en la base de datos.`, locale)], 
         ephemeral: true 
       });
     }
@@ -55,7 +58,7 @@ export async function handle(itx) {
     if (!itx.replied && !itx.deferred) {
       try {
         return await itx.reply({ 
-          embeds: [createErrorEmbed("Ocurrió un error al mostrar el case. Por favor, intenta de nuevo.")], 
+          embeds: [createErrorEmbed("Ocurrió un error al mostrar el case. Por favor, intenta de nuevo.", locale)], 
           ephemeral: true 
         });
       } catch (replyError) {

@@ -3,16 +3,16 @@ import { SlashCommandBuilder, PermissionFlagsBits } from "discord.js";
 export const autorolesSlashCommands = [
   new SlashCommandBuilder()
     .setName("setupcolors")
-    .setDescription("Crea y guarda los roles de colores (algunos pueden ser solo para boosters)")
+    .setDescription("Create and save color roles (some can be booster-only)")
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
 
   new SlashCommandBuilder()
     .setName("color-menu")
-    .setDescription("Publica/actualiza el mensaje con el menú de selección de color")
+    .setDescription("Post or update the color role selection menu")
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
 
   new SlashCommandBuilder()
     .setName("config-colors")
-    .setDescription("Configura qué colores son premium (solo para boosters)")
+    .setDescription("Configure which colors are premium (booster-only)")
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
 ];

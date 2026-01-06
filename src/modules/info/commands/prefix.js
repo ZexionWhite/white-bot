@@ -4,6 +4,7 @@
 
 import { z } from "zod";
 import * as PermService from "../../moderation/services/permissions.service.js";
+import { getLocaleForGuildId, t } from "../../../core/i18n/index.js";
 
 /**
  * Registra comandos de info para prefix
@@ -36,28 +37,29 @@ export async function registerInfoPrefixCommands() {
       permissions: null,
       argsSchema: userSchema,
       execute: async (ctx) => {
+        const locale = await getLocaleForGuildId(ctx.guild.id);
         const { userId } = ctx.args;
         const targetUser = userId 
           ? await ctx.raw.client.users.fetch(userId).catch(() => null)
           : ctx.raw.author;
         
         if (!targetUser) {
-          return ctx.reply({ content: "❌ Usuario no encontrado." });
+          return ctx.reply({ content: `❌ ${t(locale, "common.prefix_commands.info.user_not_found")}` });
         }
         
         if (!await PermService.canExecuteCommand(ctx.member, "user")) {
-          return ctx.reply({ content: "❌ No tienes permisos para usar este comando." });
+          return ctx.reply({ content: `❌ ${t(locale, "common.prefix_commands.info.no_permissions")}` });
         }
         
         const targetMember = await ctx.guild.members.fetch(targetUser.id).catch(() => null);
         if (!targetMember) {
-          return ctx.reply({ content: "❌ Usuario no encontrado en el servidor." });
+          return ctx.reply({ content: `❌ ${t(locale, "common.prefix_commands.info.user_not_found_server")}` });
         }
         
         const { createUserinfoOverview } = await import("../ui/embeds.js");
         const { createUserinfoSelectMenu } = await import("../../moderation/ui/components.js");
         
-        const embed = await createUserinfoOverview(targetMember, ctx.guild);
+        const embed = await createUserinfoOverview(targetMember, ctx.guild, locale);
         const components = [createUserinfoSelectMenu(`user:${targetUser.id}`, "overview")];
         
         return ctx.reply({ embeds: [embed], components });

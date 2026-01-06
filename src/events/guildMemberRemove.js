@@ -3,6 +3,7 @@ import { getSettings } from "../db.js";
 import { TZ } from "../config.js";
 import { log } from "../core/logger/index.js";
 import { sendLog } from "../core/webhooks/index.js";
+import { t, getLocaleForGuild } from "../core/i18n/index.js";
 
 export default async function guildMemberRemove(client, member) {
   try {
@@ -15,6 +16,7 @@ export default async function guildMemberRemove(client, member) {
     });
     if (!ch?.isTextBased()) return;
 
+  const locale = await getLocaleForGuild(member.guild);
   const when = new Intl.DateTimeFormat("es-AR", {
     dateStyle: "short", timeStyle: "short", timeZone: TZ
   }).format(new Date());
@@ -23,8 +25,8 @@ export default async function guildMemberRemove(client, member) {
   const id  = member.id ?? "desconocido";
 
   const embed = new EmbedBuilder()
-    .setTitle("<:user_left:1404291902236528700> User left")
-    .setDescription(`**${tag}** (\`${id}\`) user left the guild.`)
+    .setTitle(`<:user_left:1404291902236528700> ${t(locale, "logging.events.user_left.title")}`)
+    .setDescription(t(locale, "logging.events.user_left.description", { tag, id }))
     .setFooter({ text: `${when}` })
     .setColor(0xed4245)
 

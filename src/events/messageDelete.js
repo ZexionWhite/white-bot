@@ -4,6 +4,7 @@ import { TZ } from "../config.js";
 import { EMOJIS } from "../config/emojis.js";
 import { log } from "../core/logger/index.js";
 import { sendLog } from "../core/webhooks/index.js";
+import { t, getLocaleForGuild } from "../core/i18n/index.js";
 
 function truncate(str, n = 1000) {
   if (!str) return "(no content)";
@@ -24,9 +25,10 @@ export default async function messageDelete(client, message) {
   });
   if (!logCh?.isTextBased()) return;
 
-  const authorTag = message.author?.tag ?? message.member?.user?.tag ?? "Desconocido";
-  const authorId  = message.author?.id  ?? message.member?.id       ?? "Desconocido";
-  const channelMention = message.channel?.id ? `<#${message.channel.id}>` : "(unknown)";
+  const locale = await getLocaleForGuild(message.guild);
+  const authorTag = message.author?.tag ?? message.member?.user?.tag ?? t(locale, "common.labels.unknown");
+  const authorId  = message.author?.id  ?? message.member?.id       ?? t(locale, "common.labels.unknown");
+  const channelMention = message.channel?.id ? `<#${message.channel.id}>` : t(locale, "common.labels.unknown_short");
 
   let deleter = null;
   try {
@@ -55,39 +57,29 @@ export default async function messageDelete(client, message) {
     ? attachments
         .slice(0, 5)
         .map((a, i) => `${i + 1}. ${a.url}`)
-        .join("\n") + (attachments.length > 5 ? `\n+${attachments.length - 5} más` : "")
+        .join("\n") + (attachments.length > 5 ? `\n+${attachments.length - 5} ${t(locale, "logging.welcome.more_attachments")}` : "")
     : "—";
 
-  const whenFmt = new Intl.DateTimeFormat("es-AR", {
-    dateStyle: "short",
-    timeStyle: "short",
-    timeZone: TZ
-  }).format(new Date());
+  const userDisplay = `${authorTag} (\`${authorId}\`)`;
+  const deleterDisplay = deleter ? `${deleter.tag} (\`${deleter.id}\`)` : "(unknown)";
 
-  const createdUnix = message.createdTimestamp
-  ? Math.floor(message.createdTimestamp / 1000)
-  : null;
-
-    const footerText = [
-    `Message ID: ${message.id ?? "unknown"}`].join(" • ");
-
-    const embed = new EmbedBuilder()
-    .setTitle(`${EMOJIS.LOGS.MESSAGE_DELETED} Message Deleted`)
+  const embed = new EmbedBuilder()
+    .setTitle(`${EMOJIS.LOGS.MESSAGE_DELETED} ${t(locale, "logging.events.message_deleted.title")}`)
     .setDescription(
         [
-        `**User:** ${authorTag} (\`${authorId}\`)`,
-        `**Deleted by:** ${deleter ? `${deleter.tag} (\`${deleter.id}\`)` : "(unknown)"}`,
-        `**Channel:** ${channelMention}`
+        t(locale, "logging.events.message_deleted.description_user", { user: userDisplay }),
+        t(locale, "logging.events.message_deleted.description_deleter", { deleter: deleterDisplay }),
+        t(locale, "logging.events.message_deleted.description_channel", { channel: channelMention })
         ].join("\n")
     )
     .addFields(
-        { name: "Message", value: "```\n" + truncate(content, 1000) + "\n```" },
-        { name: "Attachments", value: attachText }
+        { name: t(locale, "logging.events.message_deleted.field_message"), value: "```\n" + truncate(content, 1000) + "\n```" },
+        { name: t(locale, "logging.events.message_deleted.field_attachments"), value: attachText }
     )
     .setColor(0xed4245)
     .setTimestamp()
     .setFooter({
-        text: footerText,
+        text: t(locale, "logging.events.message_deleted.footer_message_id", { messageId: message.id ?? "unknown" }),
         iconURL: message.guild.iconURL({ size: 64, extension: "png" }) ?? undefined
     });
 

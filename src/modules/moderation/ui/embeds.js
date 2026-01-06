@@ -1,5 +1,6 @@
 import { EmbedBuilder } from "discord.js";
 import { formatDurationMs } from "../../../utils/duration.js";
+import { t, DEFAULT_LOCALE } from "../../../core/i18n/index.js";
 
 export const TYPE_COLORS = {
   WARN: 0xffaa00,
@@ -27,23 +28,25 @@ export const TYPE_NAMES = {
   UNBAN: "unban"
 };
 
-export function createModlogEmbed(case_, target, moderator, dmSent = null) {
+export function createModlogEmbed(case_, target, moderator, dmSent = null, locale = DEFAULT_LOCALE) {
   const actionName = case_.type ? (TYPE_NAMES[case_.type] || case_.type.toLowerCase()) : "unknown";
+  // Las acciones NO se traducen según las reglas
   const actionCapitalized = actionName.charAt(0).toUpperCase() + actionName.slice(1);
   
   const targetName = target.tag || target.username || "Unknown";
   const targetDisplay = `${targetName} (${case_.target_id})`;
   
   // Build description with Duration first (if exists), then Reason last
-  let description = `**Member:** ${targetDisplay}\n**Action:** ${actionCapitalized}`;
+  let description = t(locale, "moderation.embeds.warn.description_member", { member: targetDisplay }) + "\n" +
+                    t(locale, "moderation.embeds.warn.description_action", { action: actionCapitalized });
   
   if (case_.expires_at) {
     const duration = case_.expires_at - case_.created_at;
     const durationFormatted = formatDurationMs(duration);
-    description += `\n**Duration:** ${durationFormatted}`;
+    description += "\n" + t(locale, "moderation.embeds.mute.description_duration", { duration: durationFormatted });
   }
   
-  description += `\n**Reason:** ${case_.reason || "No reason"}`;
+  description += "\n" + t(locale, "moderation.embeds.warn.description_reason", { reason: case_.reason || t(locale, "common.errors.no_reason") });
   
   const embed = new EmbedBuilder()
     .setColor(TYPE_COLORS[case_.type] || 0xffaa00)
@@ -52,7 +55,7 @@ export function createModlogEmbed(case_, target, moderator, dmSent = null) {
       iconURL: moderator.displayAvatarURL?.() || moderator.avatarURL?.() || null 
     })
     .setDescription(description)
-    .setFooter({ text: `Case #${case_.id}` });
+    .setFooter({ text: t(locale, "moderation.embeds.warn.footer_case", { caseId: case_.id }) });
   
   // Solo setear timestamp si created_at es válido
   if (case_.created_at && typeof case_.created_at === 'number' && case_.created_at > 0) {
@@ -96,14 +99,15 @@ export function createSuccessEmbed(action, target, caseId = null) {
     .setDescription(`✅ ${action}`);
 }
 
-export function createErrorEmbed(message) {
+export function createErrorEmbed(message, locale = DEFAULT_LOCALE) {
   return new EmbedBuilder()
     .setColor(0xff0000)
-    .setDescription(`❌ ${message}`);
+    .setDescription(t(locale, "moderation.embeds.error.title", { message }));
 }
 
-export function createCaseEmbed(case_, target, moderator) {
+export function createCaseEmbed(case_, target, moderator, locale = DEFAULT_LOCALE) {
   const actionName = case_.type ? (TYPE_NAMES[case_.type] || case_.type.toLowerCase()) : "unknown";
+  // Las acciones NO se traducen según las reglas
   const actionCapitalized = actionName.charAt(0).toUpperCase() + actionName.slice(1);
   
   const targetName = target.tag || target.username || "Unknown";
@@ -112,19 +116,22 @@ export function createCaseEmbed(case_, target, moderator) {
   const moderatorName = moderator.tag || moderator.username || "Unknown";
   
   // Build description with Duration first (if exists), then Reason last
-  let description = `**Member:** ${targetDisplay}\n**Action:** ${actionCapitalized}`;
+  let description = t(locale, "moderation.embeds.case.description_member", { member: targetDisplay }) + "\n" +
+                    t(locale, "moderation.embeds.case.description_action", { action: actionCapitalized });
   
   if (case_.expires_at) {
     const duration = case_.expires_at - case_.created_at;
     const durationFormatted = formatDurationMs(duration);
-    description += `\n**Duration:** ${durationFormatted}`;
+    description += "\n" + t(locale, "moderation.embeds.case.description_duration", { duration: durationFormatted });
   }
   
-  description += `\n**Reason:** ${case_.reason || "No reason"}`;
+  description += "\n" + t(locale, "moderation.embeds.case.description_reason", { reason: case_.reason || t(locale, "moderation.embeds.case.no_reason") });
   
   if (case_.deleted_at) {
-    const deletedByMention = case_.deleted_by ? `<@${case_.deleted_by}>` : "Usuario desconocido";
-    description += `\n**Deleted:** <t:${Math.floor(case_.deleted_at / 1000)}:R>\n**Deleted by:** ${deletedByMention}\n**Deletion reason:** ${case_.deleted_reason || "No reason"}`;
+    const deletedByMention = case_.deleted_by ? `<@${case_.deleted_by}>` : t(locale, "common.errors.user_not_found");
+    description += "\n" + t(locale, "moderation.embeds.case.description_deleted", { timestamp: `<t:${Math.floor(case_.deleted_at / 1000)}:R>` }) +
+                "\n" + t(locale, "moderation.embeds.case.description_deleted_by", { deleter: deletedByMention }) +
+                "\n" + t(locale, "moderation.embeds.case.description_deletion_reason", { reason: case_.deleted_reason || t(locale, "moderation.embeds.case.no_reason") });
   }
   
   const embed = new EmbedBuilder()
@@ -134,7 +141,7 @@ export function createCaseEmbed(case_, target, moderator) {
       iconURL: moderator.displayAvatarURL?.() || moderator.avatarURL?.() || null 
     })
     .setDescription(description)
-    .setFooter({ text: `Case #${case_.id}` });
+    .setFooter({ text: t(locale, "moderation.embeds.case.footer_case", { caseId: case_.id }) });
   
   // Solo setear timestamp si created_at es válido
   if (case_.created_at && typeof case_.created_at === 'number' && case_.created_at > 0) {
@@ -144,7 +151,7 @@ export function createCaseEmbed(case_, target, moderator) {
   return embed;
 }
 
-export function createHistoryEmbed(cases, target, page, totalPages, type = null, counts = null) {
+export function createHistoryEmbed(cases, target, page, totalPages, type = null, counts = null, locale = DEFAULT_LOCALE) {
   const targetName = target.tag || target.username || "Unknown";
   const targetDisplay = `${targetName} (${target.id})`;
   
@@ -156,12 +163,19 @@ export function createHistoryEmbed(cases, target, page, totalPages, type = null,
     });
 
   if (cases.length === 0) {
-    embed.setDescription("No sanctions recorded");
+    embed.setDescription(t(locale, "moderation.embeds.history.description_no_sanctions"));
     if (counts) {
-      const footerText = `Warned: ${counts.warned} | Muted: ${counts.muted} | Timeouted: ${counts.timeouted} | Kicked: ${counts.kicked} | Banned: ${counts.banned}`;
+      const footerParts = [
+        t(locale, "moderation.embeds.history.footer_warned", { warned: counts.warned }),
+        t(locale, "moderation.embeds.history.footer_muted", { muted: counts.muted }),
+        t(locale, "moderation.embeds.history.footer_timeouted", { timeouted: counts.timeouted }),
+        t(locale, "moderation.embeds.history.footer_kicked", { kicked: counts.kicked }),
+        t(locale, "moderation.embeds.history.footer_banned", { banned: counts.banned })
+      ];
+      const footerText = footerParts.join(t(locale, "moderation.embeds.history.footer_counts_separator"));
       embed.setFooter({ text: footerText });
     } else {
-      embed.setFooter({ text: `Page ${page}/${totalPages}` });
+      embed.setFooter({ text: t(locale, "moderation.embeds.history.footer_page", { page, totalPages }) });
     }
     return embed;
   }
@@ -169,10 +183,11 @@ export function createHistoryEmbed(cases, target, page, totalPages, type = null,
   // Limitar a 10 casos por página
   const fields = cases.slice(0, 10).map(c => {
     const actionName = c.type ? (TYPE_NAMES[c.type] || c.type.toLowerCase()) : "unknown";
+    // Las acciones NO se traducen según las reglas
     
     return {
-      name: `Case #${c.id} - ${actionName}`,
-      value: c.reason || "No reason",
+      name: t(locale, "moderation.embeds.history.field_case_format", { caseId: c.id, action: actionName }),
+      value: c.reason || t(locale, "moderation.embeds.history.no_reason"),
       inline: false
     };
   });
@@ -181,10 +196,17 @@ export function createHistoryEmbed(cases, target, page, totalPages, type = null,
 
   // Footer con conteos si están disponibles, sino solo página
   if (counts) {
-    const footerText = `Warned: ${counts.warned} | Muted: ${counts.muted} | Timeouted: ${counts.timeouted} | Kicked: ${counts.kicked} | Banned: ${counts.banned}`;
+    const footerParts = [
+      t(locale, "moderation.embeds.history.footer_warned", { warned: counts.warned }),
+      t(locale, "moderation.embeds.history.footer_muted", { muted: counts.muted }),
+      t(locale, "moderation.embeds.history.footer_timeouted", { timeouted: counts.timeouted }),
+      t(locale, "moderation.embeds.history.footer_kicked", { kicked: counts.kicked }),
+      t(locale, "moderation.embeds.history.footer_banned", { banned: counts.banned })
+    ];
+    const footerText = footerParts.join(t(locale, "moderation.embeds.history.footer_counts_separator"));
     embed.setFooter({ text: footerText });
   } else {
-    embed.setFooter({ text: `Page ${page}/${totalPages}` });
+    embed.setFooter({ text: t(locale, "moderation.embeds.history.footer_page", { page, totalPages }) });
   }
 
   return embed;

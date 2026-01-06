@@ -1,0 +1,52 @@
+{
+  "embeds": {
+    "userinfo": {
+      "overview": {
+        "field_user_id": "User ID",
+        "field_user": "User",
+        "field_joined_discord": "Joined Discord",
+        "field_joined_server": "Joined Server",
+        "field_highest_role": "Highest Role",
+        "field_trust_score": "Trust Score",
+        "none": "None"
+      },
+      "sanctions": {
+        "title": "Sanctions",
+        "description_no_sanctions": "No sanctions recorded",
+        "field_case_format": "Case #{id} - {action}",
+        "footer_counts": "Warned: {warned} | Muted: {muted} | Timeouted: {timeouted} | Kicked: {kicked} | Banned: {banned}",
+        "no_reason": "No reason"
+      },
+      "voice": {
+        "title": "Voice Activity",
+        "description_no_activity": "No voice activity recorded",
+        "field_joined": "Joined",
+        "field_left": "Left",
+        "field_moved": "Moved",
+        "field_channel_unknown": "Unknown"
+      },
+      "messages": {
+        "title": "Recent Messages",
+        "description_no_messages": "No messages recorded",
+        "field_no_content": "*No content*"
+      },
+      "permissions": {
+        "title": "Permissions/Overrides",
+        "description_no_overrides": "No permission overrides configured",
+        "field_allowed_modules": "Allowed Modules",
+        "field_denied_modules": "Denied Modules",
+        "field_allowed_commands": "Allowed Commands",
+        "field_denied_commands": "Denied Commands",
+        "none": "None"
+      },
+      "statistics": {
+        "title": "Statistics",
+        "field_voice_time": "Voice Time",
+        "field_messages": "Messages"
+      }
+    }
+  },
+  "errors": {
+    "user_not_found": "User not found"
+  }
+}

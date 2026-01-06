@@ -12,6 +12,7 @@ import * as SettingsRepo from "../db/settings.repo.js";
 import * as ModlogService from "../services/modlog.service.js";
 import { createSanctionMessage } from "../ui/messages.js";
 import { parseDuration } from "../../../utils/duration.js";
+import { getLocaleForGuildId, t } from "../../../core/i18n/index.js";
 
 /**
  * Parsea un user mention o ID
@@ -110,18 +111,18 @@ async function executeModerationCommand(ctx, commandName, requireDuration = fals
         // Verificar mute role
         const settings = await SettingsRepo.getGuildSettings(ctx.guild.id);
         if (!settings.mute_role_id) {
-          return ctx.reply({ content: "❌ No hay rol de mute configurado. Usa /createmuterole o /setmuterole" });
+          return ctx.reply({ content: `❌ ${t(locale, "common.prefix_commands.moderation.mute_role_not_set")}` });
         }
         const muteRole = await ctx.guild.roles.fetch(settings.mute_role_id).catch(() => null);
         if (!muteRole) {
-          return ctx.reply({ content: "❌ El rol de mute configurado no existe" });
+          return ctx.reply({ content: `❌ ${t(locale, "common.prefix_commands.moderation.mute_role_not_found")}` });
         }
         result = await ModService.mute(ctx.guild, targetMember, ctx.member, reason, duration);
         break;
       }
       case "timeout":
         if (!duration) {
-          return ctx.reply({ content: "❌ Timeout requiere una duración." });
+          return ctx.reply({ content: `❌ ${t(locale, "common.prefix_commands.moderation.timeout_duration_required")}` });
         }
         result = await ModService.timeout(ctx.guild, targetMember, ctx.member, reason, duration);
         break;
@@ -130,12 +131,12 @@ async function executeModerationCommand(ctx, commandName, requireDuration = fals
         break;
       case "tempban":
         if (!duration) {
-          return ctx.reply({ content: "❌ Tempban requiere una duración." });
+          return ctx.reply({ content: `❌ ${t(locale, "common.prefix_commands.moderation.tempban_duration_required")}` });
         }
         result = await ModService.tempban(ctx.guild, targetId, ctx.member, reason, duration);
         break;
       default:
-        return ctx.reply({ content: "❌ Comando no implementado aún." });
+        return ctx.reply({ content: `❌ ${t(locale, "common.errors.command_not_implemented")}` });
     }
   } catch (error) {
     return ctx.reply({ content: `❌ Error: ${error.message}` });

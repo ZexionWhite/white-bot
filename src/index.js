@@ -11,12 +11,14 @@ import { initRedis } from "./core/redis/index.js";
 import { registerModerationPrefixCommands } from "./modules/moderation/commands/prefix.js";
 import { registerUtilitiesPrefixCommands } from "./modules/utilities/commands/prefix.js";
 import { registerInfoPrefixCommands } from "./modules/info/commands/prefix.js";
+import { registerLanguagePrefixCommand } from "./modules/settings/commands/language-prefix.js";
 
 async function registerAllPrefixCommands() {
   try {
     await registerModerationPrefixCommands();
     await registerUtilitiesPrefixCommands();
     await registerInfoPrefixCommands();
+    await registerLanguagePrefixCommand();
     log.info("Prefix commands", "Todos los prefix commands registrados correctamente");
   } catch (err) {
     log.error("Prefix commands", "Error registrando prefix commands:", err);

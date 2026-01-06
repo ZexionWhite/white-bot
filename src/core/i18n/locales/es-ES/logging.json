@@ -1,0 +1,87 @@
+{
+  "events": {
+    "message_deleted": {
+      "title": "Mensaje Eliminado",
+      "description_user": "**Usuario:** {user}",
+      "description_deleter": "**Eliminado por:** {deleter}",
+      "description_channel": "**Canal:** {channel}",
+      "field_message": "Mensaje",
+      "field_attachments": "Archivos adjuntos",
+      "footer_message_id": "Message ID: {messageId}"
+    },
+    "message_updated": {
+      "title": "Mensaje Editado",
+      "description_user": "**Usuario:** {user}",
+      "description_channel": "**Canal:** {channel}",
+      "field_before": "Antes",
+      "field_after": "Después",
+      "field_attachments_after": "Archivos adjuntos (después)",
+      "footer_message_id": "Message ID: {messageId}"
+    },
+    "user_left": {
+      "title": "Usuario Abandonó",
+      "description": "**{tag}** (`{id}`) usuario abandonó el servidor."
+    },
+    "user_joined": {
+      "title": "📥 Miembro Unido",
+      "description": "**{tag}** ({id})",
+      "field_account_created": "Cuenta creada",
+      "field_total_members": "Miembros totales"
+    },
+    "avatar_updated": {
+      "title": "Avatar Actualizado",
+      "description_user": "**Usuario:** {user}",
+      "field_links": "Enlaces",
+      "link_before": "**Antes:** [abrir]({url})",
+      "link_after": "**Después:** [abrir]({url})",
+      "link_before_empty": "**Antes:** —",
+      "link_after_empty": "**Después:** —",
+      "footer_updated": "Actualizado el {when}"
+    },
+    "nickname_updated": {
+      "title": "Apodo Actualizado",
+      "description_user": "**Usuario:** {user}",
+      "description_changed_by": "**Cambiado por:** {executor}",
+      "field_before": "Antes",
+      "field_after": "Después",
+      "footer_nick_update": "Nick update"
+    },
+    "server_avatar_updated": {
+      "title": "Avatar de Servidor Actualizado",
+      "description_user": "**Usuario:** {user}",
+      "field_links": "Enlaces",
+      "link_before": "**Antes:** [abrir]({url})",
+      "link_after": "**Después:** [abrir]({url})",
+      "link_before_empty": "**Antes:** —",
+      "link_after_empty": "**Después:** —",
+      "footer_updated": "Actualizado el {when}"
+    }
+  },
+  "voice": {
+    "joined": {
+      "title": "🔊 Usuario se unió a voz",
+      "description": "**{username}** (`{userId}`) se unió a un canal de voz.",
+      "field_channel": "Canal",
+      "footer": "Voice state update • {when}"
+    },
+    "left": {
+      "title": "🔇 Usuario salió de voz",
+      "description": "**{username}** (`{userId}`) salió del canal de voz.",
+      "field_previous_channel": "Canal anterior",
+      "field_time_in_channel": "Tiempo en canal",
+      "footer": "Voice state update • {when}"
+    },
+    "moved": {
+      "title": "🔄 Usuario se movió de canal",
+      "description": "**{username}** (`{userId}`) cambió de canal de voz.",
+      "field_from": "Desde",
+      "field_to": "Hacia",
+      "field_time_in_previous_channel": "Tiempo en canal anterior",
+      "footer": "Voice state update • {when}"
+    }
+  },
+  "welcome": {
+    "message": "¡Bienvenido/a",
+    "more_attachments": "más"
+  }
+}

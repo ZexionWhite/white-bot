@@ -1,0 +1,86 @@
+{
+  "embeds": {
+    "warn": {
+      "title": "Advertencia",
+      "description_member": "**Miembro:** {member}",
+      "description_action": "**Acción:** {action}",
+      "description_reason": "**Razón:** {reason}",
+      "footer_case": "Caso #{caseId}"
+    },
+    "mute": {
+      "title": "Silenciado",
+      "description_member": "**Miembro:** {member}",
+      "description_action": "**Acción:** {action}",
+      "description_duration": "**Duración:** {duration}",
+      "description_reason": "**Razón:** {reason}",
+      "footer_case": "Caso #{caseId}"
+    },
+    "ban": {
+      "title": "Baneado",
+      "description_member": "**Miembro:** {member}",
+      "description_action": "**Acción:** {action}",
+      "description_reason": "**Razón:** {reason}",
+      "footer_case": "Caso #{caseId}"
+    },
+    "kick": {
+      "title": "Expulsado",
+      "description_member": "**Miembro:** {member}",
+      "description_action": "**Acción:** {action}",
+      "description_reason": "**Razón:** {reason}",
+      "footer_case": "Caso #{caseId}"
+    },
+    "timeout": {
+      "title": "Tiempo de espera",
+      "description_member": "**Miembro:** {member}",
+      "description_action": "**Acción:** {action}",
+      "description_duration": "**Duración:** {duration}",
+      "description_reason": "**Razón:** {reason}",
+      "footer_case": "Caso #{caseId}"
+    },
+    "success": {
+      "title": "✅ {action}",
+      "description_member_action": "**Miembro:** {member}\n**Acción:** {action}",
+      "footer_case": "Caso #{caseId}"
+    },
+    "error": {
+      "title": "❌ {message}"
+    },
+    "history": {
+      "title": "Historial de Sanciones",
+      "description_no_sanctions": "No se registraron sanciones",
+      "footer_warned": "Warned: {warned}",
+      "footer_muted": "Muted: {muted}",
+      "footer_timeouted": "Timeouted: {timeouted}",
+      "footer_kicked": "Kicked: {kicked}",
+      "footer_banned": "Banned: {banned}",
+      "footer_counts_separator": " | ",
+      "footer_page": "Página {page}/{totalPages}",
+      "field_case_format": "Case #{caseId} - {action}",
+      "no_reason": "No reason"
+    },
+    "case": {
+      "title": "Caso #{caseId}",
+      "description_member": "**Miembro:** {member}",
+      "description_action": "**Acción:** {action}",
+      "description_duration": "**Duración:** {duration}",
+      "description_reason": "**Razón:** {reason}",
+      "description_deleted": "**Eliminado:** {timestamp}",
+      "description_deleted_by": "**Eliminado por:** {deleter}",
+      "description_deletion_reason": "**Razón de eliminación:** {reason}",
+      "footer_case": "Caso #{caseId}",
+      "no_reason": "No reason"
+    }
+  },
+  "messages": {
+    "sanction": "✅ Caso #{caseId} {user} ha sido {action}.",
+    "case_updated": "Caso actualizado",
+    "case_not_found": "Caso #{caseId} no encontrado"
+  },
+  "errors": {
+    "no_mute_role": "No hay rol de mute configurado. Usa /createmuterole o /setmuterole",
+    "mute_role_not_found": "El rol de mute configurado no existe",
+    "cannot_manage_mute_role": "El bot no puede gestionar el rol de mute. Verifica la jerarquía de roles",
+    "duration_required": "La duración es requerida",
+    "case_not_found": "Caso #{caseId} no encontrado"
+  }
+}

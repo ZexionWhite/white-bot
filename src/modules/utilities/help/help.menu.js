@@ -1,56 +1,57 @@
 import { ActionRowBuilder, StringSelectMenuBuilder } from "discord.js";
 import { EMOJIS } from "../../../config/emojis.js";
+import { t, DEFAULT_LOCALE } from "../../../core/i18n/index.js";
 
-export function createHelpSelectMenu(currentCategory = "intro") {
+export function createHelpSelectMenu(currentCategory = "intro", locale = DEFAULT_LOCALE) {
   return new ActionRowBuilder().addComponents(
     new StringSelectMenuBuilder()
       .setCustomId("help:select")
-      .setPlaceholder("Selecciona una categoría...")
+      .setPlaceholder(t(locale, "utilities.help.menu.placeholder"))
       .addOptions([
         {
-          label: "Introducción",
+          label: t(locale, "utilities.help.menu.intro"),
           value: "intro",
           emoji: EMOJIS.UTILS.HELP,
           default: currentCategory === "intro"
         },
         {
-          label: "Configuración",
+          label: t(locale, "utilities.help.menu.config"),
           value: "config",
           emoji: EMOJIS.UTILS.CONFIG,
           default: currentCategory === "config"
         },
         {
-          label: "Moderación",
+          label: t(locale, "utilities.help.menu.moderation"),
           value: "moderation",
           emoji: EMOJIS.UTILS.REPORT,
           default: currentCategory === "moderation"
         },
         {
-          label: "Casos y Herramientas",
+          label: t(locale, "utilities.help.menu.cases"),
           value: "cases",
           emoji: EMOJIS.UTILS.UTILITIES,
           default: currentCategory === "cases"
         },
         {
-          label: "Blacklist",
+          label: t(locale, "utilities.help.menu.blacklist"),
           value: "blacklist",
           emoji: EMOJIS.UTILS.QUARANTINE,
           default: currentCategory === "blacklist"
         },
         {
-          label: "Información",
+          label: t(locale, "utilities.help.menu.info"),
           value: "info",
           emoji: EMOJIS.UTILS.SEARCH,
           default: currentCategory === "info"
         },
         {
-          label: "Voz",
+          label: t(locale, "utilities.help.menu.voice"),
           value: "voice",
           emoji: EMOJIS.UTILS.VOICE,
           default: currentCategory === "voice"
         },
         {
-          label: "Utilidades",
+          label: t(locale, "utilities.help.menu.utilities"),
           value: "utilities",
           emoji: EMOJIS.UTILS.LIST,
           default: currentCategory === "utilities"
@@ -58,4 +59,3 @@ export function createHelpSelectMenu(currentCategory = "intro") {
       ])
   );
 }
-

@@ -1,0 +1,124 @@
+{
+  "errors": {
+    "permission_denied": "You don't have permission to use this command",
+    "user_not_found": "User not found in server",
+    "cannot_moderate": "You cannot moderate this user",
+    "invalid_guild": "Invalid guild",
+    "invalid_modal": "Invalid modal",
+    "invalid_action_id": "Invalid action ID",
+    "action_expired": "This action has expired or doesn't exist",
+    "not_author": "You didn't initiate this action",
+    "no_reason": "No reason",
+    "unknown_error": "An unknown error occurred",
+    "interaction_error": "An error occurred while processing this interaction.",
+    "guild_only": "This command only works in servers.",
+    "invalid_option": "Invalid option.",
+    "case_not_found": "Case #{caseId} not found",
+    "user_not_banned": "User is not banned.",
+    "command_not_implemented": "Command not implemented yet.",
+    "not_text_channel": "This command only works in text channels.",
+    "no_permissions_command": "You don't have permission to use this command.",
+    "invalid_user_input": "You must mention a user or provide their ID",
+    "invalid_case_id": "You must provide the case ID",
+    "invalid_case_id_number": "Case ID must be a number",
+    "clear_amount_required": "You must provide the number of messages (1-100)",
+    "clear_amount_invalid": "Amount must be a number between 1 and 100",
+    "clear_error": "Error clearing messages: {error}",
+    "unban_error": "Error unbanning: {error}"
+  },
+  "success": {
+    "operation_complete": "Operation completed",
+    "settings_updated": "Settings updated",
+    "unbanned": "User unbanned. Case #{caseId}",
+    "clear_success_singular": "{count} message deleted. Case #{caseId}",
+    "clear_success_plural": "{count} messages deleted. Case #{caseId}"
+  },
+  "labels": {
+    "unknown": "Unknown",
+    "unknown_short": "(unknown)",
+    "more": "more",
+    "welcome": "Welcome",
+    "welcome_title": "Welcome to {guildName}!"
+  },
+  "footer": {
+    "case": "Case #{caseId}",
+    "page": "Page {page}/{totalPages}"
+  },
+  "fields": {
+    "member": "Member",
+    "user": "User",
+    "action": "Action",
+    "reason": "Reason",
+    "duration": "Duration",
+    "channel": "Channel",
+    "before": "Before",
+    "after": "After",
+    "attachments": "Attachments",
+    "links": "Links",
+    "message_id": "Message ID"
+  },
+  "time": {
+    "updated_at": "Updated on {when}",
+    "created_at": "Created on {when}"
+  },
+  "prefix_commands": {
+    "moderation": {
+      "user_required": "You must mention a user or provide their ID.",
+      "reason_required": "You must provide a reason.",
+      "duration_required": "You must provide a duration.",
+      "usage": "Usage: `{prefix}{command} <@user> [duration] <reason>`",
+      "usage_with_duration": "Usage: `{prefix}{command} <@user> <duration> <reason>`",
+      "user_not_found_server": "User not found in server.",
+      "no_permissions": "You don't have permission to use this command.",
+      "cannot_moderate_user": "You cannot moderate this user.",
+      "mute_role_not_set": "No mute role configured. Use /createmuterole or /setmuterole",
+      "mute_role_not_found": "The configured mute role does not exist",
+      "timeout_duration_required": "Timeout requires a duration.",
+      "tempban_duration_required": "Tempban requires a duration."
+    },
+    "info": {
+      "user_not_found": "User not found.",
+      "no_permissions": "You don't have permission to use this command.",
+      "user_not_found_server": "User not found in server."
+    }
+  },
+  "autoroles": {
+    "no_permissions": "No permissions.",
+    "channels_not_configured": "First configure channels with /set welcome and /set join-log.",
+    "no_color_roles": "No color roles. Use /setupcolors.",
+    "invalid_option": "Invalid option.",
+    "booster_only": "This color is only for boosters.",
+    "color_removed": "Color removed ✅",
+    "color_applied": "Color applied ✅",
+    "role_change_failed": "Could not change role. Check bot permissions/hierarchy.",
+    "menu_post_failed": "Could not post/edit menu. Check permissions and channel.",
+    "menu_posted": "Autorole menu posted/updated.",
+    "title": "Color Autoroles",
+    "description": "• Select the color that best suits you.\n• Options with a {emoji} are **boosters only**.",
+    "footer_options": "{count} options available",
+    "placeholder": "Choose your color"
+  },
+  "settings": {
+    "prefix": {
+      "no_permissions": "No permissions.",
+      "invalid_length": "Prefix must be between 1 and 10 characters.",
+      "save_error": "Error saving configuration.",
+      "success": "Prefix set to `{prefix}`\n\nYou can now use commands like: `{prefix}help`"
+    }
+  },
+  "test": {
+    "guild_only": "This command only works in servers.",
+    "server_info_error": "Could not get server information.",
+    "test_guild_only": "This command is only available in the test server.",
+    "member_info_error": "Could not get member information.",
+    "no_embed_selected": "No embed selected.",
+    "embed_type_unknown": "Unknown embed type.",
+    "embed_generation_failed": "Could not generate embed.",
+    "embed_generation_error": "Error generating embed: {error}",
+    "critical_error": "Critical error: {error}",
+    "title": "🧪 Test Embed Selector",
+    "description": "Select an embed from the menu to test it:",
+    "testing": "🧪 Testing: {type}",
+    "no_voice_channels": "No voice channels available to test this embed."
+  }
+}

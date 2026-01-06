@@ -1,5 +1,6 @@
 import { ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, PermissionFlagsBits } from "discord.js";
 import { EMOJIS } from "../../../config/emojis.js";
+import { t, DEFAULT_LOCALE } from "../../../core/i18n/index.js";
 
 function parseEmojiMarkdown(markdown, fallback) {
   if (!markdown || typeof markdown !== "string") return fallback;
@@ -10,11 +11,11 @@ function parseEmojiMarkdown(markdown, fallback) {
   return fallback;
 }
 
-export function voiceModEmbed(channel, members, moderator, client = null) {
+export function voiceModEmbed(channel, members, moderator, client = null, locale = DEFAULT_LOCALE) {
   if (!channel || !members || members.length === 0) {
     return new EmbedBuilder()
-      .setTitle("🔇 Canal de voz")
-      .setDescription("No hay usuarios en este canal de voz.")
+      .setTitle(t(locale, "voice.mod.embed.empty_title"))
+      .setDescription(t(locale, "voice.mod.embed.empty_description"))
       .setColor(0x95a5a6);
   }
 
@@ -60,7 +61,7 @@ export function voiceModEmbed(channel, members, moderator, client = null) {
   }).join("\n");
 
   const firstMember = members[0];
-  const headerText = `<@${firstMember.id}> está en`;
+  const headerText = t(locale, "voice.mod.embed.header_in_channel", { userId: firstMember.id });
 
   const embed = new EmbedBuilder()
     .setDescription(`${headerText} <#${channel.id}>\n\n${memberList}`)
@@ -69,7 +70,7 @@ export function voiceModEmbed(channel, members, moderator, client = null) {
   return embed;
 }
 
-export function createVoiceModComponents(channel, members, moderator, targetMember = null, client = null) {
+export function createVoiceModComponents(channel, members, moderator, targetMember = null, client = null, locale = DEFAULT_LOCALE) {
   const muteEmoji = parseEmojiMarkdown(EMOJIS.VOICE?.GUILD_MUTE, "🔇");
   const unmutedEmoji = parseEmojiMarkdown(EMOJIS.VOICE?.UNMUTED, "🔊");
   const refreshEmoji = parseEmojiMarkdown(EMOJIS.ACTIONS?.REFRESH, "🔄");
@@ -78,33 +79,33 @@ export function createVoiceModComponents(channel, members, moderator, targetMemb
 
   const menuOptions = [
     {
-      label: "Moverme al canal",
+      label: t(locale, "voice.mod.menu.join_channel"),
       value: `mod_join_${channel.id}`,
-      description: "Te mueve a este canal de voz",
+      description: t(locale, "voice.mod.menu.join_description"),
       emoji: moveInEmoji
     },
     {
-      label: "Traer todos a mi canal",
+      label: t(locale, "voice.mod.menu.bring_all"),
       value: `mod_bring_all_${channel.id}`,
-      description: "Mueve todos los usuarios no-mods a tu canal",
+      description: t(locale, "voice.mod.menu.bring_all_description"),
       emoji: moveOutEmoji
     },
     {
-      label: "Mutear a todos",
+      label: t(locale, "voice.mod.menu.mute_all"),
       value: `mod_mute_all_${channel.id}`,
-      description: "Mutea a todos los usuarios no-moderadores",
+      description: t(locale, "voice.mod.menu.mute_all_description"),
       emoji: muteEmoji
     },
     {
-      label: "Desmutear a todos",
+      label: t(locale, "voice.mod.menu.unmute_all"),
       value: `mod_unmute_all_${channel.id}`,
-      description: "Desmutea a todos los usuarios",
+      description: t(locale, "voice.mod.menu.unmute_all_description"),
       emoji: unmutedEmoji
     },
     {
-      label: "Recargar",
+      label: t(locale, "voice.mod.menu.refresh"),
       value: `mod_refresh_${channel.id}`,
-      description: "Actualiza la lista de usuarios",
+      description: t(locale, "voice.mod.menu.refresh_description"),
       emoji: refreshEmoji
     }
   ];
@@ -114,9 +115,9 @@ export function createVoiceModComponents(channel, members, moderator, targetMemb
       !targetMember.permissions.has(PermissionFlagsBits.MoveMembers) &&
       targetMember.id !== moderator.guild.ownerId) {
     menuOptions.push({
-      label: `Traer ${targetMember.user.username} a mi canal`,
+      label: t(locale, "voice.mod.menu.bring_user", { username: targetMember.user.username }),
       value: `mod_bring_${targetMember.id}`,
-      description: `Mover ${targetMember.user.username} a tu canal`,
+      description: t(locale, "voice.mod.menu.bring_user_description", { username: targetMember.user.username }),
       emoji: moveOutEmoji
     });
   }
@@ -130,16 +131,20 @@ export function createVoiceModComponents(channel, members, moderator, targetMemb
   nonMods.slice(0, 21).forEach(member => {
     const isServerMuted = member.voice.serverMute;
     menuOptions.push({
-      label: `${isServerMuted ? "Desmutear" : "Mutear"} ${member.user.username}`,
+      label: isServerMuted 
+        ? t(locale, "voice.mod.menu.unmute_user", { username: member.user.username })
+        : t(locale, "voice.mod.menu.mute_user", { username: member.user.username }),
       value: `mod_mute_${member.id}`,
-      description: `${isServerMuted ? "Desmutear" : "Mutear"} a ${member.user.username}`,
+      description: isServerMuted
+        ? t(locale, "voice.mod.menu.unmute_user_description", { username: member.user.username })
+        : t(locale, "voice.mod.menu.mute_user_description", { username: member.user.username }),
       emoji: muteEmoji
     });
   });
 
   const menu = new StringSelectMenuBuilder()
     .setCustomId(`mod_menu_${channel.id}`)
-    .setPlaceholder("Ver acciones disponibles")
+    .setPlaceholder(t(locale, "voice.mod.menu.placeholder"))
     .setMinValues(1)
     .setMaxValues(1)
     .addOptions(menuOptions.slice(0, 25));

@@ -1,0 +1,87 @@
+{
+  "events": {
+    "message_deleted": {
+      "title": "Message Deleted",
+      "description_user": "**User:** {user}",
+      "description_deleter": "**Deleted by:** {deleter}",
+      "description_channel": "**Channel:** {channel}",
+      "field_message": "Message",
+      "field_attachments": "Attachments",
+      "footer_message_id": "Message ID: {messageId}"
+    },
+    "message_updated": {
+      "title": "Message Edited",
+      "description_user": "**User:** {user}",
+      "description_channel": "**Channel:** {channel}",
+      "field_before": "Before",
+      "field_after": "After",
+      "field_attachments_after": "Attachments (after)",
+      "footer_message_id": "Message ID: {messageId}"
+    },
+    "user_left": {
+      "title": "User Left",
+      "description": "**{tag}** ({id}) user left the guild."
+    },
+    "user_joined": {
+      "title": "📥 Member Joined",
+      "description": "**{tag}** ({id})",
+      "field_account_created": "Account created",
+      "field_total_members": "Total members"
+    },
+    "avatar_updated": {
+      "title": "Avatar Updated",
+      "description_user": "**User:** {user}",
+      "field_links": "Links",
+      "link_before": "**Before:** [open]({url})",
+      "link_after": "**After:** [open]({url})",
+      "link_before_empty": "**Before:** —",
+      "link_after_empty": "**After:** —",
+      "footer_updated": "Updated on {when}"
+    },
+    "nickname_updated": {
+      "title": "Nickname Updated",
+      "description_user": "**User:** {user}",
+      "description_changed_by": "**Changed by:** {executor}",
+      "field_before": "Before",
+      "field_after": "After",
+      "footer_nick_update": "Nick update"
+    },
+    "server_avatar_updated": {
+      "title": "Server Avatar Updated",
+      "description_user": "**User:** {user}",
+      "field_links": "Links",
+      "link_before": "**Before:** [open]({url})",
+      "link_after": "**After:** [open]({url})",
+      "link_before_empty": "**Before:** —",
+      "link_after_empty": "**After:** —",
+      "footer_updated": "Updated on {when}"
+    }
+  },
+  "voice": {
+    "joined": {
+      "title": "🔊 User Joined Voice",
+      "description": "**{username}** ({userId}) joined a voice channel.",
+      "field_channel": "Channel",
+      "footer": "Voice state update • {when}"
+    },
+    "left": {
+      "title": "🔇 User Left Voice",
+      "description": "**{username}** ({userId}) left the voice channel.",
+      "field_previous_channel": "Previous channel",
+      "field_time_in_channel": "Time in channel",
+      "footer": "Voice state update • {when}"
+    },
+    "moved": {
+      "title": "🔄 User Moved Channel",
+      "description": "**{username}** ({userId}) moved voice channels.",
+      "field_from": "From",
+      "field_to": "To",
+      "field_time_in_previous_channel": "Time in previous channel",
+      "footer": "Voice state update • {when}"
+    }
+  },
+  "welcome": {
+    "message": "Welcome",
+    "more_attachments": "more"
+  }
+}

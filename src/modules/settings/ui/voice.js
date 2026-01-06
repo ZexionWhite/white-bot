@@ -1,8 +1,9 @@
 import { EmbedBuilder } from "discord.js";
 import { TZ } from "../../../config.js";
 import { formatDuration } from "../../../utils/time.js";
+import { t, getLocaleForGuild, DEFAULT_LOCALE } from "../../../core/i18n/index.js";
 
-export function voiceStateEmbed(oldState, newState, session = null) {
+export async function voiceStateEmbed(oldState, newState, session = null, locale = null) {
   const when = new Intl.DateTimeFormat("es-AR", {
     dateStyle: "short",
     timeStyle: "short",
@@ -11,6 +12,10 @@ export function voiceStateEmbed(oldState, newState, session = null) {
 
   const member = newState.member ?? oldState.member;
   if (!member) return null;
+
+  if (!locale && member.guild) {
+    locale = await getLocaleForGuild(member.guild);
+  }
 
   const username = member.user?.tag ?? member.displayName ?? "Desconocido";
   const userId = member.id ?? "Desconocido";
@@ -25,10 +30,10 @@ export function voiceStateEmbed(oldState, newState, session = null) {
   if (!oldChannel && newChannel) {
     eventType = "join";
     color = 0x2ecc71;
-    title = "🔊 Usuario se unió a voz";
-    description = `**${username}** (\`${userId}\`) se unió a un canal de voz.`;
+    title = t(locale, "logging.voice.joined.title");
+    description = t(locale, "logging.voice.joined.description", { username, userId });
     fields.push({
-      name: "Canal",
+      name: t(locale, "logging.voice.joined.field_channel"),
       value: `<#${newChannelId}>`,
       inline: true
     });
@@ -36,10 +41,10 @@ export function voiceStateEmbed(oldState, newState, session = null) {
   else if (oldChannel && !newChannel) {
     eventType = "leave";
     color = 0xed4245;
-    title = "🔇 Usuario salió de voz";
-    description = `**${username}** (\`${userId}\`) salió del canal de voz.`;
+    title = t(locale, "logging.voice.left.title");
+    description = t(locale, "logging.voice.left.description", { username, userId });
     fields.push({
-      name: "Canal anterior",
+      name: t(locale, "logging.voice.left.field_previous_channel"),
       value: `<#${oldChannelId}>`,
       inline: true
     });
@@ -49,7 +54,7 @@ export function voiceStateEmbed(oldState, newState, session = null) {
       const durationSeconds = Math.floor((now - session.join_timestamp) / 1000);
       if (durationSeconds > 0) {
         fields.push({
-          name: "Tiempo en canal",
+          name: t(locale, "logging.voice.left.field_time_in_channel"),
           value: formatDuration(durationSeconds),
           inline: true
         });
@@ -59,16 +64,16 @@ export function voiceStateEmbed(oldState, newState, session = null) {
   else if (oldChannel && newChannel && oldChannelId !== newChannelId) {
     eventType = "move";
     color = 0xf1c40f;
-    title = "🔄 Usuario se movió de canal";
-    description = `**${username}** (\`${userId}\`) cambió de canal de voz.`;
+    title = t(locale, "logging.voice.moved.title");
+    description = t(locale, "logging.voice.moved.description", { username, userId });
     fields.push(
       {
-        name: "Desde",
+        name: t(locale, "logging.voice.moved.field_from"),
         value: `<#${oldChannelId}>`,
         inline: true
       },
       {
-        name: "Hacia",
+        name: t(locale, "logging.voice.moved.field_to"),
         value: `<#${newChannelId}>`,
         inline: true
       }
@@ -79,7 +84,7 @@ export function voiceStateEmbed(oldState, newState, session = null) {
       const durationSeconds = Math.floor((now - session.join_timestamp) / 1000);
       if (durationSeconds > 0) {
         fields.push({
-          name: "Tiempo en canal anterior",
+          name: t(locale, "logging.voice.moved.field_time_in_previous_channel"),
           value: formatDuration(durationSeconds),
           inline: true
         });
@@ -97,7 +102,7 @@ export function voiceStateEmbed(oldState, newState, session = null) {
     .addFields(fields)
     .setTimestamp()
     .setFooter({
-      text: `Voice state update • ${when}`,
+      text: t(locale, `logging.voice.${eventType}.footer`, { when }),
       iconURL: member.guild?.iconURL({ size: 64, extension: "png" }) ?? undefined
     });
 

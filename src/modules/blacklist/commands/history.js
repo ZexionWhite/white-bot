@@ -2,18 +2,22 @@ import * as BlacklistService from "../services/blacklist.service.js";
 import * as PermService from "../../moderation/services/permissions.service.js";
 import { createBlacklistHistoryEmbed, createErrorEmbed } from "../ui/embeds.js";
 import { createPaginationComponents } from "../../moderation/ui/components.js";
+import { getLocaleForGuild, t, DEFAULT_LOCALE } from "../../../core/i18n/index.js";
+import { MessageFlags } from "discord.js";
 
 const ENTRIES_PER_PAGE = 10;
 
 export async function handle(itx) {
+  const locale = itx.guild ? await getLocaleForGuild(itx.guild) : DEFAULT_LOCALE;
+  
   if (!itx.inGuild()) {
-    return itx.reply({ content: "Este comando solo funciona en servidores.", ephemeral: true });
+    return itx.reply({ content: `❌ ${t(locale, "common.errors.guild_only")}`, flags: MessageFlags.Ephemeral });
   }
 
   const target = itx.options.getUser("user", true);
 
   if (!await PermService.canExecuteCommand(itx.member, "blacklist.history")) {
-    return itx.reply({ embeds: [createErrorEmbed("No tienes permisos para usar este comando")], ephemeral: true });
+    return itx.reply({ embeds: [createErrorEmbed(t(locale, "common.errors.permission_denied"), locale)], flags: MessageFlags.Ephemeral });
   }
 
   // Obtener todas las entradas para contar y paginar
@@ -41,7 +45,7 @@ export async function handle(itx) {
     else if (severity === "CRITICAL") counts.critical++;
   });
 
-  const embed = createBlacklistHistoryEmbed(entries, target, page, totalPages, counts);
+  const embed = createBlacklistHistoryEmbed(entries, target, page, totalPages, counts, locale);
   const components = totalPages > 1 ? createPaginationComponents(page, totalPages, `blacklisthistory:${target.id}:all`) : [];
 
   return itx.reply({ embeds: [embed], components });

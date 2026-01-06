@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, PermissionFlagsBits, ChannelType } from "discord.js";
+import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, ApplicationCommandOptionType } from "discord.js";
 
 export const settingsSlashCommands = [
   new SlashCommandBuilder()
@@ -108,6 +108,19 @@ export const settingsSlashCommands = [
           .setRequired(true)
           .setMinLength(1)
           .setMaxLength(10)
+       )
+    ),
+  new SlashCommandBuilder()
+    .setName("language")
+    .setDescription("Configure the bot language for this server")
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+    .addStringOption(o =>
+      o.setName("language")
+       .setDescription("Language to use for the bot in this server")
+       .setRequired(true)
+       .addChoices(
+         { name: "Español", value: "es-ES" },
+         { name: "English", value: "en-US" }
        )
     )
 ];

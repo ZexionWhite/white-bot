@@ -1,0 +1,33 @@
+{
+  "embeds": {
+    "entry": {
+      "title": "Blacklist Entry",
+      "description_member": "**Member:** {member}",
+      "description_action": "**Action:** Blacklist - {severity}",
+      "description_reason": "**Reason:** {reason}",
+      "footer_entry": "Entry #{id}",
+      "field_updated": "Updated",
+      "field_updated_by": "Updated by",
+      "field_deleted": "Deleted",
+      "field_deleted_by": "Deleted by",
+      "field_deletion_reason": "Deletion reason",
+      "no_reason": "No reason"
+    },
+    "history": {
+      "title": "Blacklist History",
+      "description_no_entries": "No blacklist entries recorded",
+      "field_entry_format": "Entry #{id} - {severity}",
+      "footer_counts": "Low: {low} | Medium: {medium} | High: {high} | Critical: {critical}",
+      "footer_page": "Page {page}/{totalPages}"
+    },
+    "success": {
+      "created": "Blacklist entry created",
+      "field_member": "**Member:** {member}",
+      "field_action": "**Action:** {action}"
+    }
+  },
+  "errors": {
+    "not_found": "Entry #{caseId} not found",
+    "invalid_severity": "Invalid severity level"
+  }
+}

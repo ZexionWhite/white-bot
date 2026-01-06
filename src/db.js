@@ -145,6 +145,7 @@ function ensureColumn(table, column, ddl) {
 
 // Solo ejecutar ensureColumn en SQLite (al nivel de módulo solo funciona para SQLite síncrono)
 if (driverType === "sqlite") {
+  ensureColumn("guild_settings", "locale", "locale TEXT");
   ensureColumn("guild_settings", "welcome_cd_minutes", "welcome_cd_minutes INTEGER DEFAULT 60");
   ensureColumn("guild_settings", "booster_announce_channel_id", "booster_announce_channel_id TEXT");
   ensureColumn("guild_settings", "info_channel_id", "info_channel_id TEXT");
@@ -184,7 +185,8 @@ export const upsertSettings = prepare(`
     blacklist_channel_id,
     mute_role_id,
     dm_on_punish,
-    command_prefix
+    command_prefix,
+    locale
   )
   VALUES (
     @guild_id,
@@ -204,7 +206,8 @@ export const upsertSettings = prepare(`
     @blacklist_channel_id,
     @mute_role_id,
     @dm_on_punish,
-    @command_prefix
+    @command_prefix,
+    @locale
   )
   ON CONFLICT(guild_id) DO UPDATE SET
     welcome_channel_id           = excluded.welcome_channel_id,
@@ -223,7 +226,8 @@ export const upsertSettings = prepare(`
     blacklist_channel_id         = excluded.blacklist_channel_id,
     mute_role_id                 = excluded.mute_role_id,
     dm_on_punish                 = excluded.dm_on_punish,
-    command_prefix               = excluded.command_prefix;
+    command_prefix               = excluded.command_prefix,
+    locale                       = excluded.locale;
 `);
 
 export const insertColorRole = prepare(`

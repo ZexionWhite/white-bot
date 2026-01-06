@@ -20,9 +20,9 @@ import { log } from "../logger/index.js";
  */
 export function registerEvents(client) {
   // Ready event (una sola vez)
-  client.once("ready", () => {
+  client.once("ready", async () => {
     startApiTracker(client);
-    ready(client);
+    await ready(client);
   });
 
   // Eventos de guild members

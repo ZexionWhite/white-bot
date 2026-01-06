@@ -4,7 +4,7 @@
  */
 import Redis from "ioredis";
 import { log } from "../logger/index.js";
-import { getEnv } from "../config/index.js";
+import { getConfig } from "../config/index.js";
 
 let redisClient = null;
 let redisEnabled = false;
@@ -22,15 +22,15 @@ export async function initRedis() {
   connectionAttempted = true;
 
   try {
-    const env = getEnv();
-    const useRedis = env.USE_REDIS === "true" || env.USE_REDIS === true;
+    const config = getConfig();
+    const useRedis = config.USE_REDIS === "true" || config.USE_REDIS === true;
     
     if (!useRedis) {
       log.info("Redis", "Redis deshabilitado (USE_REDIS=false o no configurado)");
       return false;
     }
 
-    const redisUrl = env.REDIS_URL || process.env.REDIS_URL;
+    const redisUrl = config.REDIS_URL || process.env.REDIS_URL;
     
     if (!redisUrl) {
       log.warn("Redis", "USE_REDIS=true pero REDIS_URL no está configurado. Redis deshabilitado.");

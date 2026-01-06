@@ -15,6 +15,7 @@ export async function registerUtilitiesPrefixCommands() {
       aliases: ["latency", "pong"],
       description: "Shows bot latency and status",
       permissions: null,
+      module: "utilities",
       argsSchema: emptySchema,
       execute: async (ctx) => {
         const locale = await getLocaleForGuildId(ctx.guild.id);
@@ -114,6 +115,7 @@ export async function registerUtilitiesPrefixCommands() {
       aliases: ["cfg", "configuracion"],
       description: "Shows current server configuration",
       permissions: PermissionFlagsBits.ManageGuild | PermissionFlagsBits.ManageRoles,
+      module: "utilities",
       argsSchema: emptySchema,
       execute: async (ctx) => {
         const locale = await getLocaleForGuildId(ctx.guild.id);
@@ -126,7 +128,7 @@ export async function registerUtilitiesPrefixCommands() {
         }
         
         const settings = (await getSettings.get(ctx.guild.id)) ?? {};
-        const embed = configEmbed(ctx.guild, settings, locale);
+        const embed = await configEmbed(ctx.guild, settings, locale);
         return ctx.reply({ embeds: [embed] });
       }
     }

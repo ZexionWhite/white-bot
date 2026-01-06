@@ -4,7 +4,7 @@
  */
 import Redis from "ioredis";
 import { log } from "../logger/index.js";
-import { getConfig } from "../config/index.js";
+import { getEnv } from "../config/index.js";
 
 let redisClient = null;
 let redisEnabled = false;

@@ -200,7 +200,8 @@
       "welcome_cooldown": "⏱️ Welcome Cooldown",
       "command_prefix": "🔧 Command Prefix",
       "dm_on_punish": "📨 DM on Punish",
-      "autorole_channel": "🎨 Autorole Channel"
+      "autorole_channel": "🎨 Autorole Channel",
+      "bot_language": "🌐 Bot Language"
     },
     "not_configured": "*Not configured*",
     "role_not_found": "*(role not found)*",

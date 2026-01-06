@@ -206,6 +206,7 @@ export async function registerModerationPrefixCommands() {
       aliases: ["w"],
       description: "Advertir a un usuario",
       permissions: PermissionFlagsBits.ModerateMembers,
+      module: "moderation",
       argsSchema: moderationArgsSchema,
       execute: (ctx) => executeModerationCommand(ctx, "warn", false)
     },
@@ -214,6 +215,7 @@ export async function registerModerationPrefixCommands() {
       aliases: ["b"],
       description: "Banear a un usuario",
       permissions: PermissionFlagsBits.BanMembers,
+      module: "moderation",
       argsSchema: moderationArgsSchema,
       execute: (ctx) => executeModerationCommand(ctx, "ban", false)
     },
@@ -222,6 +224,7 @@ export async function registerModerationPrefixCommands() {
       aliases: ["k"],
       description: "Expulsar a un usuario",
       permissions: PermissionFlagsBits.KickMembers,
+      module: "moderation",
       argsSchema: moderationArgsSchema,
       execute: (ctx) => executeModerationCommand(ctx, "kick", false)
     },
@@ -230,6 +233,7 @@ export async function registerModerationPrefixCommands() {
       aliases: ["m"],
       description: "Mutear a un usuario",
       permissions: PermissionFlagsBits.ManageRoles,
+      module: "moderation",
       argsSchema: moderationArgsSchema,
       execute: (ctx) => executeModerationCommand(ctx, "mute", false)
     },
@@ -238,6 +242,7 @@ export async function registerModerationPrefixCommands() {
       aliases: ["to"],
       description: "Aplicar timeout a un usuario",
       permissions: PermissionFlagsBits.ModerateMembers,
+      module: "moderation",
       argsSchema: moderationArgsSchema,
       execute: (ctx) => executeModerationCommand(ctx, "timeout", true)
     },
@@ -246,6 +251,7 @@ export async function registerModerationPrefixCommands() {
       aliases: ["tb"],
       description: "Banear temporalmente a un usuario",
       permissions: PermissionFlagsBits.BanMembers,
+      module: "moderation",
       argsSchema: moderationArgsSchema,
       execute: (ctx) => executeModerationCommand(ctx, "tempban", true)
     }

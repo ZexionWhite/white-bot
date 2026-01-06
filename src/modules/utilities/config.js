@@ -15,6 +15,6 @@ export default async function handleConfig(itx) {
   }
 
   const settings = (await getSettings.get(itx.guild.id)) ?? {};
-  const embed = configEmbed(itx.guild, settings, locale);
+  const embed = await configEmbed(itx.guild, settings, locale);
   return itx.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 }

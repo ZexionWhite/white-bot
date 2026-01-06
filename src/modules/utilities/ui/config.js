@@ -1,8 +1,9 @@
 import { EmbedBuilder } from "discord.js";
 import { EMOJIS } from "../../../config/emojis.js";
 import { t, DEFAULT_LOCALE } from "../../../core/i18n/index.js";
+import { getGuildLocale } from "../../moderation/db/settings.repo.js";
 
-export function configEmbed(guild, settings, locale = DEFAULT_LOCALE) {
+export async function configEmbed(guild, settings, locale = DEFAULT_LOCALE) {
   const embed = new EmbedBuilder()
     .setTitle(t(locale, "utilities.config.title", { guildName: guild.name }))
     .setColor(0x5865f2)
@@ -98,6 +99,22 @@ export function configEmbed(guild, settings, locale = DEFAULT_LOCALE) {
       inline: true 
     }
   ];
+
+  // Agregar idioma del bot
+  const botLocale = await getGuildLocale(guild.id);
+  let localeDisplay;
+  if (botLocale === "es-ES") {
+    localeDisplay = "Español";
+  } else if (botLocale === "en-US") {
+    localeDisplay = "English";
+  } else {
+    localeDisplay = t(locale, "utilities.config.not_configured");
+  }
+  fields.push({
+    name: t(locale, "utilities.config.fields.bot_language"),
+    value: localeDisplay,
+    inline: true
+  });
 
   embed.setFields(fields);
 

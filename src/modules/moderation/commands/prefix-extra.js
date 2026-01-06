@@ -55,6 +55,7 @@ export async function registerModerationExtraPrefixCommands() {
       aliases: ["hist", "historial"],
       description: "Ver historial de sanciones de un usuario",
       permissions: PermissionFlagsBits.ModerateMembers,
+      module: "moderation",
       argsSchema: userSchema,
       execute: async (ctx) => {
         const { userId } = ctx.args;
@@ -107,6 +108,7 @@ export async function registerModerationExtraPrefixCommands() {
       aliases: ["caso"],
       description: "Ver un caso específico",
       permissions: PermissionFlagsBits.ModerateMembers,
+      module: "moderation",
       argsSchema: caseIdSchema,
       execute: async (ctx) => {
         const locale = await getLocaleForGuildId(ctx.guild.id);
@@ -180,6 +182,7 @@ export async function registerModerationExtraPrefixCommands() {
       aliases: ["purge", "limpiar"],
       description: "Eliminar mensajes de un canal",
       permissions: PermissionFlagsBits.ManageMessages,
+      module: "moderation",
       argsSchema: z.object({
         rawArgs: z.array(z.string())
       }).transform((data) => {

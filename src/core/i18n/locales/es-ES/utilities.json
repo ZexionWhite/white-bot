@@ -200,7 +200,8 @@
       "welcome_cooldown": "⏱️ Cooldown de Bienvenida",
       "command_prefix": "🔧 Prefijo de Comandos",
       "dm_on_punish": "📨 DM al Sancionar",
-      "autorole_channel": "🎨 Canal de Autoroles"
+      "autorole_channel": "🎨 Canal de Autoroles",
+      "bot_language": "🌐 Idioma del Bot"
     },
     "not_configured": "*No configurado*",
     "role_not_found": "*(rol no encontrado)*",

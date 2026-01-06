@@ -53,5 +53,6 @@ export async function getGuildLocale(guildId) {
  */
 export async function setGuildLocale(guildId, locale) {
   await updateGuildSettings(guildId, { locale });
+  // updateGuildSettings already calls invalidateSettingsCache, so cache is already cleared
 }
 

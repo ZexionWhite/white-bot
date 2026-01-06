@@ -1,0 +1,12 @@
+{
+  "embeds": {
+    "userinfo": {
+      "title": "User Information",
+      "description": "Information about {user}",
+      "footer": "User ID: {id}"
+    }
+  },
+  "errors": {
+    "user_not_found": "User not found"
+  }
+}

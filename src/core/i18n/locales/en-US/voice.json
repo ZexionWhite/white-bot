@@ -1,0 +1,19 @@
+{
+  "events": {
+    "join": {
+      "title": "User Joined Voice Channel",
+      "description": "{user} joined {channel}",
+      "footer": "Voice Activity"
+    },
+    "leave": {
+      "title": "User Left Voice Channel",
+      "description": "{user} left {channel}",
+      "footer": "Voice Activity"
+    },
+    "move": {
+      "title": "User Moved Voice Channel",
+      "description": "{user} moved from {oldChannel} to {newChannel}",
+      "footer": "Voice Activity"
+    }
+  }
+}

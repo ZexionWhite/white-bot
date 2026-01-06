@@ -1,0 +1,34 @@
+{
+  "embeds": {
+    "add": {
+      "title": "User Added to Blacklist",
+      "description": "User {user} has been added to the blacklist",
+      "footer": "Blacklist entry #{id}"
+    },
+    "remove": {
+      "title": "User Removed from Blacklist",
+      "description": "User {user} has been removed from the blacklist",
+      "footer": "Removed by {moderator}"
+    },
+    "edit": {
+      "title": "Blacklist Entry Updated",
+      "description": "Blacklist entry #{id} has been updated",
+      "footer": "Updated by {moderator}"
+    },
+    "history": {
+      "title": "Blacklist History",
+      "description": "Blacklist entries for {user}",
+      "footer": "Total entries: {total}",
+      "no_entries": "No blacklist entries found for this user"
+    },
+    "case": {
+      "title": "Blacklist Entry #{id}",
+      "description": "Details of blacklist entry",
+      "footer": "Created by {moderator}"
+    }
+  },
+  "errors": {
+    "not_found": "Blacklist entry not found",
+    "invalid_severity": "Invalid severity level"
+  }
+}

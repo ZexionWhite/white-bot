@@ -20,7 +20,7 @@
     },
     "user_left": {
       "title": "User Left",
-      "description": "**{tag}** (\`{id}\`) user left the guild."
+      "description": "**{tag}** ({id}) user left the guild."
     },
     "user_joined": {
       "title": "📥 Member Joined",
@@ -60,20 +60,20 @@
   "voice": {
     "joined": {
       "title": "🔊 User Joined Voice",
-      "description": "**{username}** (\`{userId}\`) joined a voice channel.",
+      "description": "**{username}** ({userId}) joined a voice channel.",
       "field_channel": "Channel",
       "footer": "Voice state update • {when}"
     },
     "left": {
       "title": "🔇 User Left Voice",
-      "description": "**{username}** (\`{userId}\`) left the voice channel.",
+      "description": "**{username}** ({userId}) left the voice channel.",
       "field_previous_channel": "Previous channel",
       "field_time_in_channel": "Time in channel",
       "footer": "Voice state update • {when}"
     },
     "moved": {
       "title": "🔄 User Moved Channel",
-      "description": "**{username}** (\`{userId}\`) moved voice channels.",
+      "description": "**{username}** ({userId}) moved voice channels.",
       "field_from": "From",
       "field_to": "To",
       "field_time_in_previous_channel": "Time in previous channel",

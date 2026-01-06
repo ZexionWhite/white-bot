@@ -1,7 +1,7 @@
 /**
  * Comando /locale para gestionar el idioma del servidor
  */
-import { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, MessageFlags } from "discord.js";
 import { getGuildLocale, setGuildLocale } from "../../moderation/db/settings.repo.js";
 import { getLocaleForGuild, SUPPORTED_LOCALES } from "../../../core/i18n/index.js";
 import { t } from "../../../core/i18n/index.js";
@@ -11,7 +11,7 @@ export const localeCommand = {
     if (!itx.guild) {
       return itx.reply({ 
         content: "This command can only be used in a server.",
-        ephemeral: true 
+        flags: MessageFlags.Ephemeral
       });
     }
 
@@ -22,7 +22,7 @@ export const localeCommand = {
     if (!SUPPORTED_LOCALES.includes(locale)) {
       return itx.reply({
         content: t(currentLocale, "config.locale.errors.invalid_locale"),
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
 
@@ -34,6 +34,6 @@ export const localeCommand = {
       .setColor(0x00ff00)
       .setTimestamp();
 
-    return itx.reply({ embeds: [embed], ephemeral: true });
+    return itx.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
   }
 };

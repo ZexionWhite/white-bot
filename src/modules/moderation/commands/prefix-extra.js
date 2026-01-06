@@ -9,6 +9,7 @@ import * as CasesService from "../services/cases.service.js";
 import * as PermService from "../services/permissions.service.js";
 import { createHistoryEmbed, createCaseEmbed, createErrorEmbed, createSuccessEmbed } from "../ui/embeds.js";
 import { createPaginationComponents } from "../ui/components.js";
+import { getLocaleForGuild } from "../../../core/i18n/index.js";
 
 const CASES_PER_PAGE = 10;
 
@@ -116,13 +117,15 @@ export async function registerModerationExtraPrefixCommands() {
         
         const case_ = await CasesService.getCase(ctx.guild.id, caseId);
         if (!case_) {
-          return ctx.reply({ embeds: [createErrorEmbed(`Case #${caseId} no encontrado`)] });
+          const locale = await getLocaleForGuild(ctx.guild);
+          return ctx.reply({ embeds: [createErrorEmbed(`Case #${caseId} no encontrado`, locale)] });
         }
         
+        const locale = await getLocaleForGuild(ctx.guild);
         const target = await ctx.raw.client.users.fetch(case_.target_id).catch(() => ({ id: case_.target_id }));
         const moderator = await ctx.raw.client.users.fetch(case_.moderator_id).catch(() => ({ id: case_.moderator_id }));
         
-        const embed = createCaseEmbed(case_, target, moderator);
+        const embed = createCaseEmbed(case_, target, moderator, locale);
         return ctx.reply({ embeds: [embed] });
       }
     },

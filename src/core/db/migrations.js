@@ -33,12 +33,9 @@ export async function ensureColumn(tableName, columnName, columnDDL) {
     return; // Columna ya existe
   }
 
-  // Convertir DDL de SQLite a PostgreSQL si es necesario
   let ddl = columnDDL;
   if (driverType === "postgres") {
-    // Convertir tipos comunes
     ddl = ddl.replace(/INTEGER/g, "BIGINT");
-    // Mantener DEFAULT, NOT NULL, etc.
   }
 
   const sql = `ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${ddl}`;
@@ -52,12 +49,14 @@ export async function ensureColumn(tableName, columnName, columnDDL) {
   log.debug("DB", `Columna agregada: ${tableName}.${columnName}`);
 }
 
-/**
- * Ejecuta todas las migraciones de columnas necesarias
- * Esto reemplaza las llamadas a ensureColumn en db.js
- */
+
 export async function runColumnMigrations() {
   const migrations = [
+    {
+      table: "guild_settings",
+      column: "locale",
+      ddl: "TEXT DEFAULT NULL"
+    },
     { table: "guild_settings", column: "welcome_cd_minutes", ddl: "INTEGER DEFAULT 60" },
     { table: "guild_settings", column: "booster_announce_channel_id", ddl: "TEXT" },
     { table: "guild_settings", column: "info_channel_id", ddl: "TEXT" },

@@ -1,0 +1,39 @@
+{
+  "errors": {
+    "permission_denied": "No tienes permiso para usar este comando",
+    "user_not_found": "Usuario no encontrado en el servidor",
+    "cannot_moderate": "No puedes moderar a este usuario",
+    "invalid_guild": "Servidor inválido",
+    "invalid_modal": "Modal inválido",
+    "invalid_action_id": "ID de acción inválido",
+    "action_expired": "Esta acción ha expirado o no existe",
+    "not_author": "No iniciaste esta acción",
+    "no_reason": "Sin razón",
+    "unknown_error": "Ocurrió un error desconocido"
+  },
+  "success": {
+    "operation_complete": "Operación completada",
+    "settings_updated": "Configuración actualizada"
+  },
+  "footer": {
+    "case": "Caso #{caseId}",
+    "page": "Página {page}/{totalPages}"
+  },
+  "fields": {
+    "member": "Miembro",
+    "user": "Usuario",
+    "action": "Acción",
+    "reason": "Razón",
+    "duration": "Duración",
+    "channel": "Canal",
+    "before": "Antes",
+    "after": "Después",
+    "attachments": "Archivos adjuntos",
+    "links": "Enlaces",
+    "message_id": "ID del mensaje"
+  },
+  "time": {
+    "updated_at": "Actualizado el {when}",
+    "created_at": "Creado el {when}"
+  }
+}

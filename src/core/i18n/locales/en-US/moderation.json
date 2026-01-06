@@ -1,0 +1,86 @@
+{
+  "embeds": {
+    "warn": {
+      "title": "Warning",
+      "description_member": "**Member:** {member}",
+      "description_action": "**Action:** {action}",
+      "description_reason": "**Reason:** {reason}",
+      "footer_case": "Case #{caseId}"
+    },
+    "mute": {
+      "title": "Muted",
+      "description_member": "**Member:** {member}",
+      "description_action": "**Action:** {action}",
+      "description_duration": "**Duration:** {duration}",
+      "description_reason": "**Reason:** {reason}",
+      "footer_case": "Case #{caseId}"
+    },
+    "ban": {
+      "title": "Banned",
+      "description_member": "**Member:** {member}",
+      "description_action": "**Action:** {action}",
+      "description_reason": "**Reason:** {reason}",
+      "footer_case": "Case #{caseId}"
+    },
+    "kick": {
+      "title": "Kicked",
+      "description_member": "**Member:** {member}",
+      "description_action": "**Action:** {action}",
+      "description_reason": "**Reason:** {reason}",
+      "footer_case": "Case #{caseId}"
+    },
+    "timeout": {
+      "title": "Timeout",
+      "description_member": "**Member:** {member}",
+      "description_action": "**Action:** {action}",
+      "description_duration": "**Duration:** {duration}",
+      "description_reason": "**Reason:** {reason}",
+      "footer_case": "Case #{caseId}"
+    },
+    "success": {
+      "title": "✅ {action}",
+      "description_member_action": "**Member:** {member}\n**Action:** {action}",
+      "footer_case": "Case #{caseId}"
+    },
+    "error": {
+      "title": "❌ {message}"
+    },
+    "history": {
+      "title": "Sanctions History",
+      "description_no_sanctions": "No sanctions recorded",
+      "footer_warned": "Warned: {warned}",
+      "footer_muted": "Muted: {muted}",
+      "footer_timeouted": "Timeouted: {timeouted}",
+      "footer_kicked": "Kicked: {kicked}",
+      "footer_banned": "Banned: {banned}",
+      "footer_counts_separator": " | ",
+      "footer_page": "Page {page}/{totalPages}",
+      "field_case_format": "Case #{caseId} - {action}",
+      "no_reason": "No reason"
+    },
+    "case": {
+      "title": "Case #{caseId}",
+      "description_member": "**Member:** {member}",
+      "description_action": "**Action:** {action}",
+      "description_duration": "**Duration:** {duration}",
+      "description_reason": "**Reason:** {reason}",
+      "description_deleted": "**Deleted:** {timestamp}",
+      "description_deleted_by": "**Deleted by:** {deleter}",
+      "description_deletion_reason": "**Deletion reason:** {reason}",
+      "footer_case": "Case #{caseId}",
+      "no_reason": "No reason"
+    }
+  },
+  "messages": {
+    "sanction": "✅ Case #{caseId} {user} has been {action}.",
+    "case_updated": "Case updated",
+    "case_not_found": "Case #{caseId} not found"
+  },
+  "errors": {
+    "no_mute_role": "No mute role configured. Use /createmuterole or /setmuterole",
+    "mute_role_not_found": "The configured mute role doesn't exist",
+    "cannot_manage_mute_role": "The bot cannot manage the mute role. Check role hierarchy",
+    "duration_required": "Duration is required",
+    "case_not_found": "Case #{caseId} not found"
+  }
+}

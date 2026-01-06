@@ -6,6 +6,7 @@ import * as SettingsRepo from "../db/settings.repo.js";
 import { createModlogEmbed } from "../ui/embeds.js";
 import { log } from "../../../core/logger/index.js";
 import { sendLog } from "../../../core/webhooks/index.js";
+import { getLocaleForGuild } from "../../../core/i18n/index.js";
 
 /**
  * Envía un caso de moderación al canal de modlog
@@ -36,7 +37,8 @@ export async function sendToModlog(guild, case_, targetUser, moderatorUser, dmSe
       return false;
     }
 
-    const embed = createModlogEmbed(case_, targetUser, moderatorUser, dmSent);
+    const locale = await getLocaleForGuild(guild);
+    const embed = createModlogEmbed(case_, targetUser, moderatorUser, dmSent, locale);
     await sendLog(modlogChannel, { embeds: [embed] }, "moderation");
     
     return true;

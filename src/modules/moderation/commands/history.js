@@ -2,6 +2,7 @@ import * as CasesService from "../services/cases.service.js";
 import * as PermService from "../services/permissions.service.js";
 import { createHistoryEmbed, createErrorEmbed } from "../ui/embeds.js";
 import { createPaginationComponents } from "../ui/components.js";
+import { getLocaleForGuild } from "../../../core/i18n/index.js";
 
 const CASES_PER_PAGE = 10;
 
@@ -11,9 +12,10 @@ export async function handle(itx) {
   }
 
   const target = itx.options.getUser("user", true);
+  const locale = await getLocaleForGuild(itx.guild);
 
   if (!await PermService.canExecuteCommand(itx.member, "history")) {
-    return itx.reply({ embeds: [createErrorEmbed("No tienes permisos para usar este comando")], ephemeral: true });
+    return itx.reply({ embeds: [createErrorEmbed("No tienes permisos para usar este comando", locale)], ephemeral: true });
   }
 
   const totalCases = await CasesService.countUserCases(itx.guild.id, target.id);
@@ -44,7 +46,7 @@ export async function handle(itx) {
     else if (caseType === "BAN" || caseType === "TEMPBAN" || caseType === "SOFTBAN") counts.banned++;
   });
 
-  const embed = createHistoryEmbed(cases, target, page, totalPages, null, counts);
+  const embed = createHistoryEmbed(cases, target, page, totalPages, null, counts, locale);
   const components = totalPages > 1 ? createPaginationComponents(page, totalPages, `history:${target.id}:all`) : [];
 
   return itx.reply({ embeds: [embed], components });

@@ -1,0 +1,21 @@
+{
+  "locale": {
+    "view": {
+      "title": "Idioma del Servidor",
+      "manual": "Idioma configurado manualmente: **{locale}**",
+      "auto": "Detección automática activa.\n• Idioma detectado: **{detected}**\n• Locale de Discord: {discord}",
+      "footer": "Usa /locale set para cambiar el idioma"
+    },
+    "set": {
+      "title": "Idioma Configurado",
+      "description": "El idioma del servidor ha sido establecido a: **{locale}**"
+    },
+    "auto": {
+      "title": "Detección Automática Activada",
+      "description": "El servidor ahora usará detección automática del idioma basado en la configuración de Discord."
+    },
+    "errors": {
+      "invalid_locale": "Locale no válido. Usa `es-ES` o `en-US`."
+    }
+  }
+}

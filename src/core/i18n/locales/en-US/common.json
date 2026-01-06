@@ -1,0 +1,39 @@
+{
+  "errors": {
+    "permission_denied": "You don't have permission to use this command",
+    "user_not_found": "User not found in server",
+    "cannot_moderate": "You cannot moderate this user",
+    "invalid_guild": "Invalid guild",
+    "invalid_modal": "Invalid modal",
+    "invalid_action_id": "Invalid action ID",
+    "action_expired": "This action has expired or doesn't exist",
+    "not_author": "You didn't initiate this action",
+    "no_reason": "No reason",
+    "unknown_error": "An unknown error occurred"
+  },
+  "success": {
+    "operation_complete": "Operation completed",
+    "settings_updated": "Settings updated"
+  },
+  "footer": {
+    "case": "Case #{caseId}",
+    "page": "Page {page}/{totalPages}"
+  },
+  "fields": {
+    "member": "Member",
+    "user": "User",
+    "action": "Action",
+    "reason": "Reason",
+    "duration": "Duration",
+    "channel": "Channel",
+    "before": "Before",
+    "after": "After",
+    "attachments": "Attachments",
+    "links": "Links",
+    "message_id": "Message ID"
+  },
+  "time": {
+    "updated_at": "Updated on {when}",
+    "created_at": "Created on {when}"
+  }
+}

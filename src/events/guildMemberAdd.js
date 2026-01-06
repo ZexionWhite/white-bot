@@ -3,6 +3,7 @@ import { getSettings } from "../db.js";
 import { getCooldown, setCooldown } from "../core/redis/index.js";
 import { log } from "../core/logger/index.js";
 import { sendLog } from "../core/webhooks/index.js";
+import { getLocaleForGuild } from "../core/i18n/index.js";
 
 export default async function guildMemberAdd(client, member) {
   try {
@@ -44,7 +45,8 @@ export default async function guildMemberAdd(client, member) {
         return null;
       });
       if (logChannel?.isTextBased()) {
-        await sendLog(logChannel, { embeds: [logJoinEmbed(member)] }, "join").catch((err) => {
+        const locale = await getLocaleForGuild(member.guild);
+        await sendLog(logChannel, { embeds: [await logJoinEmbed(member, locale)] }, "join").catch((err) => {
           log.error("guildMemberAdd", `Error al enviar log de join en ${member.guild.name}:`, err.message);
         });
       }

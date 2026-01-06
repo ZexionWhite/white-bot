@@ -9,6 +9,7 @@ import { sendLog } from "../../../core/webhooks/index.js";
 import { getPendingAction, deletePendingAction, validateReason } from "./helpers.js";
 import { parseDuration } from "../../../utils/duration.js";
 import { log } from "../../../core/logger/index.js";
+import { getLocaleForGuild } from "../../../core/i18n/index.js";
 
 /**
  * Handles modal submission for moderation commands
@@ -204,7 +205,8 @@ async function handleUnmuteModal(itx, payload, reason) {
 
   const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
   if (!settings.mute_role_id) {
-    return itx.reply({ embeds: [createErrorEmbed("No mute role configured")], ephemeral: true });
+    const locale = await getLocaleForGuild(itx.guild);
+    return itx.reply({ embeds: [createErrorEmbed("No mute role configured", locale)], ephemeral: true });
   }
 
   const { case: case_, dmSent } = await ModService.unmute(itx.guild, target, moderator, reason);
@@ -212,7 +214,8 @@ async function handleUnmuteModal(itx, payload, reason) {
   if (settings.modlog_channel_id) {
     const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
     if (modlogChannel) {
-      const embed = createModlogEmbed(case_, target.user, itx.user, dmSent);
+      const locale = await getLocaleForGuild(itx.guild);
+      const embed = createModlogEmbed(case_, target.user, itx.user, dmSent, locale);
       await sendLog(modlogChannel, { embeds: [embed] }, "moderation");
     }
   }
@@ -268,7 +271,8 @@ async function handleUntimeoutModal(itx, payload, reason) {
   if (settings.modlog_channel_id) {
     const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
     if (modlogChannel) {
-      const embed = createModlogEmbed(case_, target.user, itx.user, dmSent);
+      const locale = await getLocaleForGuild(itx.guild);
+      const embed = createModlogEmbed(case_, target.user, itx.user, dmSent, locale);
       await sendLog(modlogChannel, { embeds: [embed] }, "moderation");
     }
   }
@@ -372,7 +376,8 @@ async function handleSoftbanModal(itx, payload, reason) {
   if (settings.modlog_channel_id) {
     const modlogChannel = await itx.guild.channels.fetch(settings.modlog_channel_id).catch(() => null);
     if (modlogChannel) {
-      const embed = createModlogEmbed(case_, target.user, itx.user, null);
+      const locale = await getLocaleForGuild(itx.guild);
+      const embed = createModlogEmbed(case_, target.user, itx.user, null, locale);
       await sendLog(modlogChannel, { embeds: [embed] }, "moderation");
     }
   }
@@ -413,10 +418,11 @@ async function handleEditCaseModal(itx, payload, reason) {
 
   const updated = await CasesService.updateCase(itx.guild.id, payload.caseId, reason);
 
+  const locale = await getLocaleForGuild(itx.guild);
   const target = await itx.client.users.fetch(updated.target_id).catch(() => ({ id: updated.target_id }));
   const originalModerator = await itx.client.users.fetch(updated.moderator_id).catch(() => ({ id: updated.moderator_id }));
 
-  const embed = createCaseEmbed(updated, target, originalModerator);
+  const embed = createCaseEmbed(updated, target, originalModerator, locale);
 
-  return itx.reply({ embeds: [createSuccessEmbed("Case updated", { id: updated.target_id }, payload.caseId), embed], ephemeral: true });
+  return itx.reply({ embeds: [createSuccessEmbed("Case updated", { id: updated.target_id }, payload.caseId, locale), embed], ephemeral: true });
 }

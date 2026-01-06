@@ -28,10 +28,30 @@ export async function updateGuildSettings(guildId, updates) {
     blacklist_channel_id: updates.blacklist_channel_id ?? current.blacklist_channel_id ?? null,
     mute_role_id: updates.mute_role_id ?? current.mute_role_id ?? null,
     dm_on_punish: updates.dm_on_punish ?? current.dm_on_punish ?? 1,
-    command_prefix: updates.command_prefix ?? current.command_prefix ?? "capy!"
+    command_prefix: updates.command_prefix ?? current.command_prefix ?? "capy!",
+    locale: updates.locale !== undefined ? updates.locale : (current.locale ?? null)
   });
   
   // Invalidar cache después de actualizar
   await invalidateSettingsCache(guildId);
+}
+
+/**
+ * Obtiene el locale configurado para un guild
+ * @param {string} guildId
+ * @returns {Promise<string|null>} Locale o null si usa detección automática
+ */
+export async function getGuildLocale(guildId) {
+  const settings = await getGuildSettings(guildId);
+  return settings?.locale || null;
+}
+
+/**
+ * Establece el locale para un guild
+ * @param {string} guildId
+ * @param {string|null} locale - "es-ES", "en-US" o null para auto-detección
+ */
+export async function setGuildLocale(guildId, locale) {
+  await updateGuildSettings(guildId, { locale });
 }
 

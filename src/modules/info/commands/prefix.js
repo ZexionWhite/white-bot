@@ -59,7 +59,7 @@ export async function registerInfoPrefixCommands() {
         const { createUserinfoOverview } = await import("../ui/embeds.js");
         const { createUserinfoSelectMenu } = await import("../../moderation/ui/components.js");
         
-        const embed = await createUserinfoOverview(targetMember, ctx.guild);
+        const embed = await createUserinfoOverview(targetMember, ctx.guild, locale);
         const components = [createUserinfoSelectMenu(`user:${targetUser.id}`, "overview")];
         
         return ctx.reply({ embeds: [embed], components });

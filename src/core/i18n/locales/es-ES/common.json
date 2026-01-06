@@ -22,13 +22,14 @@
     "invalid_case_id": "Debes proporcionar el ID del caso",
     "invalid_case_id_number": "El ID del caso debe ser un número",
     "clear_amount_required": "Debes proporcionar la cantidad de mensajes (1-100)",
-    "clear_amount_invalid": "La cantidad debe ser un número entre 1 y 100"
+    "clear_amount_invalid": "La cantidad debe ser un número entre 1 y 100",
+    "clear_error": "Error al limpiar mensajes: {error}",
+    "unban_error": "Error al desbanear: {error}"
   },
   "success": {
     "operation_complete": "Operación completada",
     "settings_updated": "Configuración actualizada",
     "unbanned": "Usuario desbaneado. Case #{caseId}",
-    "clear_success": "{count} mensaje{plural} eliminado{plural}. Case #{caseId}",
     "clear_success_singular": "{count} mensaje eliminado. Case #{caseId}",
     "clear_success_plural": "{count} mensajes eliminados. Case #{caseId}"
   },

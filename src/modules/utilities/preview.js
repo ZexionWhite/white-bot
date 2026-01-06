@@ -20,10 +20,10 @@ export default async function handlePreview(itx) {
 
   if (subcommand === "boost") {
     const settings = await getSettings.get(itx.guild.id);
-    const embed = boosterEmbed(member, {
+    const embed = await boosterEmbed(member, {
       boosterRoleId: settings?.booster_role_id ?? null,
       infoChannelId: settings?.info_channel_id ?? null
-    });
+    }, locale);
 
     const forced = itx.options.getInteger("boosts");
     if (forced !== null) {

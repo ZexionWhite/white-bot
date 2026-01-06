@@ -2,13 +2,17 @@ import { EmbedBuilder } from "discord.js";
 import { formatDuration } from "../../../utils/time.js";
 import * as UserinfoService from "../services/userinfo.service.js";
 import { MODULES, MODULE_NAMES, getAllModules, getCommandModule } from "../../moderation/services/modules.service.js";
+import { t, getLocaleForGuild, DEFAULT_LOCALE } from "../../../core/i18n/index.js";
 
-export async function createUserinfoOverview(member, guild) {
+export async function createUserinfoOverview(member, guild, locale = null) {
+  if (!locale) {
+    locale = await getLocaleForGuild(guild);
+  }
   const trustScore = await UserinfoService.getUserTrustScore(guild.id, member.id);
   const highestRole = member.roles.highest;
   const highestRoleDisplay = highestRole && highestRole.id !== guild.id 
     ? `<@&${highestRole.id}>` 
-    : "None";
+    : t(locale, "info.embeds.userinfo.overview.none");
 
   // Use Discord timestamps for dates
   const createdTimestamp = `<t:${Math.floor(member.user.createdTimestamp / 1000)}:F> (<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>)`;
@@ -26,32 +30,32 @@ export async function createUserinfoOverview(member, guild) {
     .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 256 }))
     .addFields(
       { 
-        name: "User ID", 
+        name: t(locale, "info.embeds.userinfo.overview.field_user_id"), 
         value: member.id, 
         inline: false 
       },
       { 
-        name: "User", 
+        name: t(locale, "info.embeds.userinfo.overview.field_user"), 
         value: userMention, 
         inline: false 
       },
       { 
-        name: "Joined Discord", 
+        name: t(locale, "info.embeds.userinfo.overview.field_joined_discord"), 
         value: createdTimestamp, 
         inline: false 
       },
       { 
-        name: "Joined Server", 
+        name: t(locale, "info.embeds.userinfo.overview.field_joined_server"), 
         value: joinedTimestamp, 
         inline: false 
       },
       { 
-        name: "Highest Role", 
+        name: t(locale, "info.embeds.userinfo.overview.field_highest_role"), 
         value: highestRoleDisplay, 
         inline: true 
       },
       { 
-        name: "Trust Score", 
+        name: t(locale, "info.embeds.userinfo.overview.field_trust_score"), 
         value: `${trustScore}/100`, 
         inline: true 
       }
@@ -113,10 +117,11 @@ export async function createUserinfoSanctions(member, guild) {
   // Limitar a 10 casos
   const fields = sanctions.slice(0, 10).map(s => {
     const actionName = s.type ? (TYPE_NAMES[s.type] || s.type.toLowerCase()) : "unknown";
+    // Las acciones NO se traducen según las reglas
 
     return {
-      name: `Case #${s.id} - ${actionName}`,
-      value: s.reason || "No reason",
+      name: t(locale, "info.embeds.userinfo.sanctions.field_case_format", { id: s.id, action: actionName }),
+      value: s.reason || t(locale, "info.embeds.userinfo.sanctions.no_reason"),
       inline: false
     };
   });
@@ -124,8 +129,7 @@ export async function createUserinfoSanctions(member, guild) {
   embed.addFields(fields);
 
   // Footer con conteos
-  const footerText = `Warned: ${counts.warned} | Muted: ${counts.muted} | Timeouted: ${counts.timeouted} | Kicked: ${counts.kicked} | Banned: ${counts.banned}`;
-  embed.setFooter({ text: footerText });
+  embed.setFooter({ text: t(locale, "info.embeds.userinfo.sanctions.footer_counts", { warned: counts.warned, muted: counts.muted, timeouted: counts.timeouted, kicked: counts.kicked, banned: counts.banned }) });
 
   return embed;
 }
@@ -158,21 +162,25 @@ export async function createUserinfoVoice(member, guild) {
   return embed;
 }
 
-export async function createUserinfoMessages(member, guild) {
+export async function createUserinfoMessages(member, guild, locale = null) {
+  if (!locale) {
+    locale = await getLocaleForGuild(guild);
+  }
+  
   const messages = await UserinfoService.getUserMessages(guild.id, member.id);
 
   const embed = new EmbedBuilder()
     .setColor(0x0099ff)
-    .setAuthor({ name: `${member.user.tag} - Recent Messages`, iconURL: member.user.displayAvatarURL() })
+    .setAuthor({ name: `${member.user.tag} - ${t(locale, "info.embeds.userinfo.messages.title")}`, iconURL: member.user.displayAvatarURL() })
     .setTimestamp();
 
   if (messages.length === 0) {
-    embed.setDescription("No messages recorded");
+    embed.setDescription(t(locale, "info.embeds.userinfo.messages.description_no_messages"));
     return embed;
   }
 
   const fields = messages.map(m => {
-    const content = m.content ? (m.content.length > 200 ? m.content.substring(0, 200) + "..." : m.content) : "*No content*";
+    const content = m.content ? (m.content.length > 200 ? m.content.substring(0, 200) + "..." : m.content) : t(locale, "info.embeds.userinfo.messages.field_no_content");
     return {
       name: `<#${m.channel_id}>`,
       value: `${content}\n<t:${Math.floor(m.at / 1000)}:R>`,
@@ -243,26 +251,32 @@ export async function createUserinfoPermissions(member, guild) {
   return embed;
 }
 
-export function createUserinfoStatistics(member, stats) {
+export async function createUserinfoStatistics(member, stats, guild, locale = null) {
+  if (!locale && guild) {
+    locale = await getLocaleForGuild(guild);
+  } else if (!locale) {
+    locale = DEFAULT_LOCALE;
+  }
+  
   const voiceTime = stats?.total_voice_seconds ?? 0;
   const messageCount = stats?.message_count ?? 0;
   
   const embed = new EmbedBuilder()
     .setColor(member.displayColor || 0x5865f2)
     .setAuthor({ 
-      name: `${member.user.tag} - Statistics`, 
+      name: `${member.user.tag} - ${t(locale, "info.embeds.userinfo.statistics.title")}`, 
       iconURL: member.user.displayAvatarURL({ dynamic: true, size: 256 }) 
     })
     .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 256 }))
     .addFields(
       {
-        name: "Voice Time",
+        name: t(locale, "info.embeds.userinfo.statistics.field_voice_time"),
         value: formatDuration(voiceTime),
         inline: false
       },
       {
-        name: "Messages",
-        value: messageCount.toLocaleString("en-US"),
+        name: t(locale, "info.embeds.userinfo.statistics.field_messages"),
+        value: messageCount.toLocaleString(locale === "es-ES" ? "es-ES" : "en-US"),
         inline: false
       }
     )

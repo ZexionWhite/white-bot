@@ -249,10 +249,10 @@ export async function handleTestSelect(itx, client) {
         break;
 
       case "boost":
-        embed = boosterEmbed(member, {
+        embed = await boosterEmbed(member, {
           boosterRoleId: member.guild.roles.cache.find(r => r.name.toLowerCase().includes("boost"))?.id,
           infoChannelId: itx.guild.channels.cache.find(c => c.isTextBased())?.id
-        });
+        }, locale);
         break;
 
       case "config":
@@ -303,39 +303,39 @@ export async function handleTestSelect(itx, client) {
         break;
 
       case "user_overview": {
-        embed = createUserinfoOverview(member, itx.guild);
+        embed = await createUserinfoOverview(member, itx.guild, locale);
         break;
       }
 
       case "user_sanctions": {
-        embed = createUserinfoSanctions(member, itx.guild);
+        embed = await createUserinfoSanctions(member, itx.guild, locale);
         break;
       }
 
       case "user_voice": {
-        embed = createUserinfoVoice(member, itx.guild);
+        embed = await createUserinfoVoice(member, itx.guild, locale);
         break;
       }
 
       case "user_messages": {
-        embed = createUserinfoMessages(member, itx.guild);
+        embed = await createUserinfoMessages(member, itx.guild, locale);
         break;
       }
 
       case "user_permissions": {
-        embed = createUserinfoPermissions(member, itx.guild);
+        embed = await createUserinfoPermissions(member, itx.guild, locale);
         break;
       }
 
       case "user_statistics": {
         const mockStats = generateMockStats();
-        embed = createUserinfoStatistics(member, mockStats);
+        embed = await createUserinfoStatistics(member, mockStats, itx.guild, locale);
         break;
       }
 
       case "blacklist":
         const entry = generateMockBlacklistEntry(member);
-        embed = createBlacklistEmbed(entry, member.user, itx.user);
+        embed = createBlacklistEmbed(entry, member.user, itx.user, locale);
         break;
 
       case "blacklist_history":
@@ -344,7 +344,7 @@ export async function handleTestSelect(itx, client) {
           generateMockBlacklistEntry(member)
         ];
         const mockCounts = { low: 0, medium: 1, high: 1, critical: 0 };
-        embed = createBlacklistHistoryEmbed(entries, member.user, 1, 1, mockCounts);
+        embed = createBlacklistHistoryEmbed(entries, member.user, 1, 1, mockCounts, locale);
         break;
 
       case "help_intro":

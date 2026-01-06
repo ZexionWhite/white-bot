@@ -17,5 +17,15 @@
     "errors": {
       "invalid_locale": "Locale no válido. Usa `es-ES` o `en-US`."
     }
+  },
+  "boost": {
+    "title": "¡Nuevo Booster!",
+    "description": "**{tag}** acaba de boostear el servidor",
+    "footer": "{count} boost{plural} • {when}",
+    "field_perks": "Perks",
+    "field_perks_value": "Mira <#{channelId}> para ver los beneficios"
+  },
+  "welcome": {
+    "description": "• Lee las <#{channelId}> para más información\n• ¡Disfruta tu estadía!"
   }
 }

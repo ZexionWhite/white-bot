@@ -22,7 +22,9 @@
     "invalid_case_id": "You must provide the case ID",
     "invalid_case_id_number": "Case ID must be a number",
     "clear_amount_required": "You must provide the number of messages (1-100)",
-    "clear_amount_invalid": "Amount must be a number between 1 and 100"
+    "clear_amount_invalid": "Amount must be a number between 1 and 100",
+    "clear_error": "Error clearing messages: {error}",
+    "unban_error": "Error unbanning: {error}"
   },
   "success": {
     "operation_complete": "Operation completed",

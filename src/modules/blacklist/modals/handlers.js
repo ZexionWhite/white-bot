@@ -1,4 +1,4 @@
-import { AttachmentBuilder } from "discord.js";
+import { AttachmentBuilder, MessageFlags } from "discord.js";
 import * as BlacklistService from "../services/blacklist.service.js";
 import * as PermService from "../../moderation/services/permissions.service.js";
 import * as SettingsRepo from "../../moderation/db/settings.repo.js";
@@ -6,50 +6,52 @@ import { createBlacklistEmbed, createSuccessEmbed, createErrorEmbed } from "../u
 import { getPendingAction, deletePendingAction, validateReason } from "../../moderation/modals/helpers.js";
 import { log } from "../../../core/logger/index.js";
 import { sendLog } from "../../../core/webhooks/index.js";
+import { getLocaleForGuild, t, DEFAULT_LOCALE } from "../../../core/i18n/index.js";
 
 /**
  * Handles modal submission for blacklist commands
  */
 export async function handleBlacklistModal(itx) {
+  const locale = itx.guild ? await getLocaleForGuild(itx.guild) : DEFAULT_LOCALE;
   const customId = itx.customId;
   
   // Parse customId: "pending:<actionId>"
   if (!customId.startsWith("pending:")) {
     return itx.reply({ 
-      embeds: [createErrorEmbed("Invalid modal")], 
-      ephemeral: true 
+      embeds: [createErrorEmbed(t(locale, "common.errors.invalid_modal"), locale)], 
+      flags: MessageFlags.Ephemeral 
     });
   }
 
   const actionId = parseInt(customId.replace("pending:", ""));
   if (isNaN(actionId)) {
     return itx.reply({ 
-      embeds: [createErrorEmbed("Invalid action ID")], 
-      ephemeral: true 
+      embeds: [createErrorEmbed(t(locale, "common.errors.invalid_action_id"), locale)], 
+      flags: MessageFlags.Ephemeral 
     });
   }
 
   const pendingAction = await getPendingAction(actionId);
   if (!pendingAction) {
     return itx.reply({ 
-      embeds: [createErrorEmbed("This action has expired or doesn't exist")], 
-      ephemeral: true 
+      embeds: [createErrorEmbed(t(locale, "common.errors.action_expired"), locale)], 
+      flags: MessageFlags.Ephemeral 
     });
   }
 
   // Verify author
   if (pendingAction.author_id !== itx.user.id) {
     return itx.reply({ 
-      embeds: [createErrorEmbed("You didn't initiate this action")], 
-      ephemeral: true 
+      embeds: [createErrorEmbed(t(locale, "common.errors.not_author"), locale)], 
+      flags: MessageFlags.Ephemeral 
     });
   }
 
   // Verify guild
   if (pendingAction.guild_id !== itx.guild.id) {
     return itx.reply({ 
-      embeds: [createErrorEmbed("Invalid guild")], 
-      ephemeral: true 
+      embeds: [createErrorEmbed(t(locale, "common.errors.invalid_guild"), locale)], 
+      flags: MessageFlags.Ephemeral 
     });
   }
 
@@ -102,20 +104,22 @@ export async function handleBlacklistModal(itx) {
 }
 
 async function handleBlacklistAddModal(itx, payload, reason) {
+  const locale = await getLocaleForGuild(itx.guild);
+  
   // Validaciones de seguridad
   const target = await itx.client.users.fetch(payload.targetId).catch(() => null);
   if (!target) {
-    return itx.reply({ embeds: [createErrorEmbed("User not found")], ephemeral: true });
+    return itx.reply({ embeds: [createErrorEmbed(t(locale, "common.errors.user_not_found"), locale)], flags: MessageFlags.Ephemeral });
   }
 
   const moderator = await itx.guild.members.fetch(itx.user.id);
   if (!await PermService.canExecuteCommand(moderator, "blacklist.add")) {
-    return itx.reply({ embeds: [createErrorEmbed("You don't have permission to use this command")], ephemeral: true });
+    return itx.reply({ embeds: [createErrorEmbed(t(locale, "common.errors.permission_denied"), locale)], flags: MessageFlags.Ephemeral });
   }
 
   const targetMember = await itx.guild.members.fetch(payload.targetId).catch(() => null);
   if (targetMember && !PermService.canModerate(moderator, targetMember)) {
-    return itx.reply({ embeds: [createErrorEmbed("You cannot moderate this user")], ephemeral: true });
+    return itx.reply({ embeds: [createErrorEmbed(t(locale, "common.errors.cannot_moderate"), locale)], flags: MessageFlags.Ephemeral });
   }
 
   const severity = payload.severity || "MEDIUM";
@@ -159,7 +163,7 @@ async function handleBlacklistAddModal(itx, payload, reason) {
     }
   }
 
-  return itx.reply({ embeds: [createSuccessEmbed("User added to blacklist", target, entry.id)] });
+  return itx.reply({ embeds: [createSuccessEmbed(t(locale, "blacklist.embeds.success.created"), target, entry.id, locale)] });
 }
 
 async function handleBlacklistEditModal(itx, payload, reason) {
@@ -187,7 +191,7 @@ async function handleBlacklistEditModal(itx, payload, reason) {
   const target = await itx.client.users.fetch(updated.user_id).catch(() => ({ id: updated.user_id }));
   const originalModerator = await itx.client.users.fetch(updated.moderator_id).catch(() => ({ id: updated.moderator_id }));
 
-  const embed = createBlacklistEmbed(updated, target, originalModerator);
+  const embed = createBlacklistEmbed(updated, target, originalModerator, locale);
 
   const settings = await SettingsRepo.getGuildSettings(itx.guild.id);
   if (settings.blacklist_channel_id) {
@@ -197,5 +201,5 @@ async function handleBlacklistEditModal(itx, payload, reason) {
     }
   }
 
-  return itx.reply({ embeds: [createSuccessEmbed(`Entry #${payload.caseId} updated`), embed], ephemeral: true });
+  return itx.reply({ embeds: [createSuccessEmbed(t(locale, "common.success.operation_complete"), null, null, locale), embed], flags: MessageFlags.Ephemeral });
 }

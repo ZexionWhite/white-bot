@@ -15,7 +15,7 @@ export async function welcomeEmbed(member, { autorolesChannelId = null } = {}, l
     .setTimestamp();
 
   if (autorolesChannelId) {
-    embed.setDescription(`• Lee las <#${autorolesChannelId}> para más información\n• ¡Disfruta tu estadía!`);
+    embed.setDescription(t(locale, "config.welcome.description", { channelId: autorolesChannelId }));
   }
 
   return embed;

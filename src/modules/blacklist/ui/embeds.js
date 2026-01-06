@@ -1,4 +1,5 @@
 import { EmbedBuilder } from "discord.js";
+import { t, DEFAULT_LOCALE } from "../../../core/i18n/index.js";
 
 const SEVERITY_COLORS = {
   LOW: 0x00ff00,
@@ -7,25 +8,25 @@ const SEVERITY_COLORS = {
   CRITICAL: 0xcc0000
 };
 
-export function createBlacklistEmbed(entry, target, moderator) {
-  const targetName = target.tag || target.username || "Unknown";
+export function createBlacklistEmbed(entry, target, moderator, locale = DEFAULT_LOCALE) {
+  const targetName = target.tag || target.username || t(locale, "common.labels.unknown");
   const targetDisplay = `${targetName} (${entry.user_id})`;
   
   const severityName = entry.severity || "MEDIUM";
-  const actionCapitalized = `Blacklist - ${severityName}`;
+  // Severity y "Blacklist" NO se traducen según las reglas
   
-  // Build description similar to createModlogEmbed
-  let description = `**Member:** ${targetDisplay}\n**Action:** ${actionCapitalized}`;
-  description += `\n**Reason:** ${entry.reason || "No reason"}`;
+  let description = t(locale, "blacklist.embeds.entry.description_member", { member: targetDisplay }) + "\n" +
+                    t(locale, "blacklist.embeds.entry.description_action", { severity: severityName });
+  description += "\n" + t(locale, "blacklist.embeds.entry.description_reason", { reason: entry.reason || t(locale, "blacklist.embeds.entry.no_reason") });
 
   const embed = new EmbedBuilder()
     .setColor(SEVERITY_COLORS[entry.severity] || 0x808080)
     .setAuthor({ 
-      name: moderator.tag || moderator.username || "Unknown", 
+      name: moderator.tag || moderator.username || t(locale, "common.labels.unknown"), 
       iconURL: moderator.displayAvatarURL?.() || moderator.avatarURL?.() || null 
     })
     .setDescription(description)
-    .setFooter({ text: `Entry #${entry.id}` });
+    .setFooter({ text: t(locale, "blacklist.embeds.entry.footer_entry", { id: entry.id }) });
   
   // Solo setear timestamp si created_at es válido
   if (entry.created_at && typeof entry.created_at === 'number' && entry.created_at > 0) {
@@ -34,16 +35,16 @@ export function createBlacklistEmbed(entry, target, moderator) {
 
   if (entry.updated_at) {
     embed.addFields(
-      { name: "Actualizado", value: `<t:${Math.floor(entry.updated_at / 1000)}:R>`, inline: true },
-      { name: "Actualizado por", value: `<@${entry.updated_by}>`, inline: true }
+      { name: t(locale, "blacklist.embeds.entry.field_updated"), value: `<t:${Math.floor(entry.updated_at / 1000)}:R>`, inline: true },
+      { name: t(locale, "blacklist.embeds.entry.field_updated_by"), value: `<@${entry.updated_by}>`, inline: true }
     );
   }
 
   if (entry.deleted_at) {
     embed.addFields(
-      { name: "Eliminado", value: `<t:${Math.floor(entry.deleted_at / 1000)}:R>`, inline: true },
-      { name: "Eliminado por", value: `<@${entry.deleted_by}>`, inline: true },
-      { name: "Razón de eliminación", value: entry.deleted_reason || "Sin razón", inline: false }
+      { name: t(locale, "blacklist.embeds.entry.field_deleted"), value: `<t:${Math.floor(entry.deleted_at / 1000)}:R>`, inline: true },
+      { name: t(locale, "blacklist.embeds.entry.field_deleted_by"), value: `<@${entry.deleted_by}>`, inline: true },
+      { name: t(locale, "blacklist.embeds.entry.field_deletion_reason"), value: entry.deleted_reason || t(locale, "blacklist.embeds.entry.no_reason"), inline: false }
     );
     embed.setColor(0x808080);
   }
@@ -97,17 +98,18 @@ export function createBlacklistHistoryEmbed(entries, target, page, totalPages, c
   return embed;
 }
 
-export function createSuccessEmbed(message, target = null, entryId = null) {
+export function createSuccessEmbed(message, target = null, entryId = null, locale = DEFAULT_LOCALE) {
   // Si es una entrada de blacklist exitosa, usar formato similar a createSanctionMessage
   if (target?.id && entryId) {
-    const targetName = target.tag || target.username || "Unknown";
+    const targetName = target.tag || target.username || t(locale, "common.labels.unknown");
     const targetDisplay = `${targetName} (${target.id})`;
-    const description = `**Member:** ${targetDisplay}\n**Action:** Blacklist entry created`;
+    const description = t(locale, "blacklist.embeds.success.field_member", { member: targetDisplay }) + "\n" +
+                        t(locale, "blacklist.embeds.success.field_action", { action: t(locale, "blacklist.embeds.success.created") });
     
     return new EmbedBuilder()
       .setColor(0x00ff00)
       .setDescription(description)
-      .setFooter({ text: `Entry #${entryId}` });
+      .setFooter({ text: t(locale, "blacklist.embeds.entry.footer_entry", { id: entryId }) });
   }
   
   // Formato simple para otros mensajes
@@ -116,7 +118,7 @@ export function createSuccessEmbed(message, target = null, entryId = null) {
     .setDescription(`✅ ${message}`);
 }
 
-export function createErrorEmbed(message) {
+export function createErrorEmbed(message, locale = DEFAULT_LOCALE) {
   return new EmbedBuilder()
     .setColor(0xff0000)
     .setDescription(`❌ ${message}`);

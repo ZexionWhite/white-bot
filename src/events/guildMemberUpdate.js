@@ -29,7 +29,8 @@ export default async function guildMemberUpdate(client, oldM, newM) {
         const boosterRoleId = cfg?.booster_role_id ?? autoBoosterRoleId;
         const infoChannelId = cfg?.info_channel_id ?? null;
 
-        const embed = boosterEmbed(newM, { boosterRoleId, infoChannelId });
+        const locale = await getLocaleForGuild(newM.guild);
+        const embed = await boosterEmbed(newM, { boosterRoleId, infoChannelId }, locale);
         await ch.send({ embeds: [embed] }).catch((err) => {
           log.error("guildMemberUpdate", `Error al enviar anuncio de boost en ${newM.guild.name}:`, err.message);
         });

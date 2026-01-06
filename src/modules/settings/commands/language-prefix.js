@@ -1,19 +1,19 @@
 /**
- * Comando de prefijo para gestionar el idioma del servidor
+ * Comando de prefijo para gestionar el idioma del bot en el servidor
  */
 import { PermissionFlagsBits } from "discord.js";
 import { setGuildLocale } from "../../moderation/db/settings.repo.js";
 import { getLocaleForGuild, SUPPORTED_LOCALES, t } from "../../../core/i18n/index.js";
 import { EmbedBuilder } from "discord.js";
 
-export async function registerLocalePrefixCommand() {
+export async function registerLanguagePrefixCommand() {
   const { registerCommands } = await import("../../../core/commands/commandRegistry.js");
   
   registerCommands([
     {
-      name: "locale",
-      aliases: ["language", "idioma"],
-      description: "Configure the server language",
+      name: "language",
+      aliases: ["idioma", "lang"],
+      description: "Configure the bot language for this server",
       permissions: PermissionFlagsBits.ManageGuild,
       argsSchema: null,
       execute: async (ctx) => {
@@ -22,11 +22,11 @@ export async function registerLocalePrefixCommand() {
         
         if (rawArgs.length === 0) {
           const embed = new EmbedBuilder()
-            .setTitle(t(locale, "config.locale.view.title"))
+            .setTitle(t(locale, "config.language.view.title"))
             .setDescription(
-              `**Usage:**\n` +
-              `\`${ctx.prefix}locale es\` - Set to Spanish\n` +
-              `\`${ctx.prefix}locale en\` - Set to English`
+              `${t(locale, "config.language.view.usage")}\n` +
+              `\`${ctx.prefix}language es\` - ${t(locale, "config.language.view.usage_es")}\n` +
+              `\`${ctx.prefix}language en\` - ${t(locale, "config.language.view.usage_en")}`
             )
             .setColor(0x5865f2)
             .setTimestamp();
@@ -44,14 +44,14 @@ export async function registerLocalePrefixCommand() {
         } else if (SUPPORTED_LOCALES.includes(localeArg)) {
           targetLocale = localeArg;
         } else {
-          return ctx.reply({ content: t(locale, "config.locale.errors.invalid_locale") });
+          return ctx.reply({ content: t(locale, "config.language.errors.invalid_locale") });
         }
         
         await setGuildLocale(ctx.guild.id, targetLocale);
         
         const embed = new EmbedBuilder()
-          .setTitle(t(targetLocale, "config.locale.set.title"))
-          .setDescription(t(targetLocale, "config.locale.set.description", { locale: targetLocale }))
+          .setTitle(t(targetLocale, "config.language.set.title"))
+          .setDescription(t(targetLocale, "config.language.set.description", { locale: targetLocale }))
           .setColor(0x00ff00)
           .setTimestamp();
         

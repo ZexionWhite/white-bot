@@ -27,9 +27,11 @@ async function initDBFunctions() {
 /**
  * Obtiene el locale para un guild
  * Orden de prioridad:
- * 1. DB (guild_settings.locale)
- * 2. Discord (guild.preferredLocale)
- * 3. Fallback (es-ES)
+ * 1. DB (guild_settings.locale) - Configuración explícita del bot
+ * 2. Fallback (es-ES) - Default absoluto
+ * 
+ * NOTA: No usa guild.preferredLocale porque el idioma del servidor Discord
+ * puede ser diferente al idioma que queremos para el bot.
  * 
  * @param {import("discord.js").Guild} guild - Guild de Discord
  * @returns {Promise<string>} Locale (es-ES o en-US)
@@ -42,7 +44,7 @@ export async function getLocaleForGuild(guild) {
   await initDBFunctions();
   
   try {
-    // 1. Verificar DB
+    // 1. Verificar DB (configuración explícita del bot)
     const dbLocale = await getGuildLocaleFromDB(guild.id);
     if (dbLocale && SUPPORTED_LOCALES.includes(dbLocale)) {
       return dbLocale;
@@ -51,21 +53,7 @@ export async function getLocaleForGuild(guild) {
     log.debug("i18n", `Error getting locale from DB for guild ${guild.id}: ${error.message}`);
   }
   
-  // 2. Verificar preferredLocale de Discord
-  if (guild.preferredLocale) {
-    const discordLocale = guild.preferredLocale;
-    
-    // Mapear locales de Discord a nuestros locales soportados
-    if (discordLocale.startsWith("es")) {
-      return "es-ES";
-    } else if (discordLocale.startsWith("en")) {
-      return "en-US";
-    }
-    
-    // Si es otro locale de Discord que no soportamos, continuar al fallback
-  }
-  
-  // 3. Fallback
+  // 2. Fallback al default (es-ES)
   return DEFAULT_LOCALE;
 }
 

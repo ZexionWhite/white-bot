@@ -8,7 +8,7 @@ import * as boostChannel from "./commands/boost-channel.js";
 import * as infoChannel from "./commands/info-channel.js";
 import * as boosterRole from "./commands/booster-role.js";
 import * as prefix from "./commands/prefix.js";
-import { localeCommand } from "./commands/locale.js";
+import { languageCommand } from "./commands/language.js";
 
 export const settingsHandlers = {
   set: async (itx) => {
@@ -27,7 +27,7 @@ export const settingsHandlers = {
     
     return itx.reply({ content: "Subcomando no reconocido.", ephemeral: true });
   },
-  locale: async (itx) => {
-    return localeCommand.execute(itx);
+  language: async (itx) => {
+    return languageCommand.execute(itx);
   }
 };

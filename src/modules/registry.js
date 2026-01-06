@@ -114,7 +114,9 @@ export const componentHandlers = {
     
     const target = await itx.client.users.fetch(userId).catch(() => ({ id: userId }));
     const { createBlacklistHistoryEmbed } = await import("./blacklist/ui/embeds.js");
-    const embed = createBlacklistHistoryEmbed(entries, target, newPage, totalPages, counts);
+    const { getLocaleForGuildId } = await import("../core/i18n/index.js");
+    const locale = await getLocaleForGuildId(itx.guild.id);
+    const embed = createBlacklistHistoryEmbed(entries, target, newPage, totalPages, counts, locale);
     const { createPaginationComponents } = await import("./moderation/ui/components.js");
     const components = createPaginationComponents(newPage, totalPages, `blacklisthistory:${userId}:all`);
     return itx.update({ embeds: [embed], components });

@@ -1,21 +1,24 @@
 {
-  "locale": {
+  "language": {
     "view": {
-      "title": "Server Language",
+      "title": "Bot Language",
       "manual": "Language manually set to: **{locale}**",
       "auto": "Automatic detection enabled.\n• Detected language: **{detected}**\n• Discord locale: {discord}",
-      "footer": "Use /locale set to change the language"
+      "footer": "Use /language to change the bot language",
+      "usage": "**Usage:**",
+      "usage_es": "Set to Spanish",
+      "usage_en": "Set to English"
     },
     "set": {
-      "title": "Language Set",
-      "description": "Server language has been set to: **{locale}**"
+      "title": "Bot Language Set",
+      "description": "Bot language has been set to: **{locale}**"
     },
     "auto": {
       "title": "Automatic Detection Enabled",
-      "description": "The server will now use automatic language detection based on Discord settings."
+      "description": "The bot will now use automatic language detection based on Discord settings."
     },
     "errors": {
-      "invalid_locale": "Invalid locale. Use `es-ES` or `en-US`."
+      "invalid_locale": "Invalid language. Use `es-ES` or `en-US`."
     }
   },
   "boost": {

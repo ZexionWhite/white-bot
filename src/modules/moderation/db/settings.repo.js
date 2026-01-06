@@ -47,9 +47,9 @@ export async function getGuildLocale(guildId) {
 }
 
 /**
- * Establece el locale para un guild
+ * Establece el idioma del bot para un guild
  * @param {string} guildId
- * @param {string|null} locale - "es-ES", "en-US" o null para auto-detección
+ * @param {string} locale - "es-ES" o "en-US"
  */
 export async function setGuildLocale(guildId, locale) {
   await updateGuildSettings(guildId, { locale });

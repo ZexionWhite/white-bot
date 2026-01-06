@@ -1,21 +1,24 @@
 {
-  "locale": {
+  "language": {
     "view": {
-      "title": "Idioma del Servidor",
+      "title": "Idioma del Bot",
       "manual": "Idioma configurado manualmente: **{locale}**",
       "auto": "Detección automática activa.\n• Idioma detectado: **{detected}**\n• Locale de Discord: {discord}",
-      "footer": "Usa /locale set para cambiar el idioma"
+      "footer": "Usa /language para cambiar el idioma del bot",
+      "usage": "**Uso:**",
+      "usage_es": "Establecer a Español",
+      "usage_en": "Establecer a Inglés"
     },
     "set": {
-      "title": "Idioma Configurado",
-      "description": "El idioma del servidor ha sido establecido a: **{locale}**"
+      "title": "Idioma del Bot Configurado",
+      "description": "El idioma del bot ha sido establecido a: **{locale}**"
     },
     "auto": {
       "title": "Detección Automática Activada",
-      "description": "El servidor ahora usará detección automática del idioma basado en la configuración de Discord."
+      "description": "El bot ahora usará detección automática del idioma basado en la configuración de Discord."
     },
     "errors": {
-      "invalid_locale": "Locale no válido. Usa `es-ES` o `en-US`."
+      "invalid_locale": "Idioma no válido. Usa `es-ES` o `en-US`."
     }
   },
   "boost": {

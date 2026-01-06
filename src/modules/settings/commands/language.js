@@ -1,27 +1,27 @@
 /**
- * Comando /locale para gestionar el idioma del servidor
+ * Comando /language para gestionar el idioma del bot en el servidor
  */
 import { EmbedBuilder, MessageFlags } from "discord.js";
-import { getGuildLocale, setGuildLocale } from "../../moderation/db/settings.repo.js";
+import { setGuildLocale } from "../../moderation/db/settings.repo.js";
 import { getLocaleForGuild, SUPPORTED_LOCALES } from "../../../core/i18n/index.js";
 import { t } from "../../../core/i18n/index.js";
 
-export const localeCommand = {
+export const languageCommand = {
   async execute(itx) {
+    // Obtener locale para las respuestas (usar default si no hay guild)
+    const currentLocale = itx.guild ? await getLocaleForGuild(itx.guild) : "es-ES";
+    
     if (!itx.guild) {
       return itx.reply({ 
-        content: "This command can only be used in a server.",
+        content: t(currentLocale, "common.errors.guild_only"),
         flags: MessageFlags.Ephemeral
       });
     }
-
-    // Obtener locale actual para las respuestas
-    const currentLocale = await getLocaleForGuild(itx.guild);
     const locale = itx.options.getString("language", true);
 
     if (!SUPPORTED_LOCALES.includes(locale)) {
       return itx.reply({
-        content: t(currentLocale, "config.locale.errors.invalid_locale"),
+        content: t(currentLocale, "config.language.errors.invalid_locale"),
         flags: MessageFlags.Ephemeral
       });
     }
@@ -29,8 +29,8 @@ export const localeCommand = {
     await setGuildLocale(itx.guild.id, locale);
 
     const embed = new EmbedBuilder()
-      .setTitle(t(locale, "config.locale.set.title"))
-      .setDescription(t(locale, "config.locale.set.description", { locale }))
+      .setTitle(t(locale, "config.language.set.title"))
+      .setDescription(t(locale, "config.language.set.description", { locale }))
       .setColor(0x00ff00)
       .setTimestamp();
 

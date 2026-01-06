@@ -111,12 +111,12 @@ export const settingsSlashCommands = [
        )
     ),
   new SlashCommandBuilder()
-    .setName("locale")
-    .setDescription("Configure the server language")
+    .setName("language")
+    .setDescription("Configure the bot language for this server")
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .addStringOption(o =>
       o.setName("language")
-       .setDescription("Language to use for this server")
+       .setDescription("Language to use for the bot in this server")
        .setRequired(true)
        .addChoices(
          { name: "Español", value: "es-ES" },

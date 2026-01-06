@@ -79,12 +79,37 @@ export async function initRedis() {
       log.info("Redis", `Reconectando a Redis en ${ms}ms...`);
     });
 
-    // Test de conexión (ioredis se conecta automáticamente)
-    await redisClient.ping();
-    
-    redisEnabled = true;
-    log.info("Redis", "Redis inicializado correctamente");
-    return true;
+    // Esperar a que Redis esté listo antes de hacer ping
+    // ioredis se conecta automáticamente, pero debemos esperar el evento "ready"
+    return new Promise((resolve) => {
+      const timeout = setTimeout(() => {
+        log.warn("Redis", "Timeout esperando conexión a Redis (5s). El bot continuará sin Redis.");
+        redisEnabled = false;
+        resolve(false);
+      }, 5000);
+
+      redisClient.once("ready", async () => {
+        clearTimeout(timeout);
+        try {
+          // Test de conexión
+          await redisClient.ping();
+          redisEnabled = true;
+          log.info("Redis", "Redis inicializado correctamente");
+          resolve(true);
+        } catch (error) {
+          log.warn("Redis", `Error en ping de Redis: ${error.message}. El bot continuará sin Redis.`);
+          redisEnabled = false;
+          resolve(false);
+        }
+      });
+
+      redisClient.once("error", (err) => {
+        clearTimeout(timeout);
+        // El error ya se maneja en el listener general, solo resolvemos
+        redisEnabled = false;
+        resolve(false);
+      });
+    });
   } catch (error) {
     log.warn("Redis", `No se pudo conectar a Redis: ${error.message}. El bot continuará sin Redis.`);
     redisEnabled = false;

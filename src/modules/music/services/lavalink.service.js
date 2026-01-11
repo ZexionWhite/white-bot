@@ -189,6 +189,7 @@ function setupEventListeners(discordClient) {
       connectedAt: Date.now()
     };
     log.info("Lavalink", `✅ Nodo conectado: ${node.id} (${node.host}:${node.port})`);
+    log.debug("Lavalink", `Estado del nodo - isAlive: ${node.isAlive}, estado interno: ${connectionState}`);
   });
 
   // Nodo desconectado
@@ -290,18 +291,35 @@ export function getLavalinkClient() {
  */
 export function isLavalinkReady() {
   if (!lavalinkManager) return false;
-  if (connectionState !== "CONNECTED") return false;
   
-  // Verificar que haya al menos un nodo conectado
-  if (lavalinkManager.nodeManager && lavalinkManager.nodeManager.nodes) {
-    for (const node of lavalinkManager.nodeManager.nodes.values()) {
-      if (node && node.isAlive !== false) {
+  // Verificar directamente el estado del nodo sin depender solo del estado interno
+  try {
+    const nodeManager = lavalinkManager.nodeManager;
+    if (!nodeManager || !nodeManager.nodes) return false;
+    
+    // Buscar al menos un nodo que esté conectado
+    for (const node of nodeManager.nodes.values()) {
+      if (node && node.isAlive === true) {
+        // Si encontramos un nodo vivo, actualizar el estado interno si es necesario
+        if (connectionState !== "CONNECTED") {
+          connectionState = "CONNECTED";
+          log.debug("Lavalink", `Estado actualizado a CONNECTED (nodo ${node.id} está vivo)`);
+        }
         return true;
       }
     }
+    
+    // Si no hay nodos vivos pero el manager existe, el estado es DISCONNECTED
+    if (connectionState === "CONNECTED") {
+      connectionState = "DISCONNECTED";
+      log.debug("Lavalink", "Estado actualizado a DISCONNECTED (no hay nodos vivos)");
+    }
+    
+    return false;
+  } catch (error) {
+    log.error("Lavalink", "Error verificando estado de nodos:", error);
+    return false;
   }
-  
-  return false;
 }
 
 /**

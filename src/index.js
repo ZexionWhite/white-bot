@@ -1,6 +1,3 @@
-/**
- * Entry point principal del bot
- */
 import { Client, GatewayIntentBits, Partials, Collection } from "discord.js";
 import { loadConfig, getEnv } from "./core/config/index.js";
 import { registerEvents, registerProcessHandlers } from "./core/discord/registerEvents.js";
@@ -60,7 +57,7 @@ client.voiceModMessages = new Map();
 registerEvents(client);
 registerProcessHandlers(client);
 
-// Inicializar Redis (opcional, no bloquea el inicio si falla)
+// Inicializar Redis
 initRedis().catch((error) => {
   log.warn("Redis", `Redis no disponible: ${error.message}. El bot continuará sin cache.`);
 });

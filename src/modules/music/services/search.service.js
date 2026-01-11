@@ -19,14 +19,24 @@ function getAvailableNode() {
     return null;
   }
 
-  // Buscar el primer nodo disponible
+  // Buscar el primer nodo disponible (preferir nodos vivos)
+  let bestNode = null;
   for (const node of manager.nodeManager.nodes.values()) {
-    if (node && node.isAlive === true) {
+    if (!node) continue;
+    
+    // Preferir nodos que están vivos
+    if (node.isAlive === true) {
       return node;
+    }
+    
+    // Si no hay nodos vivos, al menos usar el primer nodo disponible (puede estar conectando)
+    if (!bestNode && node.rest) {
+      bestNode = node;
     }
   }
 
-  return null;
+  // Retornar el mejor nodo encontrado (aunque no esté completamente conectado)
+  return bestNode;
 }
 
 /**

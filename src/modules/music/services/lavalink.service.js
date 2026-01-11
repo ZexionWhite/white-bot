@@ -1,41 +1,26 @@
-/**
- * Servicio de conexión a Lavalink
- * SINGLETON: Solo una instancia de LavalinkManager por proceso
- */
 import { LavalinkManager } from "lavalink-client";
 import { log } from "../../../core/logger/index.js";
 
-// INSTANCE_ID único para detectar múltiples inicializaciones
-// Usar timestamp + random para garantizar unicidad
 const INSTANCE_ID = `${Date.now().toString(36)}${Math.random().toString(36).substring(2, 6)}`.substring(0, 8);
 
-// SINGLETON: Variable privada del módulo
 let lavalinkManager = null;
-let connectionState = "DISCONNECTED"; // DISCONNECTED, CONNECTING, CONNECTED, UNAVAILABLE
+let connectionState = "DISCONNECTED";
 let nodeStatus = null;
 let reconnectAttempts = 0;
 let lastError = null;
 let initializationInProgress = false;
 let initializationPromise = null;
 
-// Configuración
 let config = null;
 
-/**
- * Helper para capturar stack trace (simplificado)
- */
 function getStackTrace() {
   const err = new Error();
   return err.stack;
 }
 
-/**
- * Instrumentación: Interceptar destroy/disconnect/close para logging
- */
 function instrumentManager(manager) {
   if (!manager) return;
 
-  // Interceptar destroy si existe
   if (manager.destroy && typeof manager.destroy === "function") {
     const originalDestroy = manager.destroy.bind(manager);
     manager.destroy = function(...args) {
@@ -46,7 +31,6 @@ function instrumentManager(manager) {
     };
   }
 
-  // Interceptar disconnect si existe
   if (manager.disconnect && typeof manager.disconnect === "function") {
     const originalDisconnect = manager.disconnect.bind(manager);
     manager.disconnect = function(...args) {
@@ -57,7 +41,6 @@ function instrumentManager(manager) {
     };
   }
 
-  // Instrumentar nodeManager si existe
   if (manager.nodeManager) {
     if (manager.nodeManager.destroy && typeof manager.nodeManager.destroy === "function") {
       const originalNodeDestroy = manager.nodeManager.destroy.bind(manager.nodeManager);
@@ -69,21 +52,16 @@ function instrumentManager(manager) {
       };
     }
 
-    // Instrumentar nodos existentes
     instrumentNodes(manager.nodeManager);
   }
 }
 
-/**
- * Instrumenta nodos individuales (llamado cuando se crean)
- */
 function instrumentNodes(nodeManager) {
   if (!nodeManager || !nodeManager.nodes) return;
 
   for (const node of nodeManager.nodes.values()) {
     if (!node) continue;
 
-    // Instrumentar destroy del nodo
     if (node.destroy && typeof node.destroy === "function" && !node._instrumentedDestroy) {
       const originalNodeDestroy = node.destroy.bind(node);
       node.destroy = function(...args) {
@@ -95,7 +73,6 @@ function instrumentNodes(nodeManager) {
       node._instrumentedDestroy = true;
     }
 
-    // Instrumentar disconnect del nodo
     if (node.disconnect && typeof node.disconnect === "function" && !node._instrumentedDisconnect) {
       const originalNodeDisconnect = node.disconnect.bind(node);
       node.disconnect = function(...args) {
@@ -107,7 +84,6 @@ function instrumentNodes(nodeManager) {
       node._instrumentedDisconnect = true;
     }
 
-    // Instrumentar socket.close si existe
     if (node.socket && node.socket.close && typeof node.socket.close === "function" && !node.socket._instrumentedClose) {
       const originalClose = node.socket.close.bind(node.socket);
       node.socket.close = function(...args) {
@@ -121,13 +97,6 @@ function instrumentNodes(nodeManager) {
   }
 }
 
-/**
- * Diagnóstico de red: verifica si Lavalink está accesible vía HTTP
- * @param {string} host - Host de Lavalink
- * @param {number} port - Puerto
- * @param {boolean} secure - Si usa HTTPS
- * @returns {Promise<{available: boolean, error?: string}>}
- */
 async function diagnoseLavalinkConnection(host, port, secure) {
   const protocol = secure ? "https" : "http";
   const url = `${protocol}://${host}:${port}/version`;
@@ -166,10 +135,6 @@ async function diagnoseLavalinkConnection(host, port, secure) {
   }
 }
 
-/**
- * Obtiene o crea el LavalinkManager (SINGLETON)
- * @returns {LavalinkManager|null}
- */
 export function getLavalinkManager() {
   if (lavalinkManager) {
     return lavalinkManager;
@@ -177,27 +142,19 @@ export function getLavalinkManager() {
   return null;
 }
 
-/**
- * Inicializa el cliente de Lavalink (SINGLETON - solo se llama UNA vez)
- * @param {import("discord.js").Client} discordClient - Cliente de Discord
- * @returns {Promise<LavalinkManager|null>}
- */
 export async function initializeLavalink(discordClient) {
-  // SINGLETON: Si ya existe, retornar la misma instancia
   if (lavalinkManager) {
     log.warn("Lavalink", `[${INSTANCE_ID}] ⚠️ initializeLavalink llamado pero ya existe manager (singleton)`);
     log.warn("Lavalink", `[${INSTANCE_ID}] Stack trace:`, getStackTrace());
     return lavalinkManager;
   }
 
-  // Si ya hay una inicialización en progreso, esperar a que termine
   if (initializationInProgress && initializationPromise) {
     log.warn("Lavalink", `[${INSTANCE_ID}] ⚠️ Inicialización ya en progreso, esperando...`);
     log.warn("Lavalink", `[${INSTANCE_ID}] Stack trace:`, getStackTrace());
     return initializationPromise;
   }
 
-  // Crear promesa de inicialización
   initializationInProgress = true;
   initializationPromise = (async () => {
     try {
@@ -216,7 +173,6 @@ export async function initializeLavalink(discordClient) {
         log.warn("Lavalink", `[${INSTANCE_ID}] ⚠️ Usando contraseña por defecto`);
       }
 
-      // Diagnóstico de red
       log.info("Lavalink", `[${INSTANCE_ID}] 🔍 Diagnóstico de red...`);
       const diagnosis = await diagnoseLavalinkConnection(host, port, secure);
       
@@ -243,7 +199,6 @@ export async function initializeLavalink(discordClient) {
 
       connectionState = "CONNECTING";
 
-      // CREAR MANAGER (SINGLETON)
       log.info("Lavalink", `[${INSTANCE_ID}] Creando LavalinkManager...`);
       lavalinkManager = new LavalinkManager({
         nodes: [
@@ -257,16 +212,20 @@ export async function initializeLavalink(discordClient) {
             retryDelay: 15000,
             retryTimespan: 300000,
             requestSignalTimeoutMS: 30000,
-            closeOnError: false, // CRÍTICO: NO cerrar automáticamente
+            closeOnError: false,
             heartBeatInterval: 30000
           }
         ],
         sendToShard: (guildId, payload) => {
           try {
             const guild = discordClient.guilds.cache.get(guildId);
-            if (guild) {
-              guild.shard.send(payload);
+            if (!guild) return;
+            const shard = discordClient.ws.shards.get(guild.shardId);
+            if (!shard) {
+              log.error("Lavalink", `[${INSTANCE_ID}] WS shard no existe para guild ${guildId}, shardId: ${guild.shardId}`);
+              return;
             }
+            shard.send(payload);
           } catch (error) {
             log.error("Lavalink", `[${INSTANCE_ID}] Error sendToShard:`, error);
           }
@@ -279,19 +238,14 @@ export async function initializeLavalink(discordClient) {
 
       log.info("Lavalink", `[${INSTANCE_ID}] LavalinkManager creado`);
 
-      // INSTRUMENTAR para detectar destroy/disconnect/close
       instrumentManager(lavalinkManager);
 
-      // Registrar eventos ANTES de init
       setupEventListeners(discordClient);
 
-      // INICIALIZAR (una sola vez)
       log.info("Lavalink", `[${INSTANCE_ID}] Llamando init()...`);
-      lavalinkManager.init({
-        id: discordClient.user.id,
-        username: discordClient.user.username
-      });
-
+      const clientId = discordClient.user.id;
+      log.info("Lavalink", `[${INSTANCE_ID}] init() argumento: tipo=${typeof clientId}, valor=${clientId}`);
+      lavalinkManager.init(clientId);
       log.info("Lavalink", `[${INSTANCE_ID}] ✅ init() completado`);
       log.info("Lavalink", `[${INSTANCE_ID}] ===== INICIALIZACIÓN COMPLETA =====`);
 
@@ -312,13 +266,8 @@ export async function initializeLavalink(discordClient) {
   return initializationPromise;
 }
 
-/**
- * Configura event listeners con logs detallados
- */
 function setupEventListeners(discordClient) {
-  // nodeConnect
   lavalinkManager.on("nodeConnect", (node) => {
-    // Instrumentar el nodo cuando se conecta (por si no se hizo antes)
     if (lavalinkManager.nodeManager) {
       instrumentNodes(lavalinkManager.nodeManager);
     }
@@ -339,7 +288,6 @@ function setupEventListeners(discordClient) {
     log.info("Lavalink", `[${INSTANCE_ID}]   connectionState: ${connectionState}`);
   });
 
-  // nodeDisconnect
   lavalinkManager.on("nodeDisconnect", (node, reason) => {
     connectionState = "DISCONNECTED";
     if (nodeStatus) {
@@ -354,7 +302,6 @@ function setupEventListeners(discordClient) {
     connectionState = "CONNECTING";
   });
 
-  // nodeError
   lavalinkManager.on("nodeError", (node, error) => {
     reconnectAttempts++;
     lastError = {
@@ -389,18 +336,15 @@ function setupEventListeners(discordClient) {
     }
   });
 
-  // nodeReconnect
   lavalinkManager.on("nodeReconnect", (node) => {
     connectionState = "CONNECTING";
     log.info("Lavalink", `[${INSTANCE_ID}] 🔄 Reconectando: ${node.id} (intento ${reconnectAttempts + 1})`);
   });
 
-  // Error en nodeManager
   lavalinkManager.nodeManager?.on("error", (error) => {
     log.error("Lavalink", `[${INSTANCE_ID}] Error en NodeManager:`, error);
   });
 
-  // Errores en nodos individuales
   const nodes = lavalinkManager.nodeManager?.nodes;
   if (nodes) {
     for (const node of nodes.values()) {
@@ -413,18 +357,10 @@ function setupEventListeners(discordClient) {
   }
 }
 
-/**
- * Obtiene el cliente de Lavalink (alias para compatibilidad)
- * @returns {LavalinkManager|null}
- */
 export function getLavalinkClient() {
   return getLavalinkManager();
 }
 
-/**
- * Verifica si Lavalink está listo
- * @returns {boolean}
- */
 export function isLavalinkReady() {
   if (!lavalinkManager) return false;
   
@@ -448,10 +384,6 @@ export function isLavalinkReady() {
   }
 }
 
-/**
- * Obtiene el estado del nodo
- * @returns {object}
- */
 export function getNodeStatus() {
   if (!lavalinkManager || !nodeStatus) {
     return {
@@ -481,9 +413,6 @@ export function getNodeStatus() {
   };
 }
 
-/**
- * Método legacy (usar isLavalinkReady)
- */
 export function isConnected() {
   return isLavalinkReady();
 }

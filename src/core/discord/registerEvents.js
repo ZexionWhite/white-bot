@@ -44,23 +44,26 @@ export function registerEvents(client) {
   // Eventos de voz
   client.on("voiceStateUpdate", (oldState, newState) => voiceStateUpdate(client, oldState, newState));
 
-  // Eventos raw para Lavalink
-  client.on("raw", async (data) => {
-    try {
-      const { getLavalinkClient } = await import("../../modules/music/services/lavalink.service.js");
-      const lavalink = getLavalinkClient();
-      if (lavalink && typeof lavalink.sendRawData === "function") {
-        try {
-          lavalink.sendRawData(data);
-        } catch (error) {
-          // Error al enviar raw data - NO crashear, solo loggear
-          log.debug("Lavalink", "Error enviando raw data:", error.message);
+  // Eventos raw para Lavalink (necesarios para manejo de voz)
+  client.on("raw", (packet) => {
+    // Usar una función async inmediata para manejar el import dinámico
+    (async () => {
+      try {
+        const { getLavalinkClient } = await import("../../modules/music/services/lavalink.service.js");
+        const lavalink = getLavalinkClient();
+        if (lavalink && typeof lavalink.sendRawData === "function") {
+          try {
+            lavalink.sendRawData(packet);
+          } catch (error) {
+            // Error al enviar raw data - NO crashear, solo loggear
+            log.debug("Lavalink", "Error enviando raw data:", error.message);
+          }
         }
+      } catch (error) {
+        // Ignorar si Lavalink no está inicializado o hay cualquier error
+        // NO hacer throw - permitir que el bot continúe
       }
-    } catch (error) {
-      // Ignorar si Lavalink no está inicializado o hay cualquier error
-      // NO hacer throw - permitir que el bot continúe
-    }
+    })();
   });
 
   // Errores y advertencias del cliente

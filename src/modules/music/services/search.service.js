@@ -15,13 +15,20 @@ const SPOTIFY_REGEX = /^(https?:\/\/)?(open\.)?spotify\.com\/(track|album|playli
  */
 function getAvailableNode() {
   const manager = getLavalinkClient();
-  if (!manager || !manager.nodeManager || !manager.nodeManager.nodes) {
+  if (!manager) {
+    return null;
+  }
+
+  if (!manager.nodeManager || !manager.nodeManager.nodes) {
     return null;
   }
 
   // Buscar el primer nodo disponible (preferir nodos vivos)
   let bestNode = null;
+  let nodeCount = 0;
+  
   for (const node of manager.nodeManager.nodes.values()) {
+    nodeCount++;
     if (!node) continue;
     
     // Preferir nodos que están vivos
@@ -33,6 +40,11 @@ function getAvailableNode() {
     if (!bestNode && node.rest) {
       bestNode = node;
     }
+  }
+
+  // Si no hay nodos en el manager, puede ser que aún no se haya inicializado
+  if (nodeCount === 0) {
+    return null;
   }
 
   // Retornar el mejor nodo encontrado (aunque no esté completamente conectado)

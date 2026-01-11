@@ -151,7 +151,11 @@ export async function initializeLavalink(discordClient) {
 
     // Inicializar (no bloquear si falla)
     try {
-      lavalinkManager.init(discordClient.user);
+      // init() requiere un objeto con id y username, no el user object directamente
+      lavalinkManager.init({
+        id: discordClient.user.id,
+        username: discordClient.user.username
+      });
       log.info("Lavalink", `✅ Cliente inicializado - Host: ${host}:${port}, Secure: ${secure}`);
     } catch (error) {
       log.error("Lavalink", `❌ Error al inicializar Lavalink:`, error);

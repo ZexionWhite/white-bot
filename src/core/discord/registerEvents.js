@@ -85,10 +85,11 @@ export function registerEvents(client) {
 }
 
 /**
- * Registra handlers de proceso (unhandledRejection, uncaughtException)
+ * Registra handlers de proceso (unhandledRejection, uncaughtException, SIGTERM, SIGINT)
  * NO debe crashear el bot por errores de Lavalink o errores no críticos
  */
 export function registerProcessHandlers(client) {
+  // Handler para unhandled rejections
   process.on("unhandledRejection", (reason, promise) => {
     const errorMsg = reason instanceof Error ? reason.message : String(reason);
     const errorStack = reason instanceof Error ? reason.stack : undefined;
@@ -107,6 +108,7 @@ export function registerProcessHandlers(client) {
     }
   });
 
+  // Handler para excepciones no capturadas
   process.on("uncaughtException", (error) => {
     log.error("Process", "Uncaught Exception:", {
       message: error.message,
@@ -129,5 +131,17 @@ export function registerProcessHandlers(client) {
     // Pero la mayoría de errores de aplicación pueden ser manejados
     log.error("Process", "Error crítico detectado. Verifica logs para más detalles.");
     // NO hacer exit automáticamente - permitir recuperación
+  });
+
+  // Handler para señales de terminación (Dokploy/docker pueden enviar SIGTERM)
+  process.on("SIGTERM", () => {
+    log.warn("Process", "⚠️ SIGTERM recibida - Cerrando gracefully...");
+    // No hacer nada agresivo, dejar que el proceso termine naturalmente
+    // Lavalink se limpiará automáticamente cuando el proceso termine
+  });
+
+  process.on("SIGINT", () => {
+    log.warn("Process", "⚠️ SIGINT recibida (Ctrl+C) - Cerrando gracefully...");
+    // Similar a SIGTERM
   });
 }

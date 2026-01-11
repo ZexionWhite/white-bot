@@ -4,13 +4,18 @@
  */
 import { LavalinkManager } from "lavalink-client";
 import { log } from "../../../core/logger/index.js";
+import { randomUUID } from "crypto";
 
-// Estado del servicio
+// INSTANCE_ID único para detectar múltiples inicializaciones
+const INSTANCE_ID = randomUUID().substring(0, 8);
+
+// Estado del servicio (SINGLETON)
 let lavalinkManager = null;
 let connectionState = "DISCONNECTED"; // DISCONNECTED, CONNECTING, CONNECTED, UNAVAILABLE
 let nodeStatus = null;
 let reconnectAttempts = 0;
 let lastError = null;
+let initializationInProgress = false;
 
 // Configuración
 let config = null;
@@ -62,121 +67,150 @@ async function diagnoseLavalinkConnection(host, port, secure) {
 
 /**
  * Inicializa el cliente de Lavalink con manejo robusto de errores
+ * SINGLETON: Solo una instancia por proceso
  * @param {import("discord.js").Client} discordClient - Cliente de Discord
  */
 export async function initializeLavalink(discordClient) {
+  // Prevenir doble inicialización
   if (lavalinkManager) {
-    log.warn("Lavalink", "Cliente ya inicializado");
+    log.warn("Lavalink", `[${INSTANCE_ID}] ⚠️ Cliente ya inicializado (singleton), retornando instancia existente`);
     return lavalinkManager;
   }
 
-  const host = process.env.LAVALINK_HOST || "localhost";
-  const port = parseInt(process.env.LAVALINK_PORT || "2333", 10);
-  const password = process.env.LAVALINK_PASSWORD || "youshallnotpass";
-  const secure = (process.env.LAVALINK_SECURE || "false").toLowerCase() === "true";
-
-  config = { host, port, password, secure };
-
-  log.info("Lavalink", `Configurando conexión a Lavalink...`);
-  log.info("Lavalink", `  Host: ${host}`);
-  log.info("Lavalink", `  Port: ${port}`);
-  log.info("Lavalink", `  Secure: ${secure}`);
-  log.info("Lavalink", `  Password: ${password ? "***" : "NO CONFIGURADA"}`);
-
-  if (!password || password === "youshallnotpass") {
-    log.warn("Lavalink", "⚠️ Usando contraseña por defecto. Configura LAVALINK_PASSWORD en tus variables de entorno.");
+  // Prevenir inicializaciones concurrentes
+  if (initializationInProgress) {
+    log.warn("Lavalink", `[${INSTANCE_ID}] ⚠️ Inicialización ya en progreso, esperando...`);
+    // Esperar hasta que termine la inicialización actual
+    while (initializationInProgress) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    return lavalinkManager;
   }
 
-  // Diagnóstico de red previo
-  log.info("Lavalink", "🔍 Ejecutando diagnóstico de red...");
-  const diagnosis = await diagnoseLavalinkConnection(host, port, secure);
-  
-  if (!diagnosis.available) {
-    const errorMsg = diagnosis.error === "DNS_FAILED" 
-      ? `No se puede resolver el hostname '${host}'. Verifica LAVALINK_HOST o configura red Docker compartida.`
-      : diagnosis.error === "AUTH_FAILED"
-      ? `Error de autenticación (${diagnosis.status}). Verifica LAVALINK_PASSWORD.`
-      : diagnosis.error === "CONNECTION_REFUSED"
-      ? `Conexión rechazada. Verifica que Lavalink esté corriendo en ${host}:${port}.`
-      : diagnosis.error === "TIMEOUT"
-      ? `Timeout al conectar. Verifica firewall o red.`
-      : `Error de red: ${diagnosis.error} (${diagnosis.code || diagnosis.status || "unknown"})`;
-    
-    log.error("Lavalink", `❌ Diagnóstico falló: ${errorMsg}`);
-    connectionState = "UNAVAILABLE";
-    lastError = { type: diagnosis.error, message: errorMsg, code: diagnosis.code, status: diagnosis.status };
-    log.warn("Lavalink", "El bot continuará sin funcionalidad de música hasta que Lavalink esté disponible.");
-    return null;
-  }
-
-  log.info("Lavalink", "✅ Diagnóstico exitoso: Lavalink está accesible");
-
-  connectionState = "CONNECTING";
+  initializationInProgress = true;
+  log.info("Lavalink", `[${INSTANCE_ID}] ===== INICIALIZACIÓN LAVALINK =====`);
 
   try {
-    lavalinkManager = new LavalinkManager({
-      nodes: [
-        {
-          authorization: password,
-          host,
-          port,
-          id: "Main Node",
-          secure,
-          retryAmount: 10, // Más intentos
-          retryDelay: 15000, // 15 segundos entre intentos
-          retryTimespan: 300000, // 5 minutos de ventana de reintentos
-          requestSignalTimeoutMS: 30000, // 30 segundos timeout
-          closeOnError: false, // NO cerrar en error, manejar manualmente
-          heartBeatInterval: 30000
-        }
-      ],
-      sendToShard: (guildId, payload) => {
-        try {
-          const guild = discordClient.guilds.cache.get(guildId);
-          if (guild) {
-            guild.shard.send(payload);
-          }
-        } catch (error) {
-          log.error("Lavalink", `Error enviando payload a shard ${guildId}:`, error);
-        }
-      },
-      client: {
-        id: discordClient.user.id,
-        username: discordClient.user.username
-      }
-    });
+    const host = process.env.LAVALINK_HOST || "localhost";
+    const port = parseInt(process.env.LAVALINK_PORT || "2333", 10);
+    const password = process.env.LAVALINK_PASSWORD || "youshallnotpass";
+    const secure = (process.env.LAVALINK_SECURE || "false").toLowerCase() === "true";
 
-    // Registrar TODOS los eventos posibles
-    setupEventListeners(discordClient);
+    config = { host, port, password, secure };
 
-    // Inicializar (no bloquear si falla)
-    try {
-      // init() requiere un objeto con id y username, no el user object directamente
-      lavalinkManager.init({
-        id: discordClient.user.id,
-        username: discordClient.user.username
-      });
-      log.info("Lavalink", `✅ Cliente inicializado - Host: ${host}:${port}, Secure: ${secure}`);
-    } catch (error) {
-      log.error("Lavalink", `❌ Error al inicializar Lavalink:`, error);
+    log.info("Lavalink", `[${INSTANCE_ID}] Configurando conexión a Lavalink...`);
+    log.info("Lavalink", `[${INSTANCE_ID}]   Host: ${host}`);
+    log.info("Lavalink", `[${INSTANCE_ID}]   Port: ${port}`);
+    log.info("Lavalink", `[${INSTANCE_ID}]   Secure: ${secure}`);
+    log.info("Lavalink", `[${INSTANCE_ID}]   Password: ${password ? "***" : "NO CONFIGURADA"}`);
+
+    if (!password || password === "youshallnotpass") {
+      log.warn("Lavalink", `[${INSTANCE_ID}] ⚠️ Usando contraseña por defecto. Configura LAVALINK_PASSWORD en tus variables de entorno.`);
+    }
+
+    // Diagnóstico de red previo
+    log.info("Lavalink", `[${INSTANCE_ID}] 🔍 Ejecutando diagnóstico de red...`);
+    const diagnosis = await diagnoseLavalinkConnection(host, port, secure);
+    
+    if (!diagnosis.available) {
+      const errorMsg = diagnosis.error === "DNS_FAILED" 
+        ? `No se puede resolver el hostname '${host}'. Verifica LAVALINK_HOST o configura red Docker compartida.`
+        : diagnosis.error === "AUTH_FAILED"
+        ? `Error de autenticación (${diagnosis.status}). Verifica LAVALINK_PASSWORD.`
+        : diagnosis.error === "CONNECTION_REFUSED"
+        ? `Conexión rechazada. Verifica que Lavalink esté corriendo en ${host}:${port}.`
+        : diagnosis.error === "TIMEOUT"
+        ? `Timeout al conectar. Verifica firewall o red.`
+        : `Error de red: ${diagnosis.error} (${diagnosis.code || diagnosis.status || "unknown"})`;
+      
+      log.error("Lavalink", `[${INSTANCE_ID}] ❌ Diagnóstico falló: ${errorMsg}`);
       connectionState = "UNAVAILABLE";
-      lastError = { type: "INIT_ERROR", message: error.message, stack: error.stack };
-      // NO hacer throw - el bot debe continuar
+      lastError = { type: diagnosis.error, message: errorMsg, code: diagnosis.code, status: diagnosis.status };
+      log.warn("Lavalink", `[${INSTANCE_ID}] El bot continuará sin funcionalidad de música hasta que Lavalink esté disponible.`);
+      initializationInProgress = false;
       return null;
     }
 
-    return lavalinkManager;
+    log.info("Lavalink", `[${INSTANCE_ID}] ✅ Diagnóstico exitoso: Lavalink está accesible`);
+
+    connectionState = "CONNECTING";
+
+    try {
+      log.info("Lavalink", `[${INSTANCE_ID}] Creando LavalinkManager...`);
+      lavalinkManager = new LavalinkManager({
+        nodes: [
+          {
+            authorization: password,
+            host,
+            port,
+            id: "Main Node",
+            secure,
+            retryAmount: 10, // Más intentos
+            retryDelay: 15000, // 15 segundos entre intentos
+            retryTimespan: 300000, // 5 minutos de ventana de reintentos
+            requestSignalTimeoutMS: 30000, // 30 segundos timeout
+            closeOnError: false, // NO cerrar en error, manejar manualmente
+            heartBeatInterval: 30000
+          }
+        ],
+        sendToShard: (guildId, payload) => {
+          try {
+            const guild = discordClient.guilds.cache.get(guildId);
+            if (guild) {
+              guild.shard.send(payload);
+            }
+          } catch (error) {
+            log.error("Lavalink", `[${INSTANCE_ID}] Error enviando payload a shard ${guildId}:`, error);
+          }
+        },
+        client: {
+          id: discordClient.user.id,
+          username: discordClient.user.username
+        }
+      });
+
+      log.info("Lavalink", `[${INSTANCE_ID}] LavalinkManager creado exitosamente`);
+
+      // Registrar TODOS los eventos posibles ANTES de inicializar
+      setupEventListeners(discordClient);
+
+      // Inicializar (no bloquear si falla)
+      try {
+        log.info("Lavalink", `[${INSTANCE_ID}] Inicializando manager (init)...`);
+        lavalinkManager.init({
+          id: discordClient.user.id,
+          username: discordClient.user.username
+        });
+        log.info("Lavalink", `[${INSTANCE_ID}] ✅ Cliente inicializado - Host: ${host}:${port}, Secure: ${secure}`);
+      } catch (error) {
+        log.error("Lavalink", `[${INSTANCE_ID}] ❌ Error al inicializar Lavalink:`, error);
+        connectionState = "UNAVAILABLE";
+        lastError = { type: "INIT_ERROR", message: error.message, stack: error.stack };
+        initializationInProgress = false;
+        // NO hacer throw - el bot debe continuar
+        return null;
+      }
+
+      initializationInProgress = false;
+      log.info("Lavalink", `[${INSTANCE_ID}] ===== INICIALIZACIÓN COMPLETA =====`);
+      return lavalinkManager;
+    } catch (error) {
+      log.error("Lavalink", `[${INSTANCE_ID}] ❌ Error creando LavalinkManager:`, error);
+      connectionState = "UNAVAILABLE";
+      lastError = { type: "CREATE_ERROR", message: error.message, stack: error.stack };
+      initializationInProgress = false;
+      // NO hacer throw
+      return null;
+    }
   } catch (error) {
-    log.error("Lavalink", `❌ Error creando LavalinkManager:`, error);
-    connectionState = "UNAVAILABLE";
-    lastError = { type: "CREATE_ERROR", message: error.message, stack: error.stack };
-    // NO hacer throw
+    log.error("Lavalink", `[${INSTANCE_ID}] ❌ Error inesperado en initializeLavalink:`, error);
+    initializationInProgress = false;
     return null;
   }
 }
 
 /**
- * Configura todos los event listeners de Lavalink
+ * Configura todos los event listeners de Lavalink con logs detallados
  * @param {import("discord.js").Client} discordClient - Cliente de Discord
  */
 function setupEventListeners(discordClient) {
@@ -192,8 +226,8 @@ function setupEventListeners(discordClient) {
       connected: true,
       connectedAt: Date.now()
     };
-    log.info("Lavalink", `✅ Nodo conectado: ${node.id} (${node.host}:${node.port})`);
-    log.debug("Lavalink", `Estado del nodo - isAlive: ${node.isAlive}, estado interno: ${connectionState}`);
+    log.info("Lavalink", `[${INSTANCE_ID}] ✅ Nodo conectado: ${node.id} (${node.host}:${node.port})`);
+    log.info("Lavalink", `[${INSTANCE_ID}]   Estado: isAlive=${node.isAlive}, connectionState=${connectionState}`);
   });
 
   // Nodo desconectado
@@ -204,7 +238,9 @@ function setupEventListeners(discordClient) {
       nodeStatus.disconnectedAt = Date.now();
       nodeStatus.lastDisconnectReason = reason;
     }
-    log.warn("Lavalink", `⚠️ Nodo desconectado: ${node.id} (${node.host}:${node.port}) - Razón: ${reason}`);
+    log.warn("Lavalink", `[${INSTANCE_ID}] ⚠️ Nodo desconectado: ${node.id} (${node.host}:${node.port})`);
+    log.warn("Lavalink", `[${INSTANCE_ID}]   Razón: ${reason || "Sin razón proporcionada"}`);
+    log.warn("Lavalink", `[${INSTANCE_ID}]   Estado anterior: ${connectionState}, Intento: ${reconnectAttempts}`);
     
     // El cliente automáticamente intentará reconectar según retryAmount/retryDelay
     connectionState = "CONNECTING";
@@ -237,16 +273,20 @@ function setupEventListeners(discordClient) {
     } else if (error.code === "ERR_UNHANDLED_ERROR") {
       errorType = "WEBSOCKET_ERROR";
       userMessage = `Error en WebSocket. Verifica conectividad de red.`;
+    } else if (error.code === 1006) {
+      errorType = "WEBSOCKET_CLOSED_ABNORMALLY";
+      userMessage = `WebSocket cerrado anormalmente (código 1006). Posible problema de red o servidor.`;
     }
 
     lastError.errorType = errorType;
 
-    log.error("Lavalink", `❌ Error en nodo ${node.id} (intento ${reconnectAttempts}):`, {
+    log.error("Lavalink", `[${INSTANCE_ID}] ❌ Error en nodo ${node.id} (intento ${reconnectAttempts}):`, {
       message: error.message,
       code: error.code,
       type: errorType,
       host: node.host,
-      port: node.port
+      port: node.port,
+      stack: error.stack
     });
 
     // NO hacer throw - solo loggear
@@ -256,24 +296,30 @@ function setupEventListeners(discordClient) {
   // Nodo reconectando
   lavalinkManager.on("nodeReconnect", (node) => {
     connectionState = "CONNECTING";
-    log.info("Lavalink", `🔄 Reconectando nodo: ${node.id} (${node.host}:${node.port}) - Intento ${reconnectAttempts + 1}`);
+    log.info("Lavalink", `[${INSTANCE_ID}] 🔄 Reconectando nodo: ${node.id} (${node.host}:${node.port}) - Intento ${reconnectAttempts + 1}`);
   });
 
   // Agregar listener genérico para cualquier error no capturado
   lavalinkManager.nodeManager?.on("error", (error) => {
-    log.error("Lavalink", "Error en NodeManager (capturado):", error);
+    log.error("Lavalink", `[${INSTANCE_ID}] Error en NodeManager (capturado):`, {
+      message: error.message,
+      code: error.code,
+      stack: error.stack
+    });
     // NO hacer throw - solo loggear
   });
 
   // Prevenir que errores del WebSocket crasheen el proceso
-  // Los nodos manejan sus propios errores, pero asegurémonos de capturar todo
   const nodes = lavalinkManager.nodeManager?.nodes;
   if (nodes) {
     for (const node of nodes.values()) {
       if (node && typeof node.on === "function") {
-        // Ya tenemos nodeError, pero por si acaso
         node.on("error", (error) => {
-          log.error("Lavalink", `Error en nodo ${node.id} (capturado):`, error);
+          log.error("Lavalink", `[${INSTANCE_ID}] Error en nodo ${node.id} (capturado):`, {
+            message: error.message,
+            code: error.code,
+            stack: error.stack
+          });
           // NO hacer throw
         });
       }
@@ -282,7 +328,7 @@ function setupEventListeners(discordClient) {
 }
 
 /**
- * Obtiene el cliente de Lavalink
+ * Obtiene el cliente de Lavalink (SINGLETON)
  * @returns {LavalinkManager|null}
  */
 export function getLavalinkClient() {
@@ -307,7 +353,7 @@ export function isLavalinkReady() {
         // Si encontramos un nodo vivo, actualizar el estado interno si es necesario
         if (connectionState !== "CONNECTED") {
           connectionState = "CONNECTED";
-          log.debug("Lavalink", `Estado actualizado a CONNECTED (nodo ${node.id} está vivo)`);
+          log.debug("Lavalink", `[${INSTANCE_ID}] Estado actualizado a CONNECTED (nodo ${node.id} está vivo)`);
         }
         return true;
       }
@@ -316,12 +362,12 @@ export function isLavalinkReady() {
     // Si no hay nodos vivos pero el manager existe, el estado es DISCONNECTED
     if (connectionState === "CONNECTED") {
       connectionState = "DISCONNECTED";
-      log.debug("Lavalink", "Estado actualizado a DISCONNECTED (no hay nodos vivos)");
+      log.debug("Lavalink", `[${INSTANCE_ID}] Estado actualizado a DISCONNECTED (no hay nodos vivos)`);
     }
     
     return false;
   } catch (error) {
-    log.error("Lavalink", "Error verificando estado de nodos:", error);
+    log.error("Lavalink", `[${INSTANCE_ID}] Error verificando estado de nodos:`, error);
     return false;
   }
 }
@@ -335,7 +381,8 @@ export function getNodeStatus() {
     return {
       state: connectionState,
       available: false,
-      error: lastError
+      error: lastError,
+      instanceId: INSTANCE_ID
     };
   }
 
@@ -344,6 +391,7 @@ export function getNodeStatus() {
   return {
     state: connectionState,
     available: isLavalinkReady(),
+    instanceId: INSTANCE_ID,
     node: {
       id: nodeStatus.id,
       host: nodeStatus.host,

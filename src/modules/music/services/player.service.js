@@ -1,6 +1,6 @@
 /**
- * Servicio de gestión de players de Lavalink
- * Maneja la creación y gestión de players por guild
+ * Servicio de gesti?n de players de Lavalink
+ * Maneja la creaci?n y gesti?n de players por guild
  */
 import { getLavalinkClient } from "./lavalink.service.js";
 import { getQueue, deleteQueue } from "./queue.service.js";
@@ -9,7 +9,7 @@ import { log } from "../../../core/logger/index.js";
 // Almacenamiento: guildId -> Player
 const players = new Map();
 
-// Timeout de desconexión por inactividad (5 minutos)
+// Timeout de desconexi?n por inactividad (5 minutos)
 const IDLE_TIMEOUT = 5 * 60 * 1000;
 const idleTimeouts = new Map();
 
@@ -46,7 +46,7 @@ export function getPlayer(guildId) {
         // Llamar al handler de trackEnd
         const { handleTrackEnd } = await import("../events/trackEnd.js");
         // El evento trackEnd de lavalink-client puede tener diferentes estructuras
-        // Intentar obtener el track y la razón
+        // Intentar obtener el track y la raz?n
         const track = data?.track || player.track || null;
         const reason = data?.reason || "FINISHED";
         if (track) {
@@ -75,7 +75,7 @@ export function getPlayer(guildId) {
     });
 
     player.on("trackException", (data) => {
-      log.error("Player", `Excepción en track guild ${guildId}:`, data);
+      log.error("Player", `Excepci?n en track guild ${guildId}:`, data);
       // NO hacer throw - solo loggear
     });
 
@@ -93,7 +93,7 @@ export function getPlayer(guildId) {
 
     // Prevenir errores no capturados del player
     if (typeof player.on === "function") {
-      // Agregar listener genérico de error si existe
+      // Agregar listener gen?rico de error si existe
       try {
         player.on("error", (error) => {
           log.error("Player", `Error en player guild ${guildId}:`, error);
@@ -178,7 +178,7 @@ export async function playTrack(guildId, track) {
 }
 
 /**
- * Pausa la reproducción
+ * Pausa la reproducci?n
  * @param {string} guildId - ID del guild
  * @returns {boolean}
  */
@@ -196,7 +196,7 @@ export function pause(guildId) {
 }
 
 /**
- * Reanuda la reproducción
+ * Reanuda la reproducci?n
  * @param {string} guildId - ID del guild
  * @returns {boolean}
  */
@@ -214,7 +214,7 @@ export function resume(guildId) {
 }
 
 /**
- * Detiene la reproducción
+ * Detiene la reproducci?n
  * @param {string} guildId - ID del guild
  * @returns {boolean}
  */
@@ -232,7 +232,7 @@ export function stop(guildId) {
 }
 
 /**
- * Verifica si está reproduciendo
+ * Verifica si est? reproduciendo
  * @param {string} guildId - ID del guild
  * @returns {boolean}
  */
@@ -243,7 +243,7 @@ export function isPlaying(guildId) {
 }
 
 /**
- * Verifica si está pausado
+ * Verifica si est? pausado
  * @param {string} guildId - ID del guild
  * @returns {boolean}
  */
@@ -265,7 +265,7 @@ export function getCurrentTrack(guildId) {
 }
 
 /**
- * Obtiene la posición actual del track
+ * Obtiene la posici?n actual del track
  * @param {string} guildId - ID del guild
  * @returns {number}
  */
@@ -311,7 +311,9 @@ export async function disconnect(guildId) {
   if (!player) return;
 
   try {
+    log.debug("Player", `Desconectando player para guild ${guildId}`);
     await player.disconnect();
+    log.debug("Player", `Player desconectado exitosamente para guild ${guildId}`);
   } catch (error) {
     log.error("Player", `Error desconectando en guild ${guildId}:`, error);
   }
@@ -327,7 +329,9 @@ export function cleanup(guildId) {
   const player = players.get(guildId);
   if (player) {
     try {
+      log.debug("Player", `Limpiando player para guild ${guildId} (destroy)`);
       player.destroy();
+      log.debug("Player", `Player destruido exitosamente para guild ${guildId}`);
     } catch (error) {
       log.error("Player", `Error destruyendo player en guild ${guildId}:`, error);
     }

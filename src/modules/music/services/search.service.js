@@ -10,6 +10,26 @@ const YOUTUBE_REGEX = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
 const SPOTIFY_REGEX = /^(https?:\/\/)?(open\.)?spotify\.com\/(track|album|playlist|artist)\/.+/;
 
 /**
+ * Obtiene un nodo disponible de Lavalink
+ * @returns {object|null} Nodo de Lavalink
+ */
+function getAvailableNode() {
+  const manager = getLavalinkClient();
+  if (!manager || !manager.nodeManager || !manager.nodeManager.nodes) {
+    return null;
+  }
+
+  // Buscar el primer nodo disponible
+  for (const node of manager.nodeManager.nodes.values()) {
+    if (node && node.isAlive === true) {
+      return node;
+    }
+  }
+
+  return null;
+}
+
+/**
  * Resuelve una query o URL a tracks
  * @param {string} query - Query de búsqueda o URL
  * @returns {Promise<{loadType: string, tracks: Array, playlistInfo?: object}>}
@@ -24,11 +44,16 @@ export async function resolveQuery(query, requester = null) {
     throw new Error("Cliente de Lavalink no inicializado");
   }
 
+  const node = getAvailableNode();
+  if (!node || !node.rest) {
+    throw new Error("No hay nodos de Lavalink disponibles");
+  }
+
   try {
     // Si es URL de YouTube, cargar directo
     if (YOUTUBE_REGEX.test(query)) {
       log.debug("Search", `Resolviendo URL de YouTube: ${query}`);
-      const result = await manager.search({ query, source: "ytsearch" }, requester);
+      const result = await node.rest.loadTracks(query);
       return result;
     }
 
@@ -38,7 +63,7 @@ export async function resolveQuery(query, requester = null) {
       
       // Intentar con LavaSrc (spsearch)
       try {
-        const spotifyResult = await manager.search({ query: `spsearch:${query}`, source: "spsearch" }, requester);
+        const spotifyResult = await node.rest.loadTracks(`spsearch:${query}`);
         if (spotifyResult && spotifyResult.tracks && spotifyResult.tracks.length > 0) {
           return spotifyResult;
         }
@@ -55,7 +80,7 @@ export async function resolveQuery(query, requester = null) {
     
     // Intentar ytmsearch primero (mejor calidad)
     try {
-      const ytmResult = await manager.search({ query, source: "ytmsearch" }, requester);
+      const ytmResult = await node.rest.loadTracks(`ytmsearch:${query}`);
       if (ytmResult && ytmResult.tracks && ytmResult.tracks.length > 0) {
         return ytmResult;
       }
@@ -64,7 +89,7 @@ export async function resolveQuery(query, requester = null) {
     }
 
     // Fallback a ytsearch
-    const ytResult = await manager.search({ query, source: "ytsearch" }, requester);
+    const ytResult = await node.rest.loadTracks(`ytsearch:${query}`);
     return ytResult;
 
   } catch (error) {
@@ -79,8 +104,11 @@ export async function resolveQuery(query, requester = null) {
  * @returns {Promise<{loadType: string, tracks: Array}>}
  */
 async function resolveSpotifyMirroring(spotifyUrl, requester = null) {
-  const manager = getLavalinkClient();
-  
+  const node = getAvailableNode();
+  if (!node || !node.rest) {
+    throw new Error("No hay nodos de Lavalink disponibles");
+  }
+
   // Extraer tipo y ID de la URL de Spotify
   const match = spotifyUrl.match(/spotify\.com\/(track|album|playlist|artist)\/([a-zA-Z0-9]+)/);
   if (!match) {
@@ -100,7 +128,7 @@ async function resolveSpotifyMirroring(spotifyUrl, requester = null) {
   // Intentar búsqueda genérica (el usuario debería proporcionar el nombre si es posible)
   // Por ahora, intentamos con spsearch de LavaSrc que debería manejar esto
   try {
-    const result = await manager.search({ query: `spsearch:${spotifyUrl}`, source: "spsearch" }, requester);
+    const result = await node.rest.loadTracks(`spsearch:${spotifyUrl}`);
     if (result && result.tracks && result.tracks.length > 0) {
       return result;
     }
@@ -110,7 +138,7 @@ async function resolveSpotifyMirroring(spotifyUrl, requester = null) {
   }
 
   // Último recurso: buscar en YouTube con el ID (probablemente no funcione bien)
-  const ytResult = await manager.search({ query: id, source: "ytsearch" }, requester);
+  const ytResult = await node.rest.loadTracks(`ytsearch:${id}`);
   return ytResult;
 }
 

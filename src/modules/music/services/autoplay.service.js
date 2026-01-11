@@ -122,9 +122,29 @@ export async function addSimilarTracks(guildId) {
 
   log.debug("Autoplay", `Buscando similares para: ${searchQuery}`);
 
+  // Obtener un nodo disponible
+  const nodeManager = client.nodeManager;
+  if (!nodeManager || !nodeManager.nodes) {
+    log.error("Autoplay", "NodeManager no disponible");
+    return 0;
+  }
+
+  let node = null;
+  for (const n of nodeManager.nodes.values()) {
+    if (n && n.isAlive === true) {
+      node = n;
+      break;
+    }
+  }
+
+  if (!node || !node.rest) {
+    log.error("Autoplay", "No hay nodos disponibles");
+    return 0;
+  }
+
   try {
     // Buscar con ytmsearch
-    const result = await client.search({ query: searchQuery, source: "ytmsearch" }, null);
+    const result = await node.rest.loadTracks(`ytmsearch:${searchQuery}`);
     
     if (!result || !result.tracks || result.tracks.length === 0) {
       log.debug("Autoplay", "No se encontraron tracks similares");

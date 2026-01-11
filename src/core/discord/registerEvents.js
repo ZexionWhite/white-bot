@@ -45,25 +45,29 @@ export function registerEvents(client) {
   client.on("voiceStateUpdate", (oldState, newState) => voiceStateUpdate(client, oldState, newState));
 
   // Eventos raw para Lavalink (necesarios para manejo de voz)
+  // Importar el servicio de manera estática para evitar problemas de timing
+  let lavalinkServicePromise = null;
   client.on("raw", (packet) => {
-    // Usar una función async inmediata para manejar el import dinámico
-    (async () => {
-      try {
-        const { getLavalinkClient } = await import("../../modules/music/services/lavalink.service.js");
-        const lavalink = getLavalinkClient();
-        if (lavalink && typeof lavalink.sendRawData === "function") {
-          try {
-            lavalink.sendRawData(packet);
-          } catch (error) {
-            // Error al enviar raw data - NO crashear, solo loggear
-            log.debug("Lavalink", "Error enviando raw data:", error.message);
-          }
+    // Cargar el servicio solo una vez (lazy initialization)
+    if (!lavalinkServicePromise) {
+      lavalinkServicePromise = import("../../modules/music/services/lavalink.service.js").catch(() => null);
+    }
+    
+    // Enviar el evento de manera asíncrona pero sin bloquear
+    lavalinkServicePromise.then((module) => {
+      if (!module) return;
+      const lavalink = module.getLavalinkClient();
+      if (lavalink && typeof lavalink.sendRawData === "function") {
+        try {
+          lavalink.sendRawData(packet);
+        } catch (error) {
+          // Error al enviar raw data - NO crashear, solo loggear
+          log.debug("Lavalink", "Error enviando raw data:", error.message);
         }
-      } catch (error) {
-        // Ignorar si Lavalink no está inicializado o hay cualquier error
-        // NO hacer throw - permitir que el bot continúe
       }
-    })();
+    }).catch(() => {
+      // Ignorar errores silenciosamente
+    });
   });
 
   // Errores y advertencias del cliente

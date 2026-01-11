@@ -118,6 +118,7 @@ function instrumentNodes(nodeManager) {
       };
       node.socket._instrumentedClose = true;
     }
+  }
 }
 
 /**

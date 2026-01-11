@@ -58,6 +58,12 @@
     }
   },
   "voice": {
+    "join": {
+      "footer": "Voice state update • {when}"
+    },
+    "leave": {
+      "footer": "Voice state update • {when}"
+    },
     "joined": {
       "title": "🔊 User Joined Voice",
       "description": "**{username}** ({userId}) joined a voice channel.",

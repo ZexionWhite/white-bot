@@ -25,13 +25,10 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed(`Entry #${caseId} not found`)], ephemeral: true });
   }
 
-  // Create pending action
   const payload = { caseId, severity: newSeverity ? newSeverity.toUpperCase() : null };
   const actionId = await createPendingAction(itx.guild.id, itx.user.id, "blacklist.edit", payload);
 
-  // Create and show modal
   const modal = createBlacklistModal(`pending:${actionId}`, true);
   
   return itx.showModal(modal);
 }
-

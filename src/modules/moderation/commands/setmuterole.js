@@ -23,4 +23,3 @@ export async function handle(itx) {
 
   return itx.reply({ embeds: [createSuccessEmbed(`Rol de mute configurado: ${role}`, { id: role.id })] });
 }
-

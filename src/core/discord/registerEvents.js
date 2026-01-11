@@ -1,6 +1,3 @@
-/**
- * Registra todos los eventos del cliente Discord
- */
 import ready from "../../events/ready.js";
 import guildMemberAdd from "../../events/guildMemberAdd.js";
 import interactionCreate from "../../events/interactionCreate.js";
@@ -14,46 +11,34 @@ import voiceStateUpdate from "../../events/voiceStateUpdate.js";
 import { startApiTracker } from "../../utils/apiTracker.js";
 import { log } from "../logger/index.js";
 
-/**
- * Registra todos los eventos del cliente
- * @param {import("discord.js").Client} client - Cliente de Discord
- */
 export function registerEvents(client) {
-  // Ready event (una sola vez)
+  
   client.once("ready", async () => {
     startApiTracker(client);
     await ready(client);
   });
 
-  // Eventos de guild members
   client.on("guildMemberAdd", (m) => guildMemberAdd(client, m));
   client.on("guildMemberUpdate", (oldM, newM) => guildMemberUpdate(client, oldM, newM));
   client.on("guildMemberRemove", (m) => guildMemberRemove(client, m));
 
-  // Eventos de interacciones
   client.on("interactionCreate", (i) => interactionCreate(client, i));
 
-  // Eventos de mensajes
   client.on("messageCreate", (m) => messageCreate(client, m));
   client.on("messageDelete", (m) => messageDelete(client, m));
   client.on("messageUpdate", (oldM, newM) => messageUpdate(client, oldM, newM));
 
-  // Eventos de usuario
   client.on("userUpdate", (oldU, newU) => userUpdate(client, oldU, newU));
 
-  // Eventos de voz
   client.on("voiceStateUpdate", (oldState, newState) => voiceStateUpdate(client, oldState, newState));
 
-  // Eventos raw para Lavalink (necesarios para manejo de voz)
-  // Importar el servicio de manera estática para evitar problemas de timing
   let lavalinkServicePromise = null;
   client.on("raw", (packet) => {
-    // Cargar el servicio solo una vez (lazy initialization)
+    
     if (!lavalinkServicePromise) {
       lavalinkServicePromise = import("../../modules/music/services/lavalink.service.js").catch(() => null);
     }
-    
-    // Enviar el evento de manera asíncrona pero sin bloquear
+
     lavalinkServicePromise.then((module) => {
       if (!module) return;
       const lavalink = module.getLavalinkClient();
@@ -61,16 +46,15 @@ export function registerEvents(client) {
         try {
           lavalink.sendRawData(packet);
         } catch (error) {
-          // Error al enviar raw data - NO crashear, solo loggear
+          
           log.debug("Lavalink", "Error enviando raw data:", error.message);
         }
       }
     }).catch(() => {
-      // Ignorar errores silenciosamente
+      
     });
   });
 
-  // Errores y advertencias del cliente
   client.on("error", (error) => {
     log.error("Client", "Error del cliente Discord:", error.message);
     console.error("[Client] Error completo:", error);
@@ -84,12 +68,8 @@ export function registerEvents(client) {
   });
 }
 
-/**
- * Registra handlers de proceso (unhandledRejection, uncaughtException, SIGTERM, SIGINT)
- * NO debe crashear el bot por errores de Lavalink o errores no críticos
- */
 export function registerProcessHandlers(client) {
-  // Handler para unhandled rejections
+  
   process.on("unhandledRejection", (reason, promise) => {
     const errorMsg = reason instanceof Error ? reason.message : String(reason);
     const errorStack = reason instanceof Error ? reason.stack : undefined;
@@ -99,16 +79,13 @@ export function registerProcessHandlers(client) {
       stack: errorStack,
       promise: promise
     });
-    
-    // NO hacer exit - permitir que el bot continúe
-    // Errores de Lavalink NO son críticos
+
     if (errorMsg.includes("Lavalink") || errorMsg.includes("ERR_UNHANDLED_ERROR") || errorMsg.includes("WebSocket")) {
       log.warn("Process", "Error relacionado con Lavalink capturado. El bot continuará sin funcionalidad de música.");
       return;
     }
   });
 
-  // Handler para excepciones no capturadas
   process.on("uncaughtException", (error) => {
     log.error("Process", "Uncaught Exception:", {
       message: error.message,
@@ -116,32 +93,26 @@ export function registerProcessHandlers(client) {
       name: error.name,
       code: error.code
     });
-    
-    // Solo hacer exit si es un error crítico del sistema
-    // Errores de Lavalink/WebSocket NO son críticos
+
     if (error.message?.includes("Lavalink") || 
         error.message?.includes("ERR_UNHANDLED_ERROR") || 
         error.message?.includes("WebSocket") ||
         error.code === "ERR_UNHANDLED_ERROR") {
       log.warn("Process", "Error relacionado con Lavalink capturado. El bot continuará sin funcionalidad de música.");
-      return; // NO hacer exit
+      return; 
     }
-    
-    // Para errores críticos del sistema (out of memory, etc.), hacer exit
-    // Pero la mayoría de errores de aplicación pueden ser manejados
+
     log.error("Process", "Error crítico detectado. Verifica logs para más detalles.");
-    // NO hacer exit automáticamente - permitir recuperación
+    
   });
 
-  // Handler para señales de terminación (Dokploy/docker pueden enviar SIGTERM)
   process.on("SIGTERM", () => {
     log.warn("Process", "⚠️ SIGTERM recibida - Cerrando gracefully...");
-    // No hacer nada agresivo, dejar que el proceso termine naturalmente
-    // Lavalink se limpiará automáticamente cuando el proceso termine
+
   });
 
   process.on("SIGINT", () => {
     log.warn("Process", "⚠️ SIGINT recibida (Ctrl+C) - Cerrando gracefully...");
-    // Similar a SIGTERM
+    
   });
 }

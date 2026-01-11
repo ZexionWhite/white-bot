@@ -5,7 +5,6 @@ import * as PolicyRepo from "../../moderation/db/policy.repo.js";
 import * as TrustScoreService from "../../moderation/services/trustscore.service.js";
 import { formatDuration } from "../../../utils/time.js";
 
-// Esta función ya no se usa, pero la mantenemos por compatibilidad
 export function getUserOverview(member, guild) {
   const highestRole = member.roles.highest;
   const highestRoleDisplay = highestRole && highestRole.id !== guild.id 
@@ -19,7 +18,7 @@ export function getUserOverview(member, guild) {
 
 export async function getUserSanctions(guildId, userId) {
   const allCases = await CasesService.getUserCases(guildId, userId, null, 10, 0);
-  // Filtrar casos de blacklist - la blacklist es un sistema separado
+  
   return allCases.filter(c => c.type !== "BLACKLIST");
 }
 
@@ -49,4 +48,3 @@ export async function getUserPermissions(guildId, userId, member) {
 export async function getUserTrustScore(guildId, userId) {
   return await TrustScoreService.calculateTrustScore(guildId, userId);
 }
-

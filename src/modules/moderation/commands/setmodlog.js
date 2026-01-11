@@ -21,4 +21,3 @@ export async function handle(itx) {
 
   return itx.reply({ embeds: [createSuccessEmbed(`Canal de modlog configurado: ${channel}`, { id: channel.id })] });
 }
-

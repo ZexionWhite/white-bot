@@ -7,4 +7,3 @@ export const infoHandlers = {
 export const infoComponentHandlers = {
   user: userinfo.handleSelectMenu
 };
-

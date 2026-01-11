@@ -1,12 +1,3 @@
-/**
- * Crea contextos normalizados desde interaction o message
- */
-
-/**
- * Crea contexto desde una interaction
- * @param {Interaction} itx - Interaction de Discord
- * @returns {Promise<CommandContext>}
- */
 export async function createCommandContextFromInteraction(itx) {
   const guild = itx.guild;
   const member = itx.member;
@@ -16,7 +7,7 @@ export async function createCommandContextFromInteraction(itx) {
     guildId: guild?.id,
     userId: itx.user.id,
     channelId: channel?.id,
-    args: {}, // Se llena desde las opciones de la interaction
+    args: {}, 
     reply: async (options) => {
       if (itx.replied || itx.deferred) {
         return itx.editReply(options);
@@ -33,12 +24,6 @@ export async function createCommandContextFromInteraction(itx) {
   };
 }
 
-/**
- * Crea contexto desde un message
- * @param {Message} message - Mensaje de Discord
- * @param {Object} args - Argumentos ya validados
- * @returns {Promise<CommandContext>}
- */
 export async function createCommandContextFromMessage(message, args) {
   const guild = message.guild;
   const member = message.member;
@@ -53,7 +38,7 @@ export async function createCommandContextFromMessage(message, args) {
       return message.reply(options);
     },
     defer: async (options) => {
-      // Para messages, defer no hace nada (es inmediato)
+      
       return Promise.resolve();
     },
     raw: message,

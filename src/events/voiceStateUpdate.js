@@ -27,10 +27,10 @@ export default async function voiceStateUpdate(client, oldState, newState) {
     let sessionForEmbed = null;
     
     if (oldChannelId) {
-      // Intentar obtener sesión de Redis primero, fallback a PostgreSQL
+      
       let session = await getVoiceSession(guildId, userId);
       if (!session) {
-        // Fallback a PostgreSQL
+        
         const dbSession = await getVoiceSessionDB.get(guildId, userId);
         if (dbSession) {
           session = { channel_id: dbSession.channel_id, join_timestamp: dbSession.join_timestamp };
@@ -49,8 +49,7 @@ export default async function voiceStateUpdate(client, oldState, newState) {
             log.error("voiceStateUpdate", `Error al incrementar tiempo de voz para ${member.user.tag} en ${guild.name}:`, err.message);
           }
         }
-        
-        // Eliminar sesión de Redis y PostgreSQL
+
         await deleteVoiceSession(guildId, userId);
         try {
           await endVoiceSessionDB.run(guildId, userId);
@@ -61,7 +60,7 @@ export default async function voiceStateUpdate(client, oldState, newState) {
     }
 
     if (newChannelId && !oldChannelId) {
-      // Guardar sesión en Redis y PostgreSQL
+      
       await setVoiceSession(guildId, userId, newChannelId, now);
       try {
         await startVoiceSessionDB.run(guildId, userId, newChannelId, now);
@@ -71,7 +70,7 @@ export default async function voiceStateUpdate(client, oldState, newState) {
         log.error("voiceStateUpdate", `Error al iniciar sesión de voz en PostgreSQL para ${member.user.tag} en ${guild.name}:`, err.message);
       }
     } else if (newChannelId && oldChannelId && oldChannelId !== newChannelId) {
-      // Movimiento entre canales: eliminar sesión anterior y crear nueva
+      
       await deleteVoiceSession(guildId, userId);
       await setVoiceSession(guildId, userId, newChannelId, now);
       try {
@@ -83,7 +82,6 @@ export default async function voiceStateUpdate(client, oldState, newState) {
         log.error("voiceStateUpdate", `Error al mover sesión de voz:`, err.message);
       }
     }
-
 
     if (oldChannelId && !newChannelId) {
       try {
@@ -153,4 +151,3 @@ export default async function voiceStateUpdate(client, oldState, newState) {
     log.error("voiceStateUpdate", "Error inesperado:", error.message);
   }
 }
-

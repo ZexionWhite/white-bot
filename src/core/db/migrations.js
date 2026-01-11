@@ -1,37 +1,18 @@
-/**
- * Sistema de migraciones para PostgreSQL y SQLite
- * Maneja la creación de tablas base y columnas adicionales
- * Todas las migraciones son idempotentes y no destructivas
- */
-
 import { getDriverType, getDriver, pragmaTableInfoAsync } from "./index.js";
 import { log } from "../logger/index.js";
 
-/**
- * Obtiene información de columnas de una tabla
- * @param {string} tableName - Nombre de la tabla
- * @returns {Promise<Array>} Array con nombres de columnas
- */
 async function getTableColumns(tableName) {
   const cols = await pragmaTableInfoAsync(tableName);
   return cols.map(c => c.name);
 }
 
-/**
- * Añade una columna a una tabla si no existe
- * Compatible con SQLite y PostgreSQL
- * @param {string} tableName - Nombre de la tabla
- * @param {string} columnName - Nombre de la columna
- * @param {string} columnDDL - Definición de la columna (ej: "TEXT", "INTEGER DEFAULT 60")
- * @returns {Promise<void>|void}
- */
 export async function ensureColumn(tableName, columnName, columnDDL) {
   const driverType = getDriverType();
   const driver = getDriver();
   const columns = await getTableColumns(tableName);
 
   if (columns.includes(columnName)) {
-    return; // Columna ya existe
+    return; 
   }
 
   let ddl = columnDDL;
@@ -50,12 +31,6 @@ export async function ensureColumn(tableName, columnName, columnDDL) {
   log.debug("DB", `Columna agregada: ${tableName}.${columnName}`);
 }
 
-
-/**
- * Verifica si una tabla existe
- * @param {string} tableName - Nombre de la tabla
- * @returns {Promise<boolean>}
- */
 async function tableExists(tableName) {
   const driverType = getDriverType();
   const driver = getDriver();
@@ -70,7 +45,7 @@ async function tableExists(tableName) {
     `, [tableName]);
     return result.rows[0].exists;
   } else {
-    // SQLite
+    
     try {
       const result = driver.native.prepare(
         "SELECT name FROM sqlite_master WHERE type='table' AND name=?"
@@ -82,24 +57,18 @@ async function tableExists(tableName) {
   }
 }
 
-/**
- * Crea las tablas base para PostgreSQL
- * Solo se ejecuta si las tablas no existen (idempotente)
- * @returns {Promise<void>}
- */
 export async function createBaseTables() {
   const driverType = getDriverType();
   
   if (driverType !== "postgres") {
-    return; // SQLite ya crea las tablas en db.js
+    return; 
   }
   
   const driver = getDriver();
   const pool = driver.getPool();
   
   log.info("DB", "Verificando y creando tablas base para PostgreSQL...");
-  
-  // guild_settings
+
   if (!(await tableExists("guild_settings"))) {
     await pool.query(`
       CREATE TABLE guild_settings (
@@ -113,8 +82,7 @@ export async function createBaseTables() {
     `);
     log.info("DB", "Tabla guild_settings creada");
   }
-  
-  // color_roles
+
   if (!(await tableExists("color_roles"))) {
     await pool.query(`
       CREATE TABLE color_roles (
@@ -128,8 +96,7 @@ export async function createBaseTables() {
     `);
     log.info("DB", "Tabla color_roles creada");
   }
-  
-  // cooldowns
+
   if (!(await tableExists("cooldowns"))) {
     await pool.query(`
       CREATE TABLE cooldowns (
@@ -142,8 +109,7 @@ export async function createBaseTables() {
     `);
     log.info("DB", "Tabla cooldowns creada");
   }
-  
-  // voice_sessions
+
   if (!(await tableExists("voice_sessions"))) {
     await pool.query(`
       CREATE TABLE voice_sessions (
@@ -156,8 +122,7 @@ export async function createBaseTables() {
     `);
     log.info("DB", "Tabla voice_sessions creada");
   }
-  
-  // user_stats
+
   if (!(await tableExists("user_stats"))) {
     await pool.query(`
       CREATE TABLE user_stats (
@@ -170,8 +135,7 @@ export async function createBaseTables() {
     `);
     log.info("DB", "Tabla user_stats creada");
   }
-  
-  // mod_cases
+
   if (!(await tableExists("mod_cases"))) {
     await pool.query(`
       CREATE TABLE mod_cases (
@@ -192,8 +156,7 @@ export async function createBaseTables() {
     `);
     log.info("DB", "Tabla mod_cases creada");
   }
-  
-  // mod_policy
+
   if (!(await tableExists("mod_policy"))) {
     await pool.query(`
       CREATE TABLE mod_policy (
@@ -209,8 +172,7 @@ export async function createBaseTables() {
     `);
     log.info("DB", "Tabla mod_policy creada");
   }
-  
-  // voice_activity
+
   if (!(await tableExists("voice_activity"))) {
     await pool.query(`
       CREATE TABLE voice_activity (
@@ -224,8 +186,7 @@ export async function createBaseTables() {
     `);
     log.info("DB", "Tabla voice_activity creada");
   }
-  
-  // message_log
+
   if (!(await tableExists("message_log"))) {
     await pool.query(`
       CREATE TABLE message_log (
@@ -240,8 +201,7 @@ export async function createBaseTables() {
     `);
     log.info("DB", "Tabla message_log creada");
   }
-  
-  // blacklist
+
   if (!(await tableExists("blacklist"))) {
     await pool.query(`
       CREATE TABLE blacklist (
@@ -262,8 +222,7 @@ export async function createBaseTables() {
     `);
     log.info("DB", "Tabla blacklist creada");
   }
-  
-  // pending_actions
+
   if (!(await tableExists("pending_actions"))) {
     await pool.query(`
       CREATE TABLE pending_actions (
@@ -281,11 +240,6 @@ export async function createBaseTables() {
   log.info("DB", "✅ Todas las tablas base verificadas/creadas");
 }
 
-/**
- * Ejecuta migraciones de columnas adicionales
- * Solo agrega columnas que no existen (idempotente)
- * @returns {Promise<void>}
- */
 export async function runColumnMigrations() {
   const migrations = [
     {
@@ -314,18 +268,13 @@ export async function runColumnMigrations() {
       await ensureColumn(migration.table, migration.column, migration.ddl);
     } catch (error) {
       log.error("DB", `Error en migración ${migration.table}.${migration.column}: ${error.message}`);
-      // Continuar con las demás migraciones aunque una falle
+      
     }
   }
   
   log.info("DB", "✅ Migraciones de columnas completadas");
 }
 
-/**
- * Ejecuta todas las migraciones automáticamente
- * Seguro: solo crea/agrega, nunca elimina datos
- * @returns {Promise<void>}
- */
 export async function runAllMigrations() {
   try {
     await createBaseTables();

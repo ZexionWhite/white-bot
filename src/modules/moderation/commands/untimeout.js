@@ -22,13 +22,10 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed("You cannot moderate this user")], ephemeral: true });
   }
 
-  // Create pending action
   const payload = { targetId: target.id };
   const actionId = await createPendingAction(itx.guild.id, itx.user.id, "untimeout", payload);
 
-  // Create and show modal
   const modal = createReasonModal("untimeout", "Untimeout: Reason", `pending:${actionId}`, "Explain briefly why you're removing the timeout...");
   
   return itx.showModal(modal);
 }
-

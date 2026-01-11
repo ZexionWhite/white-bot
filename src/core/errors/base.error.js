@@ -1,10 +1,3 @@
-/**
- * Error base para errores del bot
- */
-
-/**
- * Error base para errores del bot
- */
 export class BotError extends Error {
   constructor(message, code = "BOT_ERROR") {
     super(message);

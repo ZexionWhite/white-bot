@@ -1,18 +1,6 @@
-/**
- * Adapter para Slash Commands
- * Convierte comandos del registry a handlers para interactionCreate
- * 
- * NOTA: Por ahora este adapter no se usa, los slash commands siguen usando el sistema actual.
- * Se puede usar en el futuro cuando se migren más módulos al command kernel.
- */
-
 import * as commandRegistry from "../commandRegistry.js";
 import { createCommandContextFromInteraction } from "./context.js";
 
-/**
- * Genera handlers de slash commands desde el registry
- * @returns {Object} - Object con commandName -> handler function
- */
 export function generateSlashHandlers() {
   const handlers = {};
   

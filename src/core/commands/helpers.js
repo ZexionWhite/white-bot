@@ -1,18 +1,8 @@
-/**
- * Helpers para convertir comandos existentes al command kernel
- */
-
-/**
- * Crea un schema básico para comandos sin argumentos
- */
 export function createEmptyArgsSchema() {
   const { z } = require("zod");
   return z.object({}).transform(() => ({}));
 }
 
-/**
- * Crea un schema para comandos que solo requieren un usuario
- */
 export function createUserArgsSchema() {
   const { z } = require("zod");
   return z.object({
@@ -21,7 +11,7 @@ export function createUserArgsSchema() {
     if (!data.rawArgs || data.rawArgs.length === 0) {
       return { userId: null };
     }
-    // Parsear mention o ID
+    
     const input = data.rawArgs[0];
     const mentionMatch = input.match(/^<@!?(\d+)>$/);
     if (mentionMatch) {

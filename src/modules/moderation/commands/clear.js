@@ -66,4 +66,3 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed(error.message)], ephemeral: true });
   }
 }
-

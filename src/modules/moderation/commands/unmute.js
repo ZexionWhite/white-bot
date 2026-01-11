@@ -28,13 +28,10 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed("No mute role configured")], ephemeral: true });
   }
 
-  // Create pending action
   const payload = { targetId: target.id };
   const actionId = await createPendingAction(itx.guild.id, itx.user.id, "unmute", payload);
 
-  // Create and show modal
   const modal = createReasonModal("unmute", "Unmute: Reason", `pending:${actionId}`, "Explain briefly why you're unmuting this user...");
   
   return itx.showModal(modal);
 }
-

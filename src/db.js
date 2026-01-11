@@ -1,15 +1,8 @@
-/**
- * Módulo de base de datos legacy (compatibilidad)
- * Internamente usa src/core/db/ para abstracción
- * TODO: En FASE 2, este archivo será refactorizado o eliminado
- */
 import { getNative, prepare, exec, pragmaTableInfo, getDriverType } from "./core/db/index.js";
 import { log } from "./core/logger/index.js";
 
-// Obtener instancia nativa de SQLite para compatibilidad
 const db = getNative();
 
-// Ejecutar CREATE TABLE solo si es SQLite (PostgreSQL usa migraciones)
 const driverType = getDriverType();
 if (driverType === "sqlite") {
   exec(`
@@ -128,14 +121,11 @@ if (driverType === "sqlite") {
 `);
 }
 
-// ensureColumn solo funciona en SQLite (PostgreSQL usa migraciones)
-// SQLite tiene pragmaTableInfo síncrono, PostgreSQL lo tiene async
 function ensureColumn(table, column, ddl) {
   if (driverType !== "sqlite") {
-    return; // PostgreSQL usa migraciones, no ensureColumn
+    return; 
   }
-  
-  // En SQLite, pragmaTableInfo es síncrono
+
   const cols = pragmaTableInfo(table).map(c => c.name);
   if (!cols.includes(column)) {
     exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
@@ -143,7 +133,6 @@ function ensureColumn(table, column, ddl) {
   }
 }
 
-// Solo ejecutar ensureColumn en SQLite (al nivel de módulo solo funciona para SQLite síncrono)
 if (driverType === "sqlite") {
   ensureColumn("guild_settings", "locale", "locale TEXT");
   ensureColumn("guild_settings", "welcome_cd_minutes", "welcome_cd_minutes INTEGER DEFAULT 60");

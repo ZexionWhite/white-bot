@@ -28,4 +28,3 @@ const run = async () => {
   await wipeGlobal().catch(() => {});
 };
 run().catch(console.error);
-

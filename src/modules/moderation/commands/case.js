@@ -40,7 +40,6 @@ export async function handle(itx) {
 
     const embed = createCaseEmbed(case_, target, moderator, locale);
 
-    // Verificar que el embed no exceda los límites de Discord
     if (embed.data.description && embed.data.description.length > 4096) {
       log.error("case", `Embed description demasiado larga (${embed.data.description.length} chars) para case #${caseId}`);
       return itx.reply({ 
@@ -53,8 +52,7 @@ export async function handle(itx) {
   } catch (error) {
     log.error("case", `Error al ejecutar comando case:`, error);
     console.error("[case] Error completo:", error);
-    
-    // Si la interacción no ha sido respondida, responder con error
+
     if (!itx.replied && !itx.deferred) {
       try {
         return await itx.reply({ 
@@ -67,4 +65,3 @@ export async function handle(itx) {
     }
   }
 }
-

@@ -1,9 +1,6 @@
 import { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } from "discord.js";
 import { prepare } from "../../../core/db/index.js";
 
-/**
- * Creates a pending action in the database and returns its ID
- */
 export async function createPendingAction(guildId, authorId, command, payload) {
   const now = Date.now();
   const payloadJson = JSON.stringify(payload);
@@ -18,9 +15,6 @@ export async function createPendingAction(guildId, authorId, command, payload) {
   return result.lastInsertRowid;
 }
 
-/**
- * Gets a pending action by ID
- */
 export async function getPendingAction(actionId) {
   const stmt = prepare(`
     SELECT * FROM pending_actions WHERE id = ?
@@ -35,9 +29,6 @@ export async function getPendingAction(actionId) {
   };
 }
 
-/**
- * Deletes a pending action
- */
 export async function deletePendingAction(actionId) {
   const stmt = prepare(`
     DELETE FROM pending_actions WHERE id = ?
@@ -46,9 +37,6 @@ export async function deletePendingAction(actionId) {
   await stmt.run(actionId);
 }
 
-/**
- * Cleans up old pending actions (older than 1 hour)
- */
 export async function cleanupOldPendingActions() {
   const oneHourAgo = Date.now() - (60 * 60 * 1000);
   const stmt = prepare(`
@@ -59,9 +47,6 @@ export async function cleanupOldPendingActions() {
   return result.changes;
 }
 
-/**
- * Creates a reason modal
- */
 export function createReasonModal(command, title, customId, placeholder = "Explain briefly what happened...") {
   const modal = new ModalBuilder()
     .setCustomId(customId)
@@ -82,9 +67,6 @@ export function createReasonModal(command, title, customId, placeholder = "Expla
   return modal;
 }
 
-/**
- * Creates a blacklist modal with reason only (evidence is handled as attachment in command)
- */
 export function createBlacklistModal(customId, isEdit = false) {
   const modal = new ModalBuilder()
     .setCustomId(customId)
@@ -106,9 +88,6 @@ export function createBlacklistModal(customId, isEdit = false) {
   return modal;
 }
 
-/**
- * Creates an edit case modal
- */
 export function createEditCaseModal(customId) {
   const modal = new ModalBuilder()
     .setCustomId(customId)
@@ -129,9 +108,6 @@ export function createEditCaseModal(customId) {
   return modal;
 }
 
-/**
- * Validates reason from modal
- */
 export function validateReason(reason) {
   if (!reason || typeof reason !== "string") {
     return { valid: false, error: "Reason is required" };

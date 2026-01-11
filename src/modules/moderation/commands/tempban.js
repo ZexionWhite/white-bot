@@ -26,13 +26,10 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed("You don't have permission to use this command")], ephemeral: true });
   }
 
-  // Create pending action
   const payload = { targetId: target.id, durationMs: duration };
   const actionId = await createPendingAction(itx.guild.id, itx.user.id, "tempban", payload);
 
-  // Create and show modal
   const modal = createReasonModal("tempban", "Tempban: Reason", `pending:${actionId}`, "Explain briefly what happened...");
   
   return itx.showModal(modal);
 }
-

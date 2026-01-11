@@ -38,7 +38,7 @@ export default async function messageDelete(client, message) {
     });
     const now = Date.now();
     for (const [, entry] of logs.entries) {
-      const recent = now - entry.createdTimestamp < 5_000; // ventana 5s
+      const recent = now - entry.createdTimestamp < 5_000; 
       const sameChannel = entry.extra?.channel?.id === message.channel?.id;
       const sameTarget  = !message.author || entry.target?.id === message.author.id;
       if (recent && sameChannel && sameTarget) {

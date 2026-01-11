@@ -1,14 +1,7 @@
-/**
- * Prefix command registrations para info
- */
-
 import { z } from "zod";
 import * as PermService from "../../moderation/services/permissions.service.js";
 import { getLocaleForGuildId, t } from "../../../core/i18n/index.js";
 
-/**
- * Registra comandos de info para prefix
- */
 export async function registerInfoPrefixCommands() {
   const { registerCommands } = await import("../../../core/commands/commandRegistry.js");
   

@@ -22,13 +22,10 @@ export async function handle(itx) {
   const totalPages = Math.max(1, Math.ceil(totalCases / CASES_PER_PAGE));
   const page = 1;
 
-  // Obtener casos paginados (10 por página)
   const cases = await CasesService.getUserCases(itx.guild.id, target.id, null, CASES_PER_PAGE, 0);
 
-  // Obtener todos los casos para contar por tipo (sin paginación, solo para contar)
   const allCases = await CasesService.getUserCases(itx.guild.id, target.id, null, 10000, 0);
-  
-  // Contar por tipo
+
   const counts = {
     warned: 0,
     muted: 0,
@@ -51,4 +48,3 @@ export async function handle(itx) {
 
   return itx.reply({ embeds: [embed], components });
 }
-

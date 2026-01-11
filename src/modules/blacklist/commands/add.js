@@ -12,7 +12,6 @@ export async function handle(itx) {
   const severity = itx.options.getString("severity") || "MEDIUM";
   const evidenceAttachment = itx.options.getAttachment("evidence");
 
-  // Validaciones de seguridad
   if (!["LOW", "MEDIUM", "HIGH", "CRITICAL"].includes(severity.toUpperCase())) {
     return itx.reply({ embeds: [createErrorEmbed("Invalid severity. Use: LOW, MEDIUM, HIGH, CRITICAL")], ephemeral: true });
   }
@@ -26,12 +25,10 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed("You cannot moderate this user")], ephemeral: true });
   }
 
-  // Validar tamaño del archivo (máximo 25MB, límite de Discord)
   if (evidenceAttachment && evidenceAttachment.size > 25 * 1024 * 1024) {
     return itx.reply({ embeds: [createErrorEmbed("El archivo de evidencia es demasiado grande. Máximo 25MB")], ephemeral: true });
   }
 
-  // Crear payload con información del attachment si existe
   const payload = { 
     targetId: target.id, 
     severity: severity.toUpperCase(),
@@ -42,9 +39,7 @@ export async function handle(itx) {
   
   const actionId = await createPendingAction(itx.guild.id, itx.user.id, "blacklist.add", payload);
 
-  // Create and show modal (solo razón, sin evidence)
   const modal = createBlacklistModal(`pending:${actionId}`, false);
   
   return itx.showModal(modal);
 }
-

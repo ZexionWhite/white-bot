@@ -17,11 +17,11 @@ export async function handle(itx) {
 
   for (const color of DEFAULT_COLORS) {
     try {
-      // Buscar si ya existe un rol con ese nombre
+      
       let role = guild.roles.cache.find(r => r.name === color.name);
       
       if (!role) {
-        // Crear nuevo rol
+        
         role = await guild.roles.create({
           name: color.name,
           color: hexToInt(color.hex),
@@ -30,18 +30,16 @@ export async function handle(itx) {
         });
         created++;
       } else {
-        // Actualizar color si es diferente
+        
         if (role.color !== hexToInt(color.hex)) {
           await role.setColor(hexToInt(color.hex));
         }
         updated++;
       }
 
-      // Colores premium por defecto: Negro, Blanco, Rojo, Verde, Rosa, Violeta
       const premiumColors = ["Negro", "Blanco", "Rojo", "Verde", "Rosa", "Violeta"];
       const isPremium = premiumColors.includes(color.name);
-      
-      // Guardar en BD (premium por defecto si está en la lista, free en caso contrario)
+
       await insertColorRole.run(guild.id, role.id, color.name, color.hex, isPremium ? 1 : 0);
     } catch (error) {
       errors.push(`${color.name}: ${error.message}`);

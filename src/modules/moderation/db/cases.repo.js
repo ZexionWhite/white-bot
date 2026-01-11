@@ -69,4 +69,3 @@ export const countCasesByUser = prepare(`
   SELECT COUNT(*) as count FROM mod_cases 
   WHERE guild_id = ? AND target_id = ? AND deleted_at IS NULL AND type != 'BLACKLIST'
 `);
-

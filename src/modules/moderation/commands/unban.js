@@ -18,13 +18,10 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed("User is not banned")], ephemeral: true });
   }
 
-  // Create pending action
   const payload = { targetId };
   const actionId = await createPendingAction(itx.guild.id, itx.user.id, "unban", payload);
 
-  // Create and show modal
   const modal = createReasonModal("unban", "Unban: Reason", `pending:${actionId}`, "Explain briefly why you're unbanning this user...");
   
   return itx.showModal(modal);
 }
-

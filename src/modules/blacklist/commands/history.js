@@ -20,16 +20,13 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed(t(locale, "common.errors.permission_denied"), locale)], flags: MessageFlags.Ephemeral });
   }
 
-  // Obtener todas las entradas para contar y paginar
   const allEntries = await BlacklistService.getUserEntries(itx.guild.id, target.id);
   const totalEntries = allEntries.length;
   const totalPages = Math.max(1, Math.ceil(totalEntries / ENTRIES_PER_PAGE));
   const page = 1;
 
-  // Obtener entradas paginadas (10 por página)
   const entries = allEntries.slice(0, ENTRIES_PER_PAGE);
 
-  // Contar por severidad
   const counts = {
     low: 0,
     medium: 0,
@@ -50,4 +47,3 @@ export async function handle(itx) {
 
   return itx.reply({ embeds: [embed], components });
 }
-

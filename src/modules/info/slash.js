@@ -6,4 +6,3 @@ export const infoSlashCommands = [
     .setDescription("Detailed information about a user")
     .addUserOption(o => o.setName("user").setDescription("User to view information for"))
 ];
-

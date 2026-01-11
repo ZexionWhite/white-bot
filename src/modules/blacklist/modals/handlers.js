@@ -8,14 +8,10 @@ import { log } from "../../../core/logger/index.js";
 import { sendLog } from "../../../core/webhooks/index.js";
 import { getLocaleForGuild, t, DEFAULT_LOCALE } from "../../../core/i18n/index.js";
 
-/**
- * Handles modal submission for blacklist commands
- */
 export async function handleBlacklistModal(itx) {
   const locale = itx.guild ? await getLocaleForGuild(itx.guild) : DEFAULT_LOCALE;
   const customId = itx.customId;
-  
-  // Parse customId: "pending:<actionId>"
+
   if (!customId.startsWith("pending:")) {
     return itx.reply({ 
       embeds: [createErrorEmbed(t(locale, "common.errors.invalid_modal"), locale)], 
@@ -39,7 +35,6 @@ export async function handleBlacklistModal(itx) {
     });
   }
 
-  // Verify author
   if (pendingAction.author_id !== itx.user.id) {
     return itx.reply({ 
       embeds: [createErrorEmbed(t(locale, "common.errors.not_author"), locale)], 
@@ -47,7 +42,6 @@ export async function handleBlacklistModal(itx) {
     });
   }
 
-  // Verify guild
   if (pendingAction.guild_id !== itx.guild.id) {
     return itx.reply({ 
       embeds: [createErrorEmbed(t(locale, "common.errors.invalid_guild"), locale)], 
@@ -68,10 +62,8 @@ export async function handleBlacklistModal(itx) {
   const { command, payload } = pendingAction;
   const validatedReason = validation.reason;
 
-  // Delete pending action
   await deletePendingAction(actionId);
 
-  // Route to appropriate handler
   try {
     switch (command) {
       case "blacklist.add":
@@ -89,8 +81,7 @@ export async function handleBlacklistModal(itx) {
     console.error(`[modal:${command}] Error:`, error);
     
     const errorLocale = itx.guild ? await getLocaleForGuild(itx.guild) : DEFAULT_LOCALE;
-    
-    // Si la interacción no ha sido respondida, responder con error
+
     if (itx.isRepliable() && !itx.replied && !itx.deferred) {
       try {
         return await itx.reply({ 
@@ -98,7 +89,7 @@ export async function handleBlacklistModal(itx) {
           flags: MessageFlags.Ephemeral 
         });
       } catch (replyError) {
-        // Si falla, puede ser porque la interacción expiró (Unknown interaction)
+        
         log.error("handleBlacklistModal", `Error al responder con mensaje de error (posible interacción expirada):`, replyError);
       }
     }
@@ -107,8 +98,7 @@ export async function handleBlacklistModal(itx) {
 
 async function handleBlacklistAddModal(itx, payload, reason) {
   const locale = await getLocaleForGuild(itx.guild);
-  
-  // Validaciones de seguridad
+
   const target = await itx.client.users.fetch(payload.targetId).catch(() => null);
   if (!target) {
     return itx.reply({ embeds: [createErrorEmbed(t(locale, "common.errors.user_not_found"), locale)], flags: MessageFlags.Ephemeral });
@@ -126,13 +116,12 @@ async function handleBlacklistAddModal(itx, payload, reason) {
 
   const severity = payload.severity || "MEDIUM";
 
-  // Crear entrada sin evidence (ya no se guarda en DB)
   const entry = await BlacklistService.createEntry(
     itx.guild.id,
     payload.targetId,
     itx.user.id,
     reason,
-    null, // evidence ya no se guarda en DB
+    null, 
     severity
   );
 
@@ -141,11 +130,10 @@ async function handleBlacklistAddModal(itx, payload, reason) {
   if (settings.blacklist_channel_id) {
     const blacklistChannel = await itx.guild.channels.fetch(settings.blacklist_channel_id).catch(() => null);
     if (blacklistChannel && blacklistChannel.isTextBased()) {
-      // Enviar embed principal
+      
       const embed = createBlacklistEmbed(entry, target, itx.user);
       await sendLog(blacklistChannel, { embeds: [embed] }, "blacklist");
 
-      // Si hay archivo adjunto, reenviarlo por separado (sin guardar en DB)
       if (payload.evidenceAttachmentUrl) {
         try {
           const response = await fetch(payload.evidenceAttachmentUrl);
@@ -158,7 +146,7 @@ async function handleBlacklistAddModal(itx, payload, reason) {
             }, "blacklist");
           }
         } catch (error) {
-          // Si falla la descarga/reenvío, solo loguear el error pero no fallar la operación
+          
           log.warn("blacklist", `Error al reenviar archivo de evidencia:`, error.message);
         }
       }
@@ -169,7 +157,7 @@ async function handleBlacklistAddModal(itx, payload, reason) {
 }
 
 async function handleBlacklistEditModal(itx, payload, reason) {
-  // Validaciones de seguridad
+  
   const moderator = await itx.guild.members.fetch(itx.user.id);
   if (!await PermService.canExecuteCommand(moderator, "blacklist.edit")) {
     return itx.reply({ embeds: [createErrorEmbed("You don't have permission to use this command")], ephemeral: true });
@@ -180,13 +168,12 @@ async function handleBlacklistEditModal(itx, payload, reason) {
     return itx.reply({ embeds: [createErrorEmbed(`Entry #${payload.caseId} not found`)], ephemeral: true });
   }
 
-  // Actualizar entrada sin evidence (ya no se guarda en DB)
   const updated = await BlacklistService.updateEntry(
     itx.guild.id,
     payload.caseId,
     itx.user.id,
     reason,
-    null, // evidence ya no se guarda en DB
+    null, 
     payload.severity ? payload.severity.toUpperCase() : null
   );
 

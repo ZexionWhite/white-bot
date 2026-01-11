@@ -23,4 +23,3 @@ export async function handle(itx) {
 
   return itx.reply({ embeds: [createSuccessEmbed(`Entry #${caseId} eliminado`)] });
 }
-

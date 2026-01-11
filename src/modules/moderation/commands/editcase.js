@@ -19,13 +19,10 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed(`Case #${caseId} not found`)], ephemeral: true });
   }
 
-  // Create pending action
   const payload = { caseId };
   const actionId = await createPendingAction(itx.guild.id, itx.user.id, "editcase", payload);
 
-  // Create and show modal
   const modal = createReasonModal("editcase", "Edit Case: New Reason", `pending:${actionId}`, "Enter the new reason for this case...");
   
   return itx.showModal(modal);
 }
-

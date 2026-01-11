@@ -45,13 +45,10 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed("The bot cannot manage the mute role. Check role hierarchy")], ephemeral: true });
   }
 
-  // Create pending action
   const payload = { targetId: target.id, durationMs: duration };
     const actionId = await createPendingAction(itx.guild.id, itx.user.id, "mute", payload);
 
-  // Create and show modal
   const modal = createReasonModal("mute", "Mute: Reason", `pending:${actionId}`, "Explain briefly what happened...");
   
   return itx.showModal(modal);
 }
-

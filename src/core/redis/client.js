@@ -1,7 +1,3 @@
-/**
- * Cliente Redis con reconexión automática y fallback seguro
- * Redis es opcional: el bot funciona sin Redis usando solo PostgreSQL
- */
 import Redis from "ioredis";
 import { log } from "../logger/index.js";
 import { getConfig } from "../config/index.js";
@@ -10,10 +6,6 @@ let redisClient = null;
 let redisEnabled = false;
 let connectionAttempted = false;
 
-/**
- * Inicializa el cliente Redis
- * @returns {Promise<boolean>} true si Redis está disponible, false en caso contrario
- */
 export async function initRedis() {
   if (connectionAttempted) {
     return redisEnabled;
@@ -46,14 +38,13 @@ export async function initRedis() {
       reconnectOnError(err) {
         const targetError = "READONLY";
         if (err.message.includes(targetError)) {
-          return true; // Reconectar en caso de error READONLY
+          return true; 
         }
         return false;
       },
-      enableOfflineQueue: false, // No acumular comandos si está offline
+      enableOfflineQueue: false, 
     });
 
-    // Event listeners
     redisClient.on("connect", () => {
       log.info("Redis", "Conectado a Redis");
       redisEnabled = true;
@@ -67,7 +58,7 @@ export async function initRedis() {
     redisClient.on("error", (err) => {
       log.error("Redis", `Error de Redis: ${err.message}`);
       redisEnabled = false;
-      // No hacer throw: el bot debe continuar funcionando sin Redis
+      
     });
 
     redisClient.on("close", () => {
@@ -79,8 +70,6 @@ export async function initRedis() {
       log.info("Redis", `Reconectando a Redis en ${ms}ms...`);
     });
 
-    // Esperar a que Redis esté listo antes de hacer ping
-    // ioredis se conecta automáticamente, pero debemos esperar el evento "ready"
     return new Promise((resolve) => {
       const timeout = setTimeout(() => {
         log.warn("Redis", "Timeout esperando conexión a Redis (5s). El bot continuará sin Redis.");
@@ -91,7 +80,7 @@ export async function initRedis() {
       redisClient.once("ready", async () => {
         clearTimeout(timeout);
         try {
-          // Test de conexión
+          
           await redisClient.ping();
           redisEnabled = true;
           log.info("Redis", "Redis inicializado correctamente");
@@ -105,7 +94,7 @@ export async function initRedis() {
 
       redisClient.once("error", (err) => {
         clearTimeout(timeout);
-        // El error ya se maneja en el listener general, solo resolvemos
+        
         redisEnabled = false;
         resolve(false);
       });
@@ -113,13 +102,12 @@ export async function initRedis() {
   } catch (error) {
     log.warn("Redis", `No se pudo conectar a Redis: ${error.message}. El bot continuará sin Redis.`);
     redisEnabled = false;
-    
-    // Cerrar cliente si existe
+
     if (redisClient) {
       try {
         await redisClient.quit();
       } catch (e) {
-        // Ignorar errores al cerrar
+        
       }
       redisClient = null;
     }
@@ -128,25 +116,14 @@ export async function initRedis() {
   }
 }
 
-/**
- * Verifica si Redis está disponible y conectado
- * @returns {boolean}
- */
 export function isRedisAvailable() {
   return redisEnabled && redisClient && redisClient.status === "ready";
 }
 
-/**
- * Obtiene el cliente Redis (puede ser null si no está disponible)
- * @returns {Redis|null}
- */
 export function getRedisClient() {
   return redisClient;
 }
 
-/**
- * Cierra la conexión a Redis
- */
 export async function closeRedis() {
   if (redisClient) {
     try {

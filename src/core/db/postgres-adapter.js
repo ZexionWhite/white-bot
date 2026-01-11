@@ -1,19 +1,9 @@
-/**
- * Adaptador para PostgreSQL usando pg (node-postgres)
- * Implementa la interfaz DatabaseDriver para compatibilidad con SQLite
- */
-
 import pg from "pg";
 const { Pool, Client } = pg;
 import { DatabaseDriver, PreparedStatement } from "./interface.js";
 import { DatabaseQueryError, DatabaseConnectionError } from "../errors/database.error.js";
 import { log } from "../logger/index.js";
 
-/**
- * Wrapper para prepared statements de PostgreSQL
- * PostgreSQL no tiene "prepared statements" persistentes como SQLite,
- * así que almacenamos el SQL y lo ejecutamos con parámetros
- */
 class PostgresPreparedStatement extends PreparedStatement {
   constructor(pool, sql) {
     super();
@@ -21,12 +11,6 @@ class PostgresPreparedStatement extends PreparedStatement {
     this.sql = sql;
   }
 
-  /**
-   * Convierte parámetros posicionales (?) de SQLite a parámetros nombrados ($1, $2, etc) de PostgreSQL
-   * @param {string} sql - SQL con placeholders ?
-   * @param {Array} params - Parámetros
-   * @returns {Object} { sql: converted SQL, values: array of values }
-   */
   convertParams(sql, params) {
     let paramIndex = 1;
     const values = [];
@@ -37,18 +21,11 @@ class PostgresPreparedStatement extends PreparedStatement {
     return { sql: convertedSql, values };
   }
 
-  /**
-   * Convierte parámetros nombrados (@param) de SQLite a parámetros posicionales ($1, $2, etc) de PostgreSQL
-   * @param {string} sql - SQL con placeholders @param
-   * @param {Object} params - Objeto con parámetros
-   * @returns {Object} { sql: converted SQL, values: array of values }
-   */
   convertNamedParams(sql, paramsObj) {
     const values = [];
     const paramMap = new Map();
     let paramIndex = 1;
 
-    // Extraer nombres de parámetros del SQL (@guild_id, @welcome_channel_id, etc)
     const namedParamRegex = /@(\w+)/g;
     const convertedSql = sql.replace(namedParamRegex, (match, paramName) => {
       if (!paramMap.has(paramName)) {
@@ -66,7 +43,6 @@ class PostgresPreparedStatement extends PreparedStatement {
       let sql = this.sql;
       let values = [];
 
-      // Detectar si usa parámetros nombrados (@param) o posicionales (?)
       if (this.sql.includes("@") && typeof params[0] === "object" && params.length === 1) {
         const converted = this.convertNamedParams(this.sql, params[0]);
         sql = converted.sql;
@@ -78,16 +54,12 @@ class PostgresPreparedStatement extends PreparedStatement {
       }
 
       const result = await this.pool.query(sql, values);
-      
-      // Simular el formato de SQLite: { lastInsertRowid, changes }
-      // PostgreSQL retorna rows, rowCount
-      // Si la query tiene RETURNING, el ID estará en result.rows[0]
-      // Si es INSERT sin RETURNING, intentamos obtener el ID de la última fila insertada (no siempre funciona)
+
       let lastInsertRowid = null;
       if (sql.trim().toUpperCase().includes('RETURNING')) {
         lastInsertRowid = result.rows[0]?.id || result.rows[0]?.ID || null;
       } else if (result.rows && result.rows.length > 0) {
-        // Si hay filas retornadas (aunque no sea RETURNING explícito)
+        
         lastInsertRowid = result.rows[0]?.id || result.rows[0]?.ID || null;
       }
       
@@ -145,14 +117,8 @@ class PostgresPreparedStatement extends PreparedStatement {
   }
 }
 
-/**
- * Driver PostgreSQL que implementa DatabaseDriver
- */
 export class PostgresDriver extends DatabaseDriver {
-  /**
-   * @param {string} connectionString - Connection string de PostgreSQL (ej: postgresql://user:pass@host:port/db)
-   * @param {Object} poolConfig - Configuración opcional del pool
-   */
+
   constructor(connectionString, poolConfig = {}) {
     super();
     
@@ -162,15 +128,14 @@ export class PostgresDriver extends DatabaseDriver {
 
     const defaultPoolConfig = {
       connectionString,
-      max: 20, // máximo de conexiones en el pool
-      idleTimeoutMillis: 30000, // cerrar conexiones idle después de 30s
-      connectionTimeoutMillis: 2000, // timeout al obtener conexión del pool
+      max: 20, 
+      idleTimeoutMillis: 30000, 
+      connectionTimeoutMillis: 2000, 
       ...poolConfig
     };
 
     this.pool = new Pool(defaultPoolConfig);
-    
-    // Manejar errores del pool
+
     this.pool.on("error", (err) => {
       log.error("PostgresDriver", "Error inesperado del pool de PostgreSQL:", err);
     });
@@ -178,21 +143,10 @@ export class PostgresDriver extends DatabaseDriver {
     log.info("PostgresDriver", "Pool de PostgreSQL inicializado");
   }
 
-  /**
-   * Prepara una statement (PostgreSQL no tiene prepared statements persistentes,
-   * pero mantenemos la interfaz para compatibilidad)
-   * @param {string} sql - Query SQL
-   * @returns {PostgresPreparedStatement}
-   */
   prepare(sql) {
     return new PostgresPreparedStatement(this.pool, sql);
   }
 
-  /**
-   * Ejecuta una query SQL directamente (sin preparar)
-   * @param {string} sql - Query SQL a ejecutar
-   * @returns {Promise<void>}
-   */
   async exec(sql) {
     try {
       await this.pool.query(sql);
@@ -201,11 +155,6 @@ export class PostgresDriver extends DatabaseDriver {
     }
   }
 
-  /**
-   * Ejecuta un callback dentro de una transacción
-   * @param {Function} callback - Función a ejecutar en la transacción
-   * @returns {Promise<*>}
-   */
   async transaction(callback) {
     const client = await this.pool.connect();
     try {
@@ -221,19 +170,11 @@ export class PostgresDriver extends DatabaseDriver {
     }
   }
 
-  /**
-   * Cierra el pool de conexiones
-   * @returns {Promise<void>}
-   */
   async close() {
     await this.pool.end();
     log.info("PostgresDriver", "Pool de PostgreSQL cerrado");
   }
 
-  /**
-   * Verifica la conexión a la base de datos
-   * @returns {Promise<boolean>}
-   */
   async healthCheck() {
     try {
       const result = await this.pool.query("SELECT 1 as health");
@@ -244,10 +185,6 @@ export class PostgresDriver extends DatabaseDriver {
     }
   }
 
-  /**
-   * Obtiene el pool nativo (para uso avanzado)
-   * @returns {Pool}
-   */
   getPool() {
     return this.pool;
   }

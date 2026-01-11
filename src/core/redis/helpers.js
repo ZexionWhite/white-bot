@@ -1,15 +1,6 @@
-/**
- * Helpers básicos para operaciones Redis con fallback seguro
- * Todas las funciones manejan el caso donde Redis no está disponible
- */
 import { isRedisAvailable, getRedisClient } from "./client.js";
 import { log } from "../logger/index.js";
 
-/**
- * Obtiene un valor de Redis
- * @param {string} key
- * @returns {Promise<string|null>} El valor o null si no existe o Redis no está disponible
- */
 export async function get(key) {
   if (!isRedisAvailable()) {
     return null;
@@ -25,13 +16,6 @@ export async function get(key) {
   }
 }
 
-/**
- * Establece un valor en Redis con TTL opcional
- * @param {string} key
- * @param {string} value
- * @param {number} [ttlSeconds] TTL en segundos (opcional)
- * @returns {Promise<boolean>} true si se guardó correctamente, false en caso contrario
- */
 export async function set(key, value, ttlSeconds = null) {
   if (!isRedisAvailable()) {
     return false;
@@ -51,11 +35,6 @@ export async function set(key, value, ttlSeconds = null) {
   }
 }
 
-/**
- * Elimina una o más keys de Redis
- * @param {string|string[]} keys
- * @returns {Promise<number>} Número de keys eliminadas (0 si Redis no está disponible)
- */
 export async function del(keys) {
   if (!isRedisAvailable()) {
     return 0;
@@ -71,11 +50,6 @@ export async function del(keys) {
   }
 }
 
-/**
- * Verifica si una key existe en Redis
- * @param {string} key
- * @returns {Promise<boolean>}
- */
 export async function exists(key) {
   if (!isRedisAvailable()) {
     return false;
@@ -91,11 +65,6 @@ export async function exists(key) {
   }
 }
 
-/**
- * Obtiene el TTL restante de una key
- * @param {string} key
- * @returns {Promise<number>} TTL en segundos, -1 si no tiene TTL, -2 si no existe, 0 si Redis no está disponible
- */
 export async function ttl(key) {
   if (!isRedisAvailable()) {
     return 0;
@@ -110,12 +79,6 @@ export async function ttl(key) {
   }
 }
 
-/**
- * Establece el TTL de una key existente
- * @param {string} key
- * @param {number} seconds
- * @returns {Promise<boolean>}
- */
 export async function expire(key, seconds) {
   if (!isRedisAvailable()) {
     return false;
@@ -131,12 +94,6 @@ export async function expire(key, seconds) {
   }
 }
 
-/**
- * Incrementa un contador atómico
- * @param {string} key
- * @param {number} [increment=1]
- * @returns {Promise<number|null>} Nuevo valor o null si Redis no está disponible
- */
 export async function incr(key, increment = 1) {
   if (!isRedisAvailable()) {
     return null;
@@ -155,12 +112,6 @@ export async function incr(key, increment = 1) {
   }
 }
 
-/**
- * Obtiene y establece un valor (operación atómica)
- * @param {string} key
- * @param {string} value
- * @returns {Promise<string|null>} Valor anterior o null
- */
 export async function getSet(key, value) {
   if (!isRedisAvailable()) {
     return null;

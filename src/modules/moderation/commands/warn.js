@@ -22,13 +22,10 @@ export async function handle(itx) {
     return itx.reply({ embeds: [createErrorEmbed("You cannot moderate this user")], ephemeral: true });
   }
 
-  // Create pending action
   const payload = { targetId: target.id };
   const actionId = await createPendingAction(itx.guild.id, itx.user.id, "warn", payload);
 
-  // Create and show modal
   const modal = createReasonModal("warn", "Warn: Reason", `pending:${actionId}`, "Explain briefly what happened...");
   
   return itx.showModal(modal);
 }
-

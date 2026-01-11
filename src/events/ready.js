@@ -9,12 +9,12 @@ import { initializeLavalink } from "../modules/music/services/lavalink.service.j
 let avatarInterval = null;
 
 export default async function ready(client) {
-  // Ejecutar migraciones automáticamente (solo crea/agrega, nunca elimina datos)
+  
   try {
     await runAllMigrations();
   } catch (error) {
     log.error("Ready", `Error ejecutando migraciones: ${error.message}`);
-    // No bloquear el inicio del bot si las migraciones fallan
+    
   }
   showBanner();
   
@@ -40,7 +40,6 @@ export default async function ready(client) {
   startTempbanScheduler(client);
   startActivityRotator(client);
 
-  // Inicializar Lavalink (no bloquea - async)
   initializeLavalink(client).then((manager) => {
     if (manager) {
       log.info("Ready", "✅ Lavalink inicializado correctamente");

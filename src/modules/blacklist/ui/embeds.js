@@ -13,8 +13,7 @@ export function createBlacklistEmbed(entry, target, moderator, locale = DEFAULT_
   const targetDisplay = `${targetName} (${entry.user_id})`;
   
   const severityName = entry.severity || "MEDIUM";
-  // Severity y "Blacklist" NO se traducen según las reglas
-  
+
   let description = t(locale, "blacklist.embeds.entry.description_member", { member: targetDisplay }) + "\n" +
                     t(locale, "blacklist.embeds.entry.description_action", { severity: severityName });
   description += "\n" + t(locale, "blacklist.embeds.entry.description_reason", { reason: entry.reason || t(locale, "blacklist.embeds.entry.no_reason") });
@@ -27,8 +26,7 @@ export function createBlacklistEmbed(entry, target, moderator, locale = DEFAULT_
     })
     .setDescription(description)
     .setFooter({ text: t(locale, "blacklist.embeds.entry.footer_entry", { id: entry.id }) });
-  
-  // Solo setear timestamp si created_at es válido
+
   if (entry.created_at && typeof entry.created_at === 'number' && entry.created_at > 0) {
     embed.setTimestamp(entry.created_at);
   }
@@ -74,7 +72,6 @@ export function createBlacklistHistoryEmbed(entries, target, page, totalPages, c
     return embed;
   }
 
-  // Limitar a 10 entradas por página
   const fields = entries.slice(0, 10).map(e => {
     const severityName = (e.severity || "MEDIUM").toLowerCase();
     
@@ -87,7 +84,6 @@ export function createBlacklistHistoryEmbed(entries, target, page, totalPages, c
 
   embed.addFields(fields);
 
-  // Footer con conteos si están disponibles, sino solo página
   if (counts) {
     const footerText = `Low: ${counts.low} | Medium: ${counts.medium} | High: ${counts.high} | Critical: ${counts.critical}`;
     embed.setFooter({ text: footerText });
@@ -99,7 +95,7 @@ export function createBlacklistHistoryEmbed(entries, target, page, totalPages, c
 }
 
 export function createSuccessEmbed(message, target = null, entryId = null, locale = DEFAULT_LOCALE) {
-  // Si es una entrada de blacklist exitosa, usar formato similar a createSanctionMessage
+  
   if (target?.id && entryId) {
     const targetName = target.tag || target.username || t(locale, "common.labels.unknown");
     const targetDisplay = `${targetName} (${target.id})`;
@@ -111,8 +107,7 @@ export function createSuccessEmbed(message, target = null, entryId = null, local
       .setDescription(description)
       .setFooter({ text: t(locale, "blacklist.embeds.entry.footer_entry", { id: entryId }) });
   }
-  
-  // Formato simple para otros mensajes
+
   return new EmbedBuilder()
     .setColor(0x00ff00)
     .setDescription(`✅ ${message}`);
@@ -123,4 +118,3 @@ export function createErrorEmbed(message, locale = DEFAULT_LOCALE) {
     .setColor(0xff0000)
     .setDescription(`❌ ${message}`);
 }
-

@@ -9,7 +9,6 @@ export const autorolesHandlers = {
   "config-colors": configColors.handle
 };
 
-// Handler para el componente color-select
 export async function handleColorSelect(itx, customId) {
   await itx.deferReply({ ephemeral: true });
 
@@ -60,7 +59,7 @@ export async function handleConfigColorSelect(itx) {
 
 async function handleConfigColorStatus(itx, customId) {
   const parts = customId.split(":");
-  const status = parts[0].split("-").pop(); // "free" o "premium"
+  const status = parts[0].split("-").pop(); 
   const selectedRoleId = parts[1];
   
   if (!selectedRoleId) return;

@@ -14,7 +14,6 @@ export async function handle(itx) {
     return itx.editReply({ content: "No hay roles de color. Utiliza /setupcolors primero." });
   }
 
-  // Ordenar colores alfabéticamente
   const sortedColors = colors.sort((a, b) => a.name.localeCompare(b.name));
 
   const options = sortedColors.map(c => ({
@@ -23,7 +22,6 @@ export async function handle(itx) {
     description: c.booster_only === 1 ? "Premium (solo boosters)" : "Free (todos)"
   }));
 
-  // Dividir en múltiples select menus si hay más de 25 colores
   const menus = [];
   for (let i = 0; i < options.length; i += 25) {
     const menuOptions = options.slice(i, i + 25);
@@ -63,7 +61,6 @@ export async function handleColorSelect(itx, selectedRoleId) {
 
   const isCurrentlyPremium = selectedColor.booster_only === 1;
 
-  // Crear botones para elegir el estado
   const freeButton = new ButtonBuilder()
     .setCustomId(`config-color-free:${selectedRoleId}`)
     .setLabel("Free")
@@ -110,7 +107,6 @@ export async function handleColorStatusChange(itx, selectedRoleId, newStatus) {
     return itx.editReply({ content: `${EMOJIS.LOGS.MESSAGE_DELETED} Color no encontrado.`, components: [] });
   }
 
-  // Actualizar en base de datos
   await insertColorRole.run(
     itx.guild.id,
     selectedColor.role_id,
@@ -142,7 +138,6 @@ export async function handleBack(itx) {
     return itx.editReply({ content: "No hay roles de color. Utiliza /setupcolors primero.", components: [] });
   }
 
-  // Ordenar colores alfabéticamente
   const sortedColors = colors.sort((a, b) => a.name.localeCompare(b.name));
 
   const options = sortedColors.map(c => ({
@@ -151,7 +146,6 @@ export async function handleBack(itx) {
     description: c.booster_only === 1 ? "Premium (solo boosters)" : "Free (todos)"
   }));
 
-  // Dividir en múltiples select menus si hay más de 25 colores
   const menus = [];
   for (let i = 0; i < options.length; i += 25) {
     const menuOptions = options.slice(i, i + 25);

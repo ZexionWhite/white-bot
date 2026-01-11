@@ -2,7 +2,7 @@ import { getSettings as getSettingsQuery, upsertSettings } from "../../../db.js"
 import { getCachedSettings, invalidateSettingsCache } from "../../../core/redis/cache.js";
 
 export async function getGuildSettings(guildId) {
-  // Usar cache-aside: Redis -> PostgreSQL -> Cache
+  
   return await getCachedSettings(guildId, async () => {
     return (await getSettingsQuery.get(guildId)) || {};
   }) || {};
@@ -31,28 +31,16 @@ export async function updateGuildSettings(guildId, updates) {
     command_prefix: updates.command_prefix ?? current.command_prefix ?? "capy!",
     locale: updates.locale !== undefined ? updates.locale : (current.locale ?? null)
   });
-  
-  // Invalidar cache después de actualizar
+
   await invalidateSettingsCache(guildId);
 }
 
-/**
- * Obtiene el locale configurado para un guild
- * @param {string} guildId
- * @returns {Promise<string|null>} Locale o null si usa detección automática
- */
 export async function getGuildLocale(guildId) {
   const settings = await getGuildSettings(guildId);
   return settings?.locale || null;
 }
 
-/**
- * Establece el idioma del bot para un guild
- * @param {string} guildId
- * @param {string} locale - "es-ES" o "en-US"
- */
 export async function setGuildLocale(guildId, locale) {
   await updateGuildSettings(guildId, { locale });
-  // updateGuildSettings already calls invalidateSettingsCache, so cache is already cleared
+  
 }
-

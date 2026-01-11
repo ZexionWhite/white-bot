@@ -27,4 +27,3 @@ export const deleteBlacklistEntry = prepare(`
   SET deleted_at = ?, deleted_by = ?, deleted_reason = ?
   WHERE id = ? AND guild_id = ?
 `);
-

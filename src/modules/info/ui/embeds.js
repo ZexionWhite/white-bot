@@ -14,11 +14,9 @@ export async function createUserinfoOverview(member, guild, locale = null) {
     ? `<@&${highestRole.id}>` 
     : t(locale, "info.embeds.userinfo.overview.none");
 
-  // Use Discord timestamps for dates
   const createdTimestamp = `<t:${Math.floor(member.user.createdTimestamp / 1000)}:F> (<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>)`;
   const joinedTimestamp = `<t:${Math.floor(member.joinedTimestamp / 1000)}:F> (<t:${Math.floor(member.joinedTimestamp / 1000)}:R>)`;
 
-  // User mention
   const userMention = `<@${member.id}>`;
 
   const embed = new EmbedBuilder()
@@ -96,7 +94,6 @@ export async function createUserinfoSanctions(member, guild) {
     UNBAN: "unban"
   };
 
-  // Contar por tipo
   const counts = {
     warned: 0,
     muted: 0,
@@ -114,10 +111,8 @@ export async function createUserinfoSanctions(member, guild) {
     else if (caseType === "BAN" || caseType === "TEMPBAN" || caseType === "SOFTBAN") counts.banned++;
   });
 
-  // Limitar a 10 casos
   const fields = sanctions.slice(0, 10).map(s => {
     const actionName = s.type ? (TYPE_NAMES[s.type] || s.type.toLowerCase()) : "unknown";
-    // Las acciones NO se traducen según las reglas
 
     return {
       name: t(locale, "info.embeds.userinfo.sanctions.field_case_format", { id: s.id, action: actionName }),
@@ -128,7 +123,6 @@ export async function createUserinfoSanctions(member, guild) {
 
   embed.addFields(fields);
 
-  // Footer con conteos
   embed.setFooter({ text: t(locale, "info.embeds.userinfo.sanctions.footer_counts", { warned: counts.warned, muted: counts.muted, timeouted: counts.timeouted, kicked: counts.kicked, banned: counts.banned }) });
 
   return embed;
@@ -201,7 +195,6 @@ export async function createUserinfoPermissions(member, guild) {
     .setAuthor({ name: `${member.user.tag} - Permissions/Overrides`, iconURL: member.user.displayAvatarURL() })
     .setTimestamp();
 
-  // Combinar todas las políticas
   const allPolicies = [...userPolicies, ...rolePolicies];
 
   if (allPolicies.length === 0) {
@@ -209,20 +202,16 @@ export async function createUserinfoPermissions(member, guild) {
     return embed;
   }
 
-  // Separar políticas de módulos y comandos
   const allModuleNames = getAllModules();
   const modulePolicies = allPolicies.filter(p => allModuleNames.includes(p.command_key));
   const commandPolicies = allPolicies.filter(p => !allModuleNames.includes(p.command_key));
 
-  // Módulos permitidos y denegados (solo explícitos)
   const allowedModules = modulePolicies.filter(p => p.effect === "ALLOW").map(p => MODULE_NAMES[p.command_key] || p.command_key);
   const deniedModules = modulePolicies.filter(p => p.effect === "DENY").map(p => MODULE_NAMES[p.command_key] || p.command_key);
 
-  // Comandos permitidos y denegados
   const allowedCommands = commandPolicies.filter(p => p.effect === "ALLOW").map(p => p.command_key);
   const deniedCommands = commandPolicies.filter(p => p.effect === "DENY").map(p => p.command_key);
 
-  // Agregar campos para módulos
   embed.addFields({
     name: "Allowed Modules",
     value: allowedModules.length > 0 ? allowedModules.join(", ") : "None",
@@ -235,7 +224,6 @@ export async function createUserinfoPermissions(member, guild) {
     inline: false
   });
 
-  // Agregar campos para comandos
   embed.addFields({
     name: "Allowed Commands",
     value: allowedCommands.length > 0 ? allowedCommands.join(", ") : "None",

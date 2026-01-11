@@ -3,13 +3,13 @@ import * as CasesService from "../../moderation/services/cases.service.js";
 
 export async function createEntry(guildId, userId, moderatorId, reason, evidence = null, severity = "MEDIUM") {
   const now = Date.now();
-  // Evidence ya no se guarda en DB (se maneja como archivo adjunto en Discord CDN)
+  
   const result = await BlacklistRepo.createBlacklistEntry.run(
     guildId,
     userId,
     moderatorId,
     reason || "Sin razón especificada",
-    null, // evidence ya no se guarda en DB
+    null, 
     severity,
     now
   );
@@ -20,7 +20,7 @@ export async function createEntry(guildId, userId, moderatorId, reason, evidence
     user_id: userId,
     moderator_id: moderatorId,
     reason: reason || "Sin razón especificada",
-    evidence: null, // Ya no se guarda en DB
+    evidence: null, 
     severity,
     created_at: now
   };
@@ -35,14 +35,13 @@ export async function getUserEntries(guildId, userId) {
 }
 
 export async function updateEntry(guildId, entryId, updatedBy, newReason, newEvidence = null, newSeverity = null) {
-  // Validaciones de seguridad
+  
   const current = await getEntry(guildId, entryId);
   if (!current) return null;
 
-  // Evidence ya no se guarda en DB (se maneja como archivo adjunto en Discord CDN)
   await BlacklistRepo.updateBlacklistEntry.run(
     newReason || current.reason,
-    null, // evidence ya no se guarda en DB
+    null, 
     newSeverity || current.severity,
     Date.now(),
     updatedBy,
@@ -62,4 +61,3 @@ export async function deleteEntry(guildId, entryId, deletedBy, reason) {
     guildId
   );
 }
-

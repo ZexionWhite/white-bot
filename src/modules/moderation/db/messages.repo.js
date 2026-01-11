@@ -21,4 +21,3 @@ export const cleanupOldMessages = prepare(`
     LIMIT 10
   )
 `);
-

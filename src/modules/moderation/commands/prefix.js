@@ -1,9 +1,3 @@
-/**
- * Prefix command handlers para moderation
- * Estos comandos se ejecutan cuando se recibe un mensaje con prefijo "capy!"
- * Reutilizan la misma lógica que los modals/slash commands
- */
-
 import { z } from "zod";
 import { PermissionFlagsBits } from "discord.js";
 import * as PermService from "../services/permissions.service.js";
@@ -14,19 +8,14 @@ import { createSanctionMessage } from "../ui/messages.js";
 import { parseDuration } from "../../../utils/duration.js";
 import { getLocaleForGuildId, t } from "../../../core/i18n/index.js";
 
-/**
- * Parsea un user mention o ID
- */
 function parseUser(input, guild) {
   if (!input) return null;
-  
-  // Mention: <@123456> or <@!123456>
+
   const mentionMatch = input.match(/^<@!?(\d+)>$/);
   if (mentionMatch) {
     return mentionMatch[1];
   }
-  
-  // User ID directo
+
   if (/^\d+$/.test(input)) {
     return input;
   }
@@ -34,10 +23,6 @@ function parseUser(input, guild) {
   return null;
 }
 
-/**
- * Parsea argumentos de un mensaje de prefix command
- * Formato: capy!<command> <user> [duration] [reason...]
- */
 function parsePrefixArgs(rawArgs) {
   if (!rawArgs || rawArgs.length === 0) {
     return { targetId: null, duration: null, reason: null };
@@ -50,22 +35,17 @@ function parsePrefixArgs(rawArgs) {
   
   let duration = null;
   let reasonStartIndex = 1;
-  
-  // Si el segundo argumento parece ser una duración (1m, 10h, etc), parsearlo
+
   if (rawArgs.length > 1 && /^\d+[smhdwMy]$/.test(rawArgs[1])) {
     duration = parseDuration(rawArgs[1]);
     reasonStartIndex = 2;
   }
-  
-  // El resto es la razón
+
   const reason = rawArgs.slice(reasonStartIndex).join(" ").trim() || null;
   
   return { targetId, duration, reason };
 }
 
-/**
- * Handler común para comandos que requieren razón
- */
 async function executeModerationCommand(ctx, commandName, requireDuration = false) {
   const { targetId, duration, reason } = ctx.args;
   
@@ -108,7 +88,7 @@ async function executeModerationCommand(ctx, commandName, requireDuration = fals
         result = await ModService.ban(ctx.guild, targetId, ctx.member, reason, 0);
         break;
       case "mute": {
-        // Verificar mute role
+        
         const settings = await SettingsRepo.getGuildSettings(ctx.guild.id);
         if (!settings.mute_role_id) {
           return ctx.reply({ content: `❌ ${t(locale, "common.prefix_commands.moderation.mute_role_not_set")}` });
@@ -141,8 +121,7 @@ async function executeModerationCommand(ctx, commandName, requireDuration = fals
   } catch (error) {
     return ctx.reply({ content: `❌ Error: ${error.message}` });
   }
-  
-  // Enviar a modlog
+
   if (result.case) {
     await ModlogService.sendToModlog(ctx.guild, result.case, targetMember.user, ctx.member.user, result.dmSent || null);
   }
@@ -151,9 +130,6 @@ async function executeModerationCommand(ctx, commandName, requireDuration = fals
   return ctx.reply({ content: message });
 }
 
-/**
- * Schema de argumentos para comandos de moderación
- */
 const moderationArgsSchema = z.object({
   rawArgs: z.array(z.string())
 }).transform((data) => {
@@ -161,11 +137,6 @@ const moderationArgsSchema = z.object({
   return { targetId, duration, reason };
 });
 
-/**
- * Registra comandos de moderation para prefix
- * Nota: Los comandos que requieren modals (warn, ban, mute, etc) ya están implementados
- * Aquí agregamos comandos adicionales que no requieren modals
- */
 export async function registerModerationPrefixCommands() {
   const { registerCommands } = await import("../../../core/commands/commandRegistry.js");
   const { z } = await import("zod");
@@ -256,8 +227,7 @@ export async function registerModerationPrefixCommands() {
       execute: (ctx) => executeModerationCommand(ctx, "tempban", true)
     }
   ]);
-  
-  // Registrar comandos adicionales
+
   const { registerModerationExtraPrefixCommands } = await import("./prefix-extra.js");
   await registerModerationExtraPrefixCommands();
 }

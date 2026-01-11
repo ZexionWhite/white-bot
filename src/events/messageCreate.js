@@ -8,10 +8,9 @@ export default async function messageCreate(client, message) {
   if (message.author?.bot) return;
   if (message.system) return;
 
-  // Intentar procesar prefix command primero
   const handled = await handlePrefixCommand(message);
   if (handled) {
-    return; // Si se procesó un comando, no continuar con el logging
+    return; 
   }
 
   try {
@@ -31,4 +30,3 @@ export default async function messageCreate(client, message) {
     log.error("messageCreate", `Error al procesar mensaje para ${message.author?.tag || message.author?.id} en ${message.guild.name}:`, error.message);
   }
 }
-

@@ -43,9 +43,8 @@ export const moderationHandlers = {
   setmuterole: setmuterole.handle,
   setmodlog: setmodlog.handle,
   "voice-mod": async (itx) => {
-    // voice-mod necesita client, lo obtenemos desde itx.client
+    
     const { handleVoiceMod } = await import("./index.js");
     return handleVoiceMod(itx.client, itx);
   }
 };
-

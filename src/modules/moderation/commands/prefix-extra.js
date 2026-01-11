@@ -1,8 +1,3 @@
-/**
- * Comandos adicionales de moderation para prefix
- * (history, case, clear, unban, etc - comandos que no usan modals)
- */
-
 import { z } from "zod";
 import { PermissionFlagsBits } from "discord.js";
 import * as CasesService from "../services/cases.service.js";
@@ -13,9 +8,6 @@ import { getLocaleForGuild, getLocaleForGuildId, t } from "../../../core/i18n/in
 
 const CASES_PER_PAGE = 10;
 
-/**
- * Registra comandos adicionales de moderation para prefix
- */
 export async function registerModerationExtraPrefixCommands() {
   const { registerCommands } = await import("../../../core/commands/commandRegistry.js");
   
@@ -72,14 +64,11 @@ export async function registerModerationExtraPrefixCommands() {
         const totalCases = await CasesService.countUserCases(ctx.guild.id, userId);
         const totalPages = Math.max(1, Math.ceil(totalCases / CASES_PER_PAGE));
         const page = 1;
-        
-        // Obtener casos paginados (10 por página)
+
         const cases = await CasesService.getUserCases(ctx.guild.id, userId, null, CASES_PER_PAGE, 0);
 
-        // Obtener todos los casos para contar por tipo (sin paginación, solo para contar)
         const allCases = await CasesService.getUserCases(ctx.guild.id, userId, null, 10000, 0);
-        
-        // Contar por tipo
+
         const counts = {
           warned: 0,
           muted: 0,
@@ -142,8 +131,7 @@ export async function registerModerationExtraPrefixCommands() {
         if (!await PermService.canExecuteCommand(ctx.member, "unban")) {
           return ctx.reply({ content: "❌ No tienes permisos para usar este comando." });
         }
-        
-        // Verificar que el usuario esté baneado
+
         const ban = await ctx.guild.bans.fetch(userId).catch(() => null);
         if (!ban) {
           return ctx.reply({ content: "❌ El usuario no está baneado." });
@@ -213,7 +201,7 @@ export async function registerModerationExtraPrefixCommands() {
         try {
           let deleted = 0;
           if (userId) {
-            // Limpiar mensajes de un usuario específico
+            
             const messages = await ctx.channel.messages.fetch({ limit: 100 });
             const userMessages = messages.filter(m => m.author.id === userId && !m.pinned);
             const toDelete = Array.from(userMessages.values()).slice(0, amount);
@@ -222,17 +210,16 @@ export async function registerModerationExtraPrefixCommands() {
               deleted = toDelete.length;
             }
           } else {
-            // Limpiar mensajes normales
+            
             const messages = await ctx.channel.messages.fetch({ limit: amount + 1 });
-            const toDelete = messages.filter(m => !m.pinned && (Date.now() - m.createdTimestamp) < 1209600000); // 14 días
+            const toDelete = messages.filter(m => !m.pinned && (Date.now() - m.createdTimestamp) < 1209600000); 
             const actualDelete = Array.from(toDelete.values()).slice(0, amount);
             if (actualDelete.length > 0) {
               await ctx.channel.bulkDelete(actualDelete, true);
               deleted = actualDelete.length;
             }
           }
-          
-          // Crear caso para clear
+
           const CasesService = await import("../services/cases.service.js");
           const case_ = await CasesService.createCase(
             ctx.guild.id,

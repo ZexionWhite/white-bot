@@ -50,4 +50,3 @@ export const blacklistSlashCommands = [
        .addIntegerOption(o => o.setName("id").setDescription("Entry ID").setRequired(true))
     )
 ];
-

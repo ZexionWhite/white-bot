@@ -1,6 +1,3 @@
-/**
- * Módulo Redis - Exportaciones principales
- */
 export { initRedis, isRedisAvailable, getRedisClient, closeRedis } from "./client.js";
 export { get, set, del, exists, ttl, expire, incr, getSet } from "./helpers.js";
 export { getCachedSettings, invalidateSettingsCache, invalidateGuildCache, KEYS, TTL } from "./cache.js";

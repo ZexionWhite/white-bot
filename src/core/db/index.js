@@ -1,9 +1,3 @@
-/**
- * Módulo central de base de datos
- * Proporciona una interfaz unificada para acceso a la base de datos
- * Soporta SQLite (default) y PostgreSQL (vía DATABASE_URL)
- */
-
 import fs from "node:fs";
 import path from "node:path";
 import { SQLiteDriver } from "./sqlite-adapter.js";
@@ -12,13 +6,8 @@ import { getEnv } from "../config/index.js";
 import { log } from "../logger/index.js";
 import { DatabaseConnectionError } from "../errors/database.error.js";
 
-// Driver actual (SQLite o PostgreSQL)
 let driver = null;
 
-/**
- * Inicializa el driver según configuración
- * @returns {DatabaseDriver}
- */
 function getDriverInstance() {
   if (driver) {
     return driver;
@@ -36,8 +25,7 @@ function getDriverInstance() {
 
     log.info("DB", "Inicializando driver PostgreSQL...");
     driver = new PostgresDriver(databaseUrl);
-    
-    // Health check al inicializar
+
     driver.healthCheck().then((healthy) => {
       if (healthy) {
         log.info("DB", "Conexión a PostgreSQL verificada exitosamente");
@@ -48,7 +36,7 @@ function getDriverInstance() {
       log.error("DB", "Error en health check de PostgreSQL:", err.message);
     });
   } else {
-    // SQLite por defecto
+    
     const dbPath = path.join(process.cwd(), "data", "bot.db");
     fs.mkdirSync(path.dirname(dbPath), { recursive: true });
     log.info("DB", "Inicializando driver SQLite...");
@@ -59,67 +47,43 @@ function getDriverInstance() {
   return driver;
 }
 
-// Exponer el driver para uso avanzado si es necesario
 export { getDriverInstance as getDriver };
 export { SQLiteDriver } from "./sqlite-adapter.js";
 export { PostgresDriver } from "./postgres-adapter.js";
 export { DatabaseDriver, PreparedStatement } from "./interface.js";
 
-/**
- * Helper para preparar statements (compatibilidad con código existente)
- * @param {string} sql - Query SQL
- * @returns {PreparedStatement}
- */
 export function prepare(sql) {
   return getDriverInstance().prepare(sql);
 }
 
-/**
- * Helper para ejecutar queries directamente (compatibilidad con código existente)
- * @param {string} sql - Query SQL
- * @returns {Promise<void>|void}
- */
 export function exec(sql) {
   const instance = getDriverInstance();
   if (instance instanceof PostgresDriver) {
-    // PostgreSQL es async
+    
     return instance.exec(sql);
   } else {
-    // SQLite es sync
+    
     return instance.exec(sql);
   }
 }
 
-/**
- * Helper para obtener información de tabla
- * SQLite: PRAGMA table_info (síncrono)
- * PostgreSQL: información_schema.columns (async)
- * @param {string} table - Nombre de la tabla
- * @returns {Promise<Array>|Array} Información de las columnas
- * @note En SQLite es síncrono, en PostgreSQL es async. Solo usar en SQLite al nivel de módulo.
- */
 export function pragmaTableInfo(table) {
   const instance = getDriverInstance();
   
   if (instance instanceof PostgresDriver) {
-    // PostgreSQL: async - no usar al nivel de módulo
+    
     throw new Error("pragmaTableInfo es async en PostgreSQL. No usar al nivel de módulo.");
   } else {
-    // SQLite: usar PRAGMA (síncrono)
+    
     return instance.pragmaTableInfo(table);
   }
 }
 
-/**
- * Versión async de pragmaTableInfo para PostgreSQL
- * @param {string} table - Nombre de la tabla
- * @returns {Promise<Array>} Información de las columnas
- */
 export async function pragmaTableInfoAsync(table) {
   const instance = getDriverInstance();
   
   if (instance instanceof PostgresDriver) {
-    // PostgreSQL: usar information_schema
+    
     const pool = instance.getPool();
     const result = await pool.query(`
       SELECT column_name as name, data_type, is_nullable
@@ -129,15 +93,11 @@ export async function pragmaTableInfoAsync(table) {
     `, [table]);
     return result.rows;
   } else {
-    // SQLite: usar PRAGMA (síncrono pero lo retornamos como Promise para compatibilidad)
+    
     return Promise.resolve(instance.pragmaTableInfo(table));
   }
 }
 
-/**
- * Obtiene la instancia nativa (SQLite Database o PostgreSQL Pool)
- * @returns {Database|Pool}
- */
 export function getNative() {
   const instance = getDriverInstance();
   if (instance instanceof PostgresDriver) {
@@ -147,10 +107,6 @@ export function getNative() {
   }
 }
 
-/**
- * Obtiene el tipo de driver actual
- * @returns {"sqlite"|"postgres"}
- */
 export function getDriverType() {
   const instance = getDriverInstance();
   return instance instanceof PostgresDriver ? "postgres" : "sqlite";

@@ -11,13 +11,9 @@ import { parseDuration } from "../../../utils/duration.js";
 import { log } from "../../../core/logger/index.js";
 import { getLocaleForGuild } from "../../../core/i18n/index.js";
 
-/**
- * Handles modal submission for moderation commands
- */
 export async function handleModerationModal(itx) {
   const customId = itx.customId;
-  
-  // Parse customId: "pending:<actionId>"
+
   if (!customId.startsWith("pending:")) {
     return itx.reply({ 
       embeds: [createErrorEmbed("Invalid modal")], 
@@ -41,7 +37,6 @@ export async function handleModerationModal(itx) {
     });
   }
 
-  // Verify author
   if (pendingAction.author_id !== itx.user.id) {
     return itx.reply({ 
       embeds: [createErrorEmbed("You didn't initiate this action")], 
@@ -49,7 +44,6 @@ export async function handleModerationModal(itx) {
     });
   }
 
-  // Verify guild
   if (pendingAction.guild_id !== itx.guild.id) {
     return itx.reply({ 
       embeds: [createErrorEmbed("Invalid guild")], 
@@ -70,10 +64,8 @@ export async function handleModerationModal(itx) {
   const { command, payload } = pendingAction;
   const validatedReason = validation.reason;
 
-  // Delete pending action
   await deletePendingAction(actionId);
 
-  // Route to appropriate handler
   try {
     switch (command) {
       case "warn":
@@ -107,8 +99,7 @@ export async function handleModerationModal(itx) {
   } catch (error) {
     console.error(`[modal:${command}] Error:`, error);
     log.error("handleModerationModal", `Error en modal ${command}:`, error);
-    
-    // Si la interacción no ha sido respondida, responder con error
+
     if (itx.isRepliable() && !itx.replied && !itx.deferred) {
       try {
         return await itx.reply({ 
@@ -116,7 +107,7 @@ export async function handleModerationModal(itx) {
           ephemeral: true 
         });
       } catch (replyError) {
-        // Si falla, puede ser porque la interacción expiró (Unknown interaction)
+        
         log.error("handleModerationModal", `Error al responder con mensaje de error (posible interacción expirada):`, replyError);
       }
     }
